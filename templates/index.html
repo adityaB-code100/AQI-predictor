@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Weather & AQI Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <link rel="stylesheet" href="style.css">
+  
+
+</head>
+<body>
+  <div class="dashboard">
+    <!-- Dashboard Header -->
+    <div class="dashboard-header">
+      <div class="dashboard-title">
+        <i class="fas fa-cloud-sun"></i> Weather & AQI Dashboard
+      </div>
+      <div class="current-time">
+        <i class="fas fa-clock"></i> <span id="current-time">10:30 AM, August 10, 2025</span>
+      </div>
+    </div>
+    
+    <!-- LEFT COLUMN -->
+    <div class="card left">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div>
+          <div class="muted"><i class="fas fa-map-marker-alt" style="margin-right:6px;"></i>Almora • Last Updated, 26 Jul</div>
+          <div class="big-temp" style="margin-top:12px">
+            <div class="temp-box">
+              <div class="temp-big">29.5<span style="font-size:18px; font-weight:600; color:var(--accent-2)">°C</span></div>
+              <div class="temp-sub"><i class="fas fa-cloud-sun" style="margin-right:4px;"></i>Partly Cloudy</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <div style="background:var(--glass); padding:12px; border-radius:10px; min-width:140px;">
+                <div class="muted"><i class="fas fa-eye" style="margin-right:4px;"></i>Visibility</div>
+                <div class="value">10 km</div>
+              </div>
+              <div style="background:var(--glass); padding:12px; border-radius:10px; min-width:140px;">
+                <div class="muted"><i class="fas fa-wind" style="margin-right:4px;"></i>Wind Speed</div>
+                <div class="value">17 Kph</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="small-stats">
+        <div class="stat"><div class="muted"><i class="fas fa-tint" style="margin-right:4px;"></i>Humidity</div><div class="value">66%</div></div>
+        <div class="stat"><div class="muted"><i class="fas fa-tachometer-alt" style="margin-right:4px;"></i>Pressure</div><div class="value">29.4 in</div></div>
+        <div class="stat"><div class="muted"><i class="fas fa-sun" style="margin-right:4px;"></i>UV Index</div><div class="value">0.0</div></div>
+        <div class="stat"><div class="muted"><i class="fas fa-cloud-rain" style="margin-right:4px;"></i>Precipitation</div><div class="value">0.0</div></div>
+      </div>
+    </div>
+
+    <!-- MIDDLE COLUMN -->
+    <div class="middle">
+      <div class="card forecast-top">
+        <div style="display:flex; gap:8px; align-items:center">
+          <div class="day-pill active">Fri<br><span class="muted">21°C</span></div>
+          <div class="day-pill">Mon<br><span class="muted">28°C</span></div>
+          <div class="day-pill">Sat<br><span class="muted">30°C</span></div>
+          <div class="day-pill">Sun<br><span class="muted">29°C</span></div>
+        </div>
+        <div class="muted">Forecast Weather</div>
+      </div>
+
+      <div class="card forecast-chart">
+        <div id="indiaMap"></div>
+        <svg class="sparkline" viewBox="0 0 600 150" preserveAspectRatio="none">
+          <defs>
+            <linearGradient id="g1" x1="0" x2="1">
+              <stop offset="0%" stop-color="#ff7a59" stop-opacity="0.9"/>
+              <stop offset="100%" stop-color="#ffb561" stop-opacity="0.6"/>
+            </linearGradient>
+          </defs>
+          <polyline points="0,110 100,80 200,120 300,60 400,100 500,90 600,95" fill="none" stroke="url(#g1)" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" />
+          <circle cx="100" cy="80" r="3" fill="#ffb561" />
+          <circle cx="300" cy="60" r="3" fill="#ffb561" />
+        </svg>
+        <div class="aqi-legend">
+          <div class="aqi-legend-item">
+            <div class="aqi-dot" style="background:var(--good-aqi);"></div>
+            <div>Good</div>
+          </div>
+          <div class="aqi-legend-item">
+            <div class="aqi-dot" style="background:var(--moderate-aqi);"></div>
+            <div>Moderate</div>
+          </div>
+          <div class="aqi-legend-item">
+            <div class="aqi-dot" style="background:var(--unhealthy-aqi);"></div>
+            <div>Unhealthy</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT COLUMN -->
+    <div class="right">
+      <!-- AQI Breakdown Card -->
+      <div class="card aqi-breakdown">
+        <div class="aqi-title">
+          <div class="aqi-icon">
+            <i class="fas fa-wind" style="color: white;"></i>
+          </div>
+          <div>
+            <div class="muted">Air Quality Index</div>
+            <div class="value">Breakdown by Pollutant</div>
+          </div>
+        </div>
+        
+        <div class="aqi-status">
+          <div class="aqi-status-label">Current AQI</div>
+          <div class="aqi-status-value">42 • Good</div>
+        </div>
+        
+        <div class="aqi-grid">
+          <div class="aqi-item">
+            <div class="aqi-value">76.0</div>
+            <div class="aqi-label">PM10</div>
+          </div>
+          <div class="aqi-item">
+            <div class="aqi-value">76.0</div>
+            <div class="aqi-label">PM10</div>
+          </div>
+          <div class="aqi-item">
+            <div class="aqi-value">76.0</div>
+            <div class="aqi-label">PM10</div>
+          </div>
+          <div class="aqi-item">
+            <div class="aqi-value">381.0</div>
+            <div class="aqi-label">CO</div>
+          </div>
+          <div class="aqi-item">
+            <div class="aqi-value">24.4</div>
+            <div class="aqi-label">NO2</div>
+          </div>
+          <div class="aqi-item">
+            <div class="aqi-value">40.1</div>
+            <div class="aqi-label">PM2.5</div>
+          </div>
+          <div class="aqi-item">
+            <div class="aqi-value">58</div>
+            <div class="aqi-label">O3</div>
+          </div>
+          <div class="aqi-item">
+            <div class="aqi-value">6.3</div>
+            <div class="aqi-label">SO2</div>
+          </div>
+          <div class="aqi-item">
+            <div class="aqi-value">42</div>
+            <div class="aqi-label">AQI</div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Sun Card with Animation -->
+      <div class="sun-card">
+        <div class="muted"><i class="fas fa-sun" style="margin-right:6px;"></i>Sunrise & Sunset</div>
+        
+        <div class="sun-animation">
+          <div class="sun"></div>
+          <div class="horizon"></div>
+        </div>
+        
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:12px">
+          <div>
+            <div class="muted">Sunrise</div>
+            <div class="value">05:54 AM</div>
+          </div>
+          <div>
+            <div class="muted">Sunset</div>
+            <div class="value">07:17 PM</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="chance-card">
+        <div class="muted"><i class="fas fa-umbrella" style="margin-right:6px;"></i>Chances of Rain</div>
+        <div style="margin-top:10px; display:flex; flex-direction:column; gap:10px">
+          <div class="muted">Saturday<div class="bar" style="margin-top:6px"><div class="bar-inner" style="width:82%; background:linear-gradient(90deg,var(--accent),var(--accent-2))"></div></div></div>
+          <div class="muted">Sunday<div class="bar" style="margin-top:6px"><div class="bar-inner" style="width:70%; background:linear-gradient(90deg,#7bd389,#6ac3ff)"></div></div></div>
+          <div class="muted">Monday<div class="bar" style="margin-top:6px"><div class="bar-inner" style="width:40%; background:linear-gradient(90deg,#ffd166,#ff7a59)"></div></div></div>
+        </div>
+      </div>
+
+      <div class="location-card">
+        <div class="location-icon">
+          <i class="fas fa-location-dot" style="color:white; font-size:14px;"></i>
+        </div>
+        <div>
+          <div class="muted">Location</div>
+          <div class="value">Almora, India</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="script.js"></script>
+
+</body>
+</html>

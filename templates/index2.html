@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Village AQI</title>
+</head>
+<body>
+    <h2>Get AQI by Village, Date, and Time</h2>
+    <form action="/p" method="post">
+        <!-- Village Dropdown -->
+        <label for="village">Select Village:</label>
+        <select name="village" id="village" required>
+            <option value="">--Select Village--</option>
+            <option value="VillageA">Village A</option>
+            <option value="VillageB">Village B</option>
+            <option value="VillageC">Village C</option>
+        </select>
+        <br><br>
+
+        <!-- Date Input -->
+        <label for="date">Select Date:</label>
+        <input type="date" name="date" id="date" required>
+        <br><br>
+
+        
+
+        <button type="submit">Get AQI</button>
+    </form>
+</body>
+</html>
