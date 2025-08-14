@@ -8,6 +8,13 @@
 <body>
     <h1>AQI is {{avg}}</h1>
     <!DOCTYPE html>
+
+     <h1>Embedded AQI Map</h1>
+<iframe src="{{ url_for('static', filename='Full_Final_AQI_Map_change.html') }}"
+            width="50%" 
+            height="50%" 
+            style="border: none;">
+    </iframe>
 <html>
 <head>
    

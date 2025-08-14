@@ -2,6 +2,7 @@
 from flask import Flask, render_template, request
 from get_data import get_data_by_date
 import statistics
+from chagefinal import mapgenerator
 
 app = Flask(__name__)
 
@@ -21,6 +22,8 @@ def index():
             print("Average AQI:", avg)
         else:
             print("No predictions available for this date.")
+        
+        mapgenerator(avg)
 
     return render_template('index3.html', avg=avg)
 
