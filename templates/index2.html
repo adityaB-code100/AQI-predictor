@@ -4,10 +4,96 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Village AQI</title>
+    <style>
+        /* General body styling */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(to right, #74ebd5, #ACB6E5);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+        }
+
+        /* Form container */
+        form {
+            background: #fff;
+            padding: 30px 40px;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+            width: 100%;
+            max-width: 400px;
+            transition: transform 0.3s ease;
+        }
+
+        form:hover {
+            transform: translateY(-5px);
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 25px;
+            color: #333;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        select, input[type="date"] {
+            width: 100%;
+            padding: 10px 12px;
+            margin-bottom: 20px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        select:focus, input[type="date"]:focus {
+            border-color: #74ebd5;
+            box-shadow: 0 0 8px rgba(116, 235, 213, 0.5);
+            outline: none;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #74ebd5;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            color: #fff;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s ease, transform 0.2s ease;
+        }
+
+        button:hover {
+            background: #4dc1b3;
+            transform: scale(1.05);
+        }
+
+        /* Responsive text scaling */
+        @media (max-width: 500px) {
+            form {
+                padding: 20px;
+            }
+
+            button {
+                font-size: 16px;
+            }
+        }
+    </style>
 </head>
 <body>
-    <h2>Get AQI by Village, Date, and Time</h2>
     <form action="/p" method="post">
+        <h2>Get AQI by Village & Date</h2>
+
         <!-- Village Dropdown -->
         <label for="village">Select Village:</label>
         <select name="village" id="village" required>
@@ -16,14 +102,10 @@
             <option value="VillageB">Village B</option>
             <option value="VillageC">Village C</option>
         </select>
-        <br><br>
 
         <!-- Date Input -->
         <label for="date">Select Date:</label>
         <input type="date" name="date" id="date" required>
-        <br><br>
-
-        
 
         <button type="submit">Get AQI</button>
     </form>
