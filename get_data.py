@@ -5,13 +5,17 @@ from model import predict_aqi_from_csv
 
 def get_file_train(train_village):
     train_dict = {
-        "VillageA": r"E:\Enginnering\Projects\AQI VIsuliser\Data_set\Training data\abc.csv"
+        "VillageA": r"E:\Enginnering\Projects\AQI VIsuliser\Data_set\Training data\abc.csv",
+         "VillageB": r"E:\Enginnering\Projects\AQI VIsuliser\Data_set\Training data\abc.csv",
+          "VillageC": r"E:\Enginnering\Projects\AQI VIsuliser\Data_set\Training data\abc.csv"
     }
     return train_dict[train_village]
 
 def get_file_input(input_village):
     input_dict = {
-        "VillageA": r"E:\Enginnering\Projects\AQI VIsuliser\Data_set\input_data\abcd.csv"
+        "VillageA": r"E:\Enginnering\Projects\AQI VIsuliser\Data_set\input_data\abcd.csv",
+        "VillageB": r"E:\Enginnering\Projects\AQI VIsuliser\Data_set\input_data\abcd.csv",
+        "VillageC": r"E:\Enginnering\Projects\AQI VIsuliser\Data_set\input_data\abcd.csv"
     
     }
     return input_dict[input_village]
