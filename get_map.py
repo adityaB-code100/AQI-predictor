@@ -5,7 +5,7 @@ import geopandas as gpd
 from geopy.geocoders import Nominatim
 
 # ----------------- CONFIG -----------------
-geojson_path = r"e:\Enginnering\Projects\AQI\india_district.geojson"
+geojson_path = "india_district.geojson"
 geolocator = Nominatim(user_agent="aqi_map")
 
 
