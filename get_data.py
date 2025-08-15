@@ -1,22 +1,21 @@
 
+import os
+base_dir = os.path.dirname(os.path.abspath(__file__))
 
 import pandas as pd
 from model import predict_aqi_from_csv
 
 def get_file_train(train_village):
     train_dict = {
-        "VillageA": r"E:\Enginnering\Projects\AQI VIsuliser\Data_set\Training data\abc.csv",
-         "VillageB": r"E:\Enginnering\Projects\AQI VIsuliser\Data_set\Training data\abc.csv",
-          "VillageC": r"E:\Enginnering\Projects\AQI VIsuliser\Data_set\Training data\abc.csv"
+        "VillageA": os.path.join(base_dir, 'Data_set', 'Training_data', 'abc.csv')
+        # Add more villages here if needed
     }
     return train_dict[train_village]
 
 def get_file_input(input_village):
     input_dict = {
-        "VillageA": r"E:\Enginnering\Projects\AQI VIsuliser\Data_set\input_data\abcd.csv",
-        "VillageB": r"E:\Enginnering\Projects\AQI VIsuliser\Data_set\input_data\abcd.csv",
-        "VillageC": r"E:\Enginnering\Projects\AQI VIsuliser\Data_set\input_data\abcd.csv"
-    
+        "VillageA": os.path.join(base_dir, 'Data_set', 'input_data', 'abcd.csv')
+        # Add more villages if needed
     }
     return input_dict[input_village]
 
@@ -50,4 +49,4 @@ def get_data_by_date(village, input_date):
     return predict_aqi_from_csv(train_file, filtered_df)
 
 
-#get_data_by_date('VillageA', '12-02-2025')
+get_data_by_date('VillageA', '12-02-2025')
