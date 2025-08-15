@@ -2,7 +2,9 @@
 from flask import Flask, render_template, request
 from get_data import get_data_by_date
 import statistics
-from chagefinal import mapgenerator
+#from get_map import mapgenerator
+from get_map import mapgenerator
+
 
 app = Flask(__name__)
 
