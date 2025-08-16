@@ -7,14 +7,18 @@ from model import predict_aqi_from_csv
 
 def get_file_train(train_village):
     train_dict = {
-        "VillageA": os.path.join(base_dir, 'Data_set', 'Training_data', 'abc.csv')
+        "VillageA": os.path.join(base_dir, 'Data_set', 'Training_data', 'abc.csv'),
+        "VillageB": os.path.join(base_dir, 'Data_set', 'Training_data', 'abc1.csv'),
+
         # Add more villages here if needed
     }
     return train_dict[train_village]
 
 def get_file_input(input_village):
     input_dict = {
-        "VillageA": os.path.join(base_dir, 'Data_set', 'input_data', 'abcd.csv')
+        "VillageA": os.path.join(base_dir, 'Data_set', 'input_data', 'abcd.csv'),
+        "VillageB": os.path.join(base_dir, 'Data_set', 'input_data', 'abcd1.csv')
+
         # Add more villages if needed
     }
     return input_dict[input_village]
