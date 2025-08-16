@@ -12,8 +12,8 @@ geolocator = Nominatim(user_agent="aqi_map")
 def mapgenerator(aqi):
     # Multiple AQI locations
     aqi_data = [
-        {'village': "NANDED", 'lat': 18.916670, 'lon': 77.500000, 'aqi': aqi},
-        {'village': "PUNE", 'lat': 18.520430, 'lon': 73.856743, 'aqi': 150},
+        {'village': "NANDED", 'lat': 18.916670, 'lon': 77.500000, 'aqi': aqi['VillageA']},
+        {'village': "PUNE", 'lat': 18.520430, 'lon': 73.856743, 'aqi': aqi['VillageB']},
         {'village': "MUMBAI", 'lat': 19.076090, 'lon': 72.877426, 'aqi': 200}
     ]
 

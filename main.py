@@ -3,11 +3,11 @@ from flask import Flask, render_template, request
 import statistics
 from get_map import mapgenerator
 from data_function import next_seven_days
-from get_from_db import get_aqi_data  # your function from previous step
+from get_from_db import get_aqi_data ,get_aqi_by_village # your function from previous step
 
 app = Flask(__name__)
 
-@app.route('/p', methods=['GET', 'POST'])
+@app.route('/dashbord', methods=['GET', 'POST'])
 def index_route():
     avg_list = []
     mean_list = []
@@ -28,12 +28,14 @@ def index_route():
                 # For average AQI card
                 if 'Predicted_AQI_mean' in data:
                     avg_list.append(data['Predicted_AQI_mean'])
+                    #print(data['Predicted_AQI_mean'])
             else:
                 print(f"No data found for {village} on {date_i}")
+        village_aqi_data = get_aqi_by_village(date)
 
         if avg_list:
             # Generate map for the first date's AQI
-            mapgenerator(avg_list[0])
+            mapgenerator(village_aqi_data)
 
         paired_data = zip(avg_list, date_list)  # For AQI cards
         if mean_list:

@@ -67,3 +67,104 @@ def get_aqi_data(date: str, village: str = None, mongo_uri="mongodb://localhost:
 # # Using DD-MM-YYYY format
 # all_data = get_aqi_data("12-09-2025")
 # print(all_data)
+
+
+# def get_aqi_by_village(date: str, db_name="AQI_Project", collection_name="aqi_records"):
+#     """
+#     Fetch only Predicted_AQI_mean for all villages on a given date.
+    
+#     Args:
+#         date (str): Date in 'DD-MM-YYYY' or 'YYYY-MM-DD' format.
+#         db_name (str): MongoDB database name.
+#         collection_name (str): MongoDB collection name.
+    
+#     Returns:
+#         dict: { "VillageA": 56, "VillageB": 267, ... } or None if date not found.
+#     """
+#     # Convert date to both formats
+#     try:
+#         dt_obj = datetime.strptime(date, "%d-%m-%Y")
+#         date_dmy = dt_obj.strftime("%d-%m-%Y")
+#         date_ymd = dt_obj.strftime("%Y-%m-%d")
+#     except ValueError:
+#         raise ValueError("Date must be in DD-MM-YYYY or YYYY-MM-DD format")
+
+#     client = MongoClient("mongodb://localhost:27017/")
+#     db = client[db_name]
+#     collection = db[collection_name]
+
+#     # Try both date formats
+#     result = collection.find_one({"date": date_dmy})
+#     if not result:
+#         result = collection.find_one({"date": date_ymd})
+
+#     if result and "data" in result:
+#         village_aqi = {}
+#         for village, pollutants in result["data"].items():
+#             aqi = pollutants.get("Predicted_AQI_mean")
+#             if aqi is not None:
+#                 village_aqi[village] = aqi
+#         return village_aqi
+#     else:
+#         print(f"No AQI data found for date {date}")
+#         return None
+
+# # Example usage:
+# # date_input = "12-09-2025"
+# # village_aqi_data = get_aqi_by_village(date_input)
+# # print(village_aqi_data)
+# # # Output: {'VillageA': 56, 'VillageB': 267}
+from pymongo import MongoClient
+from datetime import datetime
+
+def get_aqi_by_village(date: str, db_name="AQI_Project", collection_name="aqi_records"):
+    """
+    Fetch Predicted_AQI_mean for all villages on a given date.
+    
+    Accepts date in multiple formats: DD-MM-YYYY or YYYY-MM-DD.
+
+    Returns:
+        dict: { "VillageA": 56, "VillageB": 267 } or None if date not found.
+    """
+    date_formats = ["%d-%m-%Y", "%Y-%m-%d"]  # Add more if needed
+    dt_obj = None
+
+    # Try parsing date with known formats
+    for fmt in date_formats:
+        try:
+            dt_obj = datetime.strptime(date, fmt)
+            break
+        except ValueError:
+            continue
+
+    if not dt_obj:
+        print(f"⚠️ Date format not recognized: {date}")
+        return None
+
+    # Convert to both formats for MongoDB search
+    date_dmy = dt_obj.strftime("%d-%m-%Y")
+    date_ymd = dt_obj.strftime("%Y-%m-%d")
+
+    client = MongoClient("mongodb://localhost:27017/")
+    db = client[db_name]
+    collection = db[collection_name]
+
+    # Try both formats in the DB
+    result = collection.find_one({"date": date_dmy})
+    if not result:
+        result = collection.find_one({"date": date_ymd})
+
+    if result and "data" in result:
+        village_aqi = {}
+        for village, pollutants in result["data"].items():
+            aqi = pollutants.get("Predicted_AQI_mean")
+            if aqi is not None:
+                village_aqi[village] = aqi
+        return village_aqi
+    else:
+        print(f"No AQI data found for date {date}")
+        return None
+
+# # Example usage:
+# village_aqi_data = get_aqi_by_village("2025-09-12")
+# print(village_aqi_data)
