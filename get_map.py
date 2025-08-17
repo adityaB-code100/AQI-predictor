@@ -71,7 +71,7 @@ def mapgenerator(aqi):
                 radius=8,
                 color=get_aqi_color(loc['aqi']),
                 fill=True,
-                fill_opacity=0.7,
+                fill_opacity=0.01,
                 popup=f"{loc['village']}: AQI {loc['aqi']}"
             ).add_to(m)
             bounds.append([loc['lat'], loc['lon']])

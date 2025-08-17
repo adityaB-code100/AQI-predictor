@@ -35,7 +35,8 @@ def index_route():
 
         if avg_list:
             # Generate map for the first date's AQI
-            mapgenerator(village_aqi_data)
+           #map_img= 
+           mapgenerator(village_aqi_data)
 
         paired_data = zip(avg_list, date_list)  # For AQI cards
         if mean_list:
@@ -46,6 +47,7 @@ def index_route():
         'index6.html',
         pollutant_data=pollutant_data,
         paired_data=paired_data
+       # map_img=map_img
     )
 
 @app.route('/')
