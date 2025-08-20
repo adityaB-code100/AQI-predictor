@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width">
+  <title>🌍 Hyperlocal AQI – Village 7-Day Forecast</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              50: '#f0f9ff',
+              100: '#e0f2fe',
+              200: '#bae6fd',
+              300: '#7dd3fc',
+              400: '#38bdf8',
+              500: '#0ea5e9',
+              600: '#0284c7',
+              700: '#0369a1',
+              800: '#075985',
+              900: '#0c4a6e',
+            },
+            secondary: {
+              50: '#f0fdf4',
+              100: '#dcfce7',
+              200: '#bbf7d0',
+              300: '#86efac',
+              400: '#4ade80',
+              500: '#22c55e',
+              600: '#16a34a',
+              700: '#15803d',
+              800: '#166534',
+              900: '#14532d',
+            }
+          },
+          animation: {
+            'fadeIn': 'fadeIn 0.6s forwards',
+            'pulse': 'pulse 2s infinite',
+            'slideInRight': 'slideInRight 0.5s forwards',
+            'fadeOut': 'fadeOut 0.5s forwards',
+            'float': 'float 6s ease-in-out infinite',
+            'spin-slow': 'spin 3s linear infinite',
+            'bounce-slow': 'bounce 2s infinite',
+            'shimmer': 'shimmer 2s infinite',
+          },
+          keyframes: {
+            fadeIn: {
+              from: { opacity: 0, transform: 'translateY(20px)' },
+              to: { opacity: 1, transform: 'translateY(0)' }
+            },
+            slideInRight: {
+              from: { transform: 'translateX(100%)', opacity: 0 },
+              to: { transform: 'translateX(0)', opacity: 1 }
+            },
+            fadeOut: {
+              to: { opacity: 0, transform: 'translateX(100%)' }
+            },
+            float: {
+              '0%, 100%': { transform: 'translateY(0)' },
+              '50%': { transform: 'translateY(-10px)' }
+            },
+            shimmer: {
+              '0%': { backgroundPosition: '-468px 0' },
+              '100%': { backgroundPosition: '468px 0' }
+            }
+          }
+        }
+      }
+    }
+  </script>
+  
+  <!-- Leaflet -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"/>
+  
+  <!-- Chart.js for graphs -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    @keyframes shimmer {
+      0% { transform: rotate(30deg) translateX(-100px); }
+      100% { transform: rotate(30deg) translateX(100px); }
+    }
+    
+    .header::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle at center, rgba(255,255,255,0.1) 0%, transparent 70%);
+      transform: rotate(30deg);
+      animation: shimmer 15s infinite linear;
+    }
+    
+    .forecast-chart, .historical-chart { 
+      height: 300px; 
+      opacity: 0;
+      animation: fadeIn 1s forwards 0.5s;
+    }
+    
+    .forecast-day::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.3s ease;
+    }
+    
+    .forecast-day:hover::after {
+      transform: scaleX(1);
+    }
+    
+    .alert-notification {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+    
+    .alert-success {
+      background: linear-gradient(135deg, #2ecc71, #27ae60);
+    }
+    
+    .alert-error {
+      background: linear-gradient(135deg, #e74c3c, #c0392b);
+    }
+    
+    .alert-warning {
+      background: linear-gradient(135deg, #f39c12, #e67e22);
+    }
+    
+    .alert-info {
+      background: linear-gradient(135deg, #3498db, #2980b9);
+    }
+    
+    .pollutant-good { background: linear-gradient(90deg, #10b981, #059669); }
+    .pollutant-moderate { background: linear-gradient(90deg, #f59e0b, #d97706); }
+    .pollutant-poor { background: linear-gradient(90deg, #ef4444, #dc2626); }
+    
+    .good-aqi { background-image: linear-gradient(135deg, #10b981 0%, #059669 100%); }
+    .moderate-aqi { background-image: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); }
+    .poor-aqi { background-image: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); }
+    
+    /* Loading screen */
+    .loading-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #0ea5e9 0%, #0369a1 100%);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      transition: opacity 0.5s ease-out;
+    }
+    
+    .loader {
+      width: 60px;
+      height: 60px;
+      border: 5px solid rgba(255, 255, 255, 0.2);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 1s ease-in-out infinite;
+    }
+    
+    /* Theme transition */
+    .theme-transition * {
+      transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+    }
+    
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    
+    ::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 10px;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+      background: #c5c5c5;
+      border-radius: 10px;
+    }
+    
+    ::-webkit-scrollbar-thumb:hover {
+      background: #a8a8a8;
+    }
+    
+    .dark ::-webkit-scrollbar-track {
+      background: #374151;
+    }
+    
+    .dark ::-webkit-scrollbar-thumb {
+      background: #6b7280;
+    }
+    
+    .dark ::-webkit-scrollbar-thumb:hover {
+      background: #9ca3af;
+    }
+    
+    /* Hover effects */
+    .hover-lift {
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .hover-lift:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+    
+    /* Skeleton loading */
+    .skeleton {
+      background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+      background-size: 200% 100%;
+      animation: shimmer 2s infinite;
+      border-radius: 4px;
+    }
+    
+    .dark .skeleton {
+      background: linear-gradient(90deg, #374151 25%, #4b5563 50%, #374151 75%);
+      background-size: 200% 100%;
+      animation: shimmer 2s infinite;
+    }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-900 font-sans pt-16 theme-transition dark:bg-gray-900 dark:text-gray-100">
+  <!-- Loading Screen -->
+  <div class="loading-screen" id="loadingScreen">
+    <div class="loader"></div>
+    <p class="text-white mt-4 text-lg font-medium">Loading Hyperlocal AQI Data...</p>
+  </div>
+
+  <!-- Navigation Bar -->
+  <nav class="navbar fixed top-0 left-0 right-0 z-50 bg-white bg-opacity-95 backdrop-blur-sm shadow-md py-3 px-4 dark:bg-gray-800 dark:bg-opacity-95">
+    <div class="container mx-auto flex items-center justify-between">
+      <a class="navbar-brand flex items-center gap-2 font-bold text-indigo-600 text-xl dark:text-indigo-400" href="#">
+        <i class="fas fa-globe-asia animate-float"></i> Hyperlocal AQI
+      </a>
+      
+      <div class="flex items-center gap-4">
+        <!-- Theme Toggle -->
+        <button id="themeToggle" class="p-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors dark:text-gray-300 dark:hover:bg-gray-700">
+          <i class="fas fa-moon" id="themeIcon"></i>
+        </button>
+        
+        <!-- Mobile menu button -->
+        <button class="navbar-toggler md:hidden block text-gray-700 dark:text-gray-300" type="button" id="mobileMenuButton">
+          <span class="block w-6 h-0.5 bg-current mb-1 transition-transform"></span>
+          <span class="block w-6 h-0.5 bg-current mb-1 transition-transform"></span>
+          <span class="block w-6 h-0.5 bg-current transition-transform"></span>
+        </button>
+        
+        <div class="hidden md:flex items-center">
+          <ul class="navbar-nav flex space-x-2 mr-6">
+            <li class="nav-item">
+              <a class="nav-link px-4 py-2 rounded-lg font-medium text-gray-900 bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-100" href="#"><i class="fas fa-home mr-1"></i> Home</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link px-4 py-2 rounded-lg font-medium text-gray-700 hover:bg-gray-100 transition-colors dark:text-gray-300 dark:hover:bg-gray-700" href="#"><i class="fas fa-info-circle mr-1"></i> About</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link px-4 py-2 rounded-lg font-medium text-gray-700 hover:bg-gray-100 transition-colors dark:text-gray-300 dark:hover:bg-gray-700" href="#"><i class="fas fa-map-marked-alt mr-1"></i> Coverage</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link px-4 py-2 rounded-lg font-medium text-gray-700 hover:bg-gray-100 transition-colors dark:text-gray-300 dark:hover:bg-gray-700" href="#"><i class="fas fa-envelope mr-1"></i> Contact</a>
+            </li>
+          </ul>
+          <div class="flex items-center gap-2">
+            <button class="btn-nav relative p-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors dark:text-gray-300 dark:hover:bg-gray-700" data-bs-toggle="modal" data-bs-target="#alertModal">
+              <i class="fas fa-bell"></i>
+              <span class="alert-count absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center font-bold">3</span>
+            </button>
+            <button class="btn-nav px-4 py-2 rounded-lg font-medium border border-indigo-600 text-indigo-600 hover:bg-indigo-600 hover:text-white transition-colors dark:border-indigo-400 dark:text-indigo-400 dark:hover:bg-indigo-400 dark:hover:text-white" data-bs-toggle="modal" data-bs-target="#loginModal">Login</button>
+            <button class="btn-nav px-4 py-2 rounded-lg font-medium bg-gradient-to-r from-indigo-600 to-indigo-500 text-white hover:shadow-lg transform hover:-translate-y-0.5 transition-all dark:from-indigo-500 dark:to-indigo-400" data-bs-toggle="modal" data-bs-target="#registerModal">Register</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Mobile Menu -->
+    <div class="mobile-menu hidden md:hidden bg-white mt-4 rounded-lg shadow-lg p-4 dark:bg-gray-800" id="mobileMenu">
+      <ul class="space-y-2">
+        <li>
+          <a class="block px-4 py-2 rounded-lg font-medium text-gray-900 bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-100" href="#"><i class="fas fa-home mr-2"></i> Home</a>
+        </li>
+        <li>
+          <a class="block px-4 py-2 rounded-lg font-medium text-gray-700 hover:bg-gray-100 transition-colors dark:text-gray-300 dark:hover:bg-gray-700" href="#"><i class="fas fa-info-circle mr-2"></i> About</a>
+        </li>
+        <li>
+          <a class="block px-4 py-2 rounded-lg font-medium text-gray-700 hover:bg-gray-100 transition-colors dark:text-gray-300 dark:hover:bg-gray-700" href="#"><i class="fas fa-map-marked-alt mr-2"></i> Coverage</a>
+        </li>
+        <li>
+          <a class="block px-4 py-2 rounded-lg font-medium text-gray-700 hover:bg-gray-100 transition-colors dark:text-gray-300 dark:hover:bg-gray-700" href="#"><i class="fas fa-envelope mr-2"></i> Contact</a>
+        </li>
+        <li class="pt-4 border-t border-gray-200 dark:border-gray-700">
+          <div class="flex items-center space-x-2">
+            <button class="flex-1 btn-nav px-4 py-2 rounded-lg font-medium border border-indigo-600 text-indigo-600 hover:bg-indigo-600 hover:text-white transition-colors dark:border-indigo-400 dark:text-indigo-400 dark:hover:bg-indigo-400 dark:hover:text-white" data-bs-toggle="modal" data-bs-target="#loginModal">Login</button>
+            <button class="flex-1 btn-nav px-4 py-2 rounded-lg font-medium bg-gradient-to-r from-indigo-600 to-indigo-500 text-white hover:shadow-lg transform hover:-translate-y-0.5 transition-all dark:from-indigo-500 dark:to-indigo-400" data-bs-toggle="modal" data-bs-target="#registerModal">Register</button>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- HEADER -->
+  <div class="header relative bg-gradient-to-r from-indigo-600 to-indigo-500 text-white py-10 mb-8 text-center overflow-hidden dark:from-indigo-700 dark:to-indigo-800">
+    <div class="container mx-auto px-4">
+      <h1 class="text-4xl font-bold mb-2 relative animate-fadeIn">🌍 Hyperlocal AQI – Village Forecast</h1>
+      <p class="text-lg animate-fadeIn" style="animation-delay: 0.2s">Real-time AQI Predictions for Rural & Underserved Areas</p>
+      <div class="mt-4 animate-fadeIn" style="animation-delay: 0.4s">
+        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-white bg-opacity-20 backdrop-blur-sm">
+          <span class="w-2 h-2 rounded-full bg-green-400 mr-2 animate-pulse"></span>
+          System Status: <span class="ml-1 font-semibold">Live</span>
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <div class="container mx-auto px-4">
+    <!-- VILLAGE + DATE FILTER -->
+    <div class="card bg-white rounded-2xl shadow-lg mb-6 p-6 animate-fadeIn dark:bg-gray-800 hover-lift">
+      <h5 class="card-title text-lg font-semibold mb-4 flex items-center">
+        <i class="fas fa-filter mr-2 text-indigo-600 dark:text-indigo-400"></i> Select Village & Date
+      </h5>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="form-label block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Village</label>
+          <select class="form-select w-full rounded-xl py-3 px-4 border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-indigo-400 dark:focus:border-indigo-400">
+            <option selected>Select Village</option>
+            <option value="village1">Village A</option>
+            <option value="village2">Village B</option>
+            <option value="village3">Village C</option>
+          </select>
+        </div>
+        <div>
+          <label class="form-label block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Date</label>
+          <input type="date" class="form-control w-full rounded-xl py-3 px-4 border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-indigo-400 dark:focus:border-indigo-400">
+        </div>
+      </div>
+      <button class="btn-primary mt-4 bg-gradient-to-r from-indigo-600 to-indigo-500 text-white font-semibold py-2 px-6 rounded-xl shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-300 animate-pulse dark:from-indigo-500 dark:to-indigo-400 flex items-center justify-center">
+        <i class="fas fa-sync-alt mr-2"></i> Apply Filters
+      </button>
+    </div>
+
+    <!-- MAP -->
+    <div  class="h-96 rounded-2xl shadow-lg mb-5 animate-fadeIn hover-lift">{{ map_html | safe }}</div>
+
+    <!-- AQI SUMMARY CARDS -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-5 text-center mb-6">
+      <div class="aqi-card bg-white p-6 rounded-2xl shadow-lg animate-fadeIn hover-lift dark:bg-gray-800">
+        <h5 class="text-lg font-medium flex items-center justify-center">
+          <i class="fas fa-chart-line mr-2 text-indigo-600 dark:text-indigo-400"></i> 7-Day Avg AQI
+        </h5>
+        <div class="aqi-value text-4xl font-extrabold bg-clip-text text-transparent good-aqi mt-2">{{avg_aqi_7_days}}</div>
+        <div class="aqi-percentage h-1.5 bg-gray-200 rounded-full my-3 overflow-hidden dark:bg-gray-700">
+          <div class="aqi-percentage-fill h-full rounded-full" style="width: 42%; background: linear-gradient(135deg, #10b981 0%, #059669 100%);"></div>
+        </div>
+        <p class="text-gray-500 mt-2 dark:text-gray-400">Good air quality</p>
+        <div class="flex justify-between text-xs text-gray-500 mt-1 dark:text-gray-400">
+          <span>0</span>
+          <span>50 (Good)</span>
+          <span>100</span>
+        </div>
+      </div>
+      <div class="aqi-card bg-white p-6 rounded-2xl shadow-lg animate-fadeIn hover-lift dark:bg-gray-800" style="animation-delay: 0.1s">
+        <h5 class="text-lg font-medium flex items-center justify-center">
+          <i class="fas fa-exclamation-triangle mr-2 text-amber-600 dark:text-amber-400"></i> Worst AQI
+        </h5>
+        <div class="aqi-value text-4xl font-extrabold bg-clip-text text-transparent moderate-aqi mt-2">{{ worst_aqi}}</div>
+        <div class="aqi-percentage h-1.5 bg-gray-200 rounded-full my-3 overflow-hidden dark:bg-gray-700">
+          <div class="aqi-percentage-fill h-full rounded-full" style="width: 78%; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);"></div>
+        </div>
+        <p class="text-gray-500 mt-2 dark:text-gray-400">Worst On{{  avg_3card_dict['worst_aqi']}}</p>
+        <div class="flex justify-between text-xs text-gray-500 mt-1 dark:text-gray-400">
+          <span>0</span>
+          <span>50 (Moderate)</span>
+          <span>100</span>
+        </div>
+      </div>
+      <div class="aqi-card bg-white p-6 rounded-2xl shadow-lg animate-fadeIn hover-lift dark:bg-gray-800" style="animation-delay: 0.2s">
+        <h5 class="text-lg font-medium flex items-center justify-center">
+          <i class="fas fa-trophy mr-2 text-emerald-600 dark:text-emerald-400"></i> Lowest AQI
+        </h5>
+        <div class="aqi-value text-4xl font-extrabold bg-clip-text text-transparent good-aqi mt-2">{{ best_aqi}}</div>
+        <div class="aqi-percentage h-1.5 bg-gray-200 rounded-full my-3 overflow-hidden dark:bg-gray-700">
+          <div class="aqi-percentage-fill h-full rounded-full" style="width: 28%; background: linear-gradient(135deg, #10b981 0%, #059669 100%);"></div>
+        </div>
+        <p class="text-gray-500 mt-2 dark:text-gray-400"> Lowest on {{ avg_3card_dict['best_aqi'] }}</p>
+        <div class="flex justify-between text-xs text-gray-500 mt-1 dark:text-gray-400">
+          <span>0</span>
+          <span>50 (Excellent)</span>
+          <span>100</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 7-DAY FORECAST - FULL WIDTH CARD -->
+    <div class="bg-white rounded-2xl shadow-lg mb-6 p-6 animate-fadeIn hover-lift dark:bg-gray-800">
+      <h4 class="text-xl font-semibold mb-4 text-center flex items-center justify-center">
+        <i class="fas fa-calendar-alt mr-2 text-indigo-600 dark:text-indigo-400"></i> 📅 7-Day Forecast
+      </h4>
+      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-4">
+        {% for aqi, date in paired_data.items() %}
+
+        <div class="forecast-day bg-gray-50 p-4 rounded-xl shadow text-center cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-lg animate-fadeIn dark:bg-gray-700">
+          <h6 class="font-medium">{{ date }}</h6>
+<p class="aqi-value text-2xl font-extrabold bg-clip-text 
+  {% if aqi <= 50 %} text-green-500
+  {% elif aqi <= 100 %} text-yellow-500
+  {% elif aqi <= 200 %} text-orange-500
+  {% else %} text-red-600
+  {% endif %}
+">
+  {{ aqi }}
+</p>
+          <small class="text-gray-500 dark:text-gray-400">
+              {% if aqi <= 50 %} Good
+              {% elif aqi <= 100 %} Moderate
+              {% elif aqi <= 200 %} Unhealthy
+              {% else %} Very Unhealthy
+              {% endif %}
+            </small>          
+            <div class="mt-2 text-xs text-gray-400 dark:text-gray-500">PM2.5: 12</div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- AQI TABLE -->
+    <h4 class="text-xl font-semibold mb-4 animate-fadeIn flex items-center">
+      <i class="fas fa-table mr-2 text-indigo-600 dark:text-indigo-400"></i> 📊 Pollutant Details
+    </h4>
+    <div class="table-responsive overflow-x-auto bg-white rounded-2xl shadow-lg animate-fadeIn hover-lift dark:bg-gray-800">
+      <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+        <thead class="bg-gray-50 dark:bg-gray-700">
+          <tr>
+            <th class="px-6 py-4 text-left text-xs font-medium text-gray-700 uppercase tracking-wider dark:text-gray-300">Pollutant</th>
+            <th class="px-6 py-4 text-left text-xs font-medium text-gray-700 uppercase tracking-wider dark:text-gray-300">Value (μg/m³)</th>
+            <th class="px-6 py-4 text-left text-xs font-medium text-gray-700 uppercase tracking-wider dark:text-gray-300">Percentage of Standard</th>
+            <th class="px-6 py-4 text-left text-xs font-medium text-gray-700 uppercase tracking-wider dark:text-gray-300">Status</th>
+          </tr>
+        </thead>
+        <!-- <tbody class="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
+          <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">PM2.5</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">12.5</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+              <div>50%</div>
+              <div class="pollutant-bar h-2 bg-gray-200 rounded-full mt-1 overflow-hidden dark:bg-gray-700">
+                <div class="pollutant-fill h-full rounded-full pollutant-good" style="width: 80%"></div>
+              </div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100"><span class="status-indicator w-3 h-3 rounded-full bg-green-500 inline-block mr-2"></span> Good</td>
+          </tr>
+          <tr class="bg-gray-50 hover:bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 transition-colors">
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">PM10</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">54</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+              <div>36%</div>
+              <div class="pollutant-bar h-2 bg-gray-200 rounded-full mt-1 overflow-hidden dark:bg-gray-600">
+                <div class="pollutant-fill h-full rounded-full pollutant-good" style="width: 36%"></div>
+              </div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100"><span class="status-indicator w-3 h-3 rounded-full bg-green-500 inline-block mr-2"></span> Good</td>
+          </tr>
+          <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">NO (Nitric Oxide)</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">20</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+              <div>25%</div>
+              <div class="pollutant-bar h-2 bg-gray-200 rounded-full mt-1 overflow-hidden dark:bg-gray-700">
+                <div class="pollutant-fill h-full rounded-full pollutant-good" style="width: 25%"></div>
+              </div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100"><span class="status-indicator w-3 h-3 rounded-full bg-green-500 inline-block mr-2"></span> Good</td>
+          </tr>
+          <tr class="bg-gray-50 hover:bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 transition-colors">
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">NO₂ (Nitrogen Dioxide)</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">30</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+              <div>60%</div>
+              <div class="pollutant-bar h-2 bg-gray-200 rounded-full mt-1 overflow-hidden dark:bg-gray-600">
+                <div class="pollutant-fill h-full rounded-full pollutant-moderate" style="width: 60%"></div>
+              </div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100"><span class="status-indicator w-3 h-3 rounded-full bg-yellow-500 inline-block mr-2"></span> Moderate</td>
+          </tr>
+          <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">NOx (Nitrogen Oxides)</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">45</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+              <div>45%</div>
+              <div class="pollutant-bar h-2 bg-gray-200 rounded-full mt-1 overflow-hidden dark:bg-gray-700">
+                <div class="pollutant-fill h-full rounded-full pollutant-good" style="width: 45%"></div>
+              </div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100"><span class="status-indicator w-3 h-3 rounded-full bg-green-500 inline-block mr-2"></span> Good</td>
+          </tr>
+          <tr class="bg-gray-50 hover:bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 transition-colors">
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">NH₃ (Ammonia)</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">100</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+              <div>67%</div>
+              <div class="pollutant-bar h-2 bg-gray-200 rounded-full mt-1 overflow-hidden dark:bg-gray-600">
+                <div class="pollutant-fill h-full rounded-full pollutant-moderate" style="width: 67%"></div>
+              </div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100"><span class="status-indicator w-3 h-3 rounded-full bg-yellow-500 inline-block mr-2"></span> Moderate</td>
+          </tr>
+          <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">SO₂ (Sulfur Dioxide)</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">35</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+              <div>23%</div>
+              <div class="pollutant-bar h-2 bg-gray-200 rounded-full mt-1 overflow-hidden dark:bg-gray-700">
+                <div class="pollutant-fill h-full rounded-full pollutant-good" style="width: 23%"></div>
+              </div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100"><span class="status-indicator w-3 h-3 rounded-full bg-green-500 inline-block mr-2"></span> Good</td>
+          </tr>
+        </tbody> -->
+        <tbody class="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
+  {% for name,value in data_f.items() %}
+  <tr class="{% if loop.index % 2 == 0 %}bg-gray-50 hover:bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600{% else %}hover:bg-gray-50 dark:hover:bg-gray-700{% endif %} transition-colors">
+    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+      {{ name }}
+    </td>
+    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+      {{ value }}
+    </td>
+    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+      <!-- <div>{{ name}}%</div> -->
+      <div class="pollutant-bar h-2 bg-gray-200 rounded-full mt-1 overflow-hidden dark:bg-gray-700">
+        <!-- <div class="pollutant-fill h-full rounded-full {{ name }}" style="width: {{ name }}%"></div> -->
+      </div>
+    </td>
+    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+      <span class="status-indicator w-3 h-3 rounded-full {{ name }} inline-block mr-2"></span>
+      <!-- {{ name}} -->
+    </td>
+  </tr>
+  {% endfor %}
+</tbody>
+
+      </table>
+    </div>
+
+    <!-- FORECAST + HISTORICAL GRAPHS -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+      <div class="forecast-card bg-white rounded-2xl shadow-lg p-6 animate-fadeIn hover-lift dark:bg-gray-800">
+        <h5 class="text-lg font-semibold mb-4 flex items-center">
+          <i class="fas fa-chart-line mr-2 text-indigo-600 dark:text-indigo-400"></i> 72-Hour Forecast
+        </h5>
+        <div class="forecast-chart" id="forecast-chart">
+          <canvas id="forecastChart"></canvas>
+        </div>
+      </div>
+      <div class="forecast-card bg-white rounded-2xl shadow-lg p-6 animate-fadeIn hover-lift dark:bg-gray-800">
+        <h5 class="text-lg font-semibold mb-4 flex items-center">
+          <i class="fas fa-history mr-2 text-indigo-600 dark:text-indigo-400"></i> Historical Trends
+        </h5>
+        <div class="historical-chart" id="historical-chart">
+          <canvas id="historicalChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- ADVISORY -->
+    <div class="card mt-6 bg-green-50 border-l-4 border-green-500 p-6 rounded-2xl animate-fadeIn hover-lift dark:bg-green-900 dark:bg-opacity-20 dark:border-green-400">
+      <h5 class="text-lg font-semibold mb-2 flex items-center">
+        <i class="fas fa-heart mr-2 text-green-600 dark:text-green-400"></i> ✅ Health Advisory
+      </h5>
+      <p class="text-gray-700 dark:text-gray-300">Air quality is generally good this week. You can safely enjoy outdoor activities. The best day for extended outdoor activities will be Sunday with excellent air quality.</p>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="bg-gray-100 text-gray-600 text-center py-6 mt-8 dark:bg-gray-800 dark:text-gray-400">
+    <p>© 2025 Hyperlocal AQI Forecast. Built for research & awareness.</p>
+    <div class="mt-2 flex justify-center space-x-4">
+      <a href="#" class="text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300 transition-colors"><i class="fab fa-twitter"></i></a>
+      <a href="#" class="text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300 transition-colors"><i class="fab fa-facebook"></i></a>
+      <a href="#" class="text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300 transition-colors"><i class="fab fa-linkedin"></i></a>
+      <a href="#" class="text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300 transition-colors"><i class="fab fa-github"></i></a>
+    </div>
+  </footer>
+
+  <!-- Alert Container -->
+  <div class="alert-container fixed top-24 right-5 z-50 max-w-xs" id="alertContainer">
+    <!-- Alerts will be inserted here by JavaScript -->
+  </div>
+
+  <!-- Login Modal -->
+  <div class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden" id="loginModal">
+    <div class="modal-dialog bg-white rounded-2xl shadow-xl max-w-md w-full mx-4 dark:bg-gray-800">
+      <div class="modal-content">
+        <div class="modal-header bg-gradient-to-r from-indigo-600 to-indigo-500 text-white rounded-t-2xl py-4 px-6 dark:from-indigo-700 dark:to-indigo-600">
+          <h5 class="modal-title text-lg font-semibold">Login to Your Account</h5>
+          <button type="button" class="modal-close text-white text-xl">&times;</button>
+        </div>
+        <div class="modal-body p-6">
+          <form id="loginForm">
+            <div class="mb-4">
+              <label for="loginEmail" class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Email address</label>
+              <input type="email" class="w-full rounded-xl py-3 px-4 border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-indigo-400 dark:focus:border-indigo-400" id="loginEmail" required>
+            </div>
+            <div class="mb-4">
+              <label for="loginPassword" class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Password</label>
+              <input type="password" class="w-full rounded-xl py-3 px-4 border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-indigo-400 dark:focus:border-indigo-400" id="loginPassword" required>
+            </div>
+            <div class="mb-4 flex items-center">
+              <input type="checkbox" class="rounded text-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-400 dark:bg-gray-700 dark:border-gray-600" id="rememberMe">
+              <label class="ml-2 block text-sm text-gray-700 dark:text-gray-300" for="rememberMe">Remember me</label>
+            </div>
+            <button type="submit" class="w-full bg-gradient-to-r from-indigo-600 to-indigo-500 text-white font-semibold py-3 px-4 rounded-xl shadow-md hover:shadow-lg transition-shadow dark:from-indigo-500 dark:to-indigo-400">Login</button>
+          </form>
+          <div class="text-center mt-4">
+            <a href="#" class="text-indigo-600 text-sm hover:underline dark:text-indigo-400">Forgot your password?</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Register Modal -->
+  <div class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden" id="registerModal">
+    <div class="modal-dialog bg-white rounded-2xl shadow-xl max-w-md w-full mx-4 dark:bg-gray-800">
+      <div class="modal-content">
+        <div class="modal-header bg-gradient-to-r from-indigo-600 to-indigo-500 text-white rounded-t-2xl py-4 px-6 dark:from-indigo-700 dark:to-indigo-600">
+          <h5 class="modal-title text-lg font-semibold">Create an Account</h5>
+          <button type="button" class="modal-close text-white text-xl">&times;</button>
+        </div>
+        <div class="modal-body p-6">
+          <form id="registerForm">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              <div>
+                <label for="firstName" class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">First Name</label>
+                <input type="text" class="w-full rounded-xl py-3 px-4 border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-indigo-400 dark:focus:border-indigo-400" id="firstName" required>
+              </div>
+              <div>
+                <label for="lastName" class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Last Name</label>
+                <input type="text" class="w-full rounded-xl py-3 px-4 border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-indigo-400 dark:focus:border-indigo-400" id="lastName" required>
+              </div>
+            </div>
+            <div class="mb-4">
+              <label for="registerEmail" class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Email address</label>
+              <input type="email" class="w-full rounded-xl py-3 px-4 border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-indigo-400 dark:focus:border-indigo-400" id="registerEmail" required>
+            </div>
+            <div class="mb-4">
+              <label for="registerPassword" class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Password</label>
+              <input type="password" class="w-full rounded-xl py-3 px-4 border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-indigo-400 dark:focus:border-indigo-400" id="registerPassword" required>
+            </div>
+            <div class="mb-4">
+              <label for="confirmPassword" class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Confirm Password</label>
+              <input type="password" class="w-full rounded-xl py-3 px-4 border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-indigo-400 dark:focus:border-indigo-400" id="confirmPassword" required>
+            </div>
+            <div class="mb-4 flex items-center">
+              <input type="checkbox" class="rounded text-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-400 dark:bg-gray-700 dark:border-gray-600" id="termsAgree">
+              <label class="ml-2 block text-sm text-gray-700 dark:text-gray-300" for="termsAgree">I agree to the Terms and Conditions</label>
+            </div>
+            <button type="submit" class="w-full bg-gradient-to-r from-indigo-600 to-indigo-500 text-white font-semibold py-3 px-4 rounded-xl shadow-md hover:shadow-lg transition-shadow dark:from-indigo-500 dark:to-indigo-400">Register</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Alert Modal -->
+  <div class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden" id="alertModal">
+    <div class="modal-dialog bg-white rounded-2xl shadow-xl max-w-md w-full mx-4 dark:bg-gray-800">
+      <div class="modal-content">
+        <div class="modal-header bg-gradient-to-r from-indigo-600 to-indigo-500 text-white rounded-t-2xl py-4 px-6 dark:from-indigo-700 dark:to-indigo-600">
+          <h5 class="modal-title text-lg font-semibold">Alert Subscriptions</h5>
+          <button type="button" class="modal-close text-white text-xl">&times;</button>
+        </div>
+        <div class="modal-body p-6">
+          <p class="text-gray-700 mb-4 dark:text-gray-300">Select the types of alerts you want to receive:</p>
+          <div class="mb-3 flex items-center">
+            <input class="rounded text-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-400 dark:bg-gray-700 dark:border-gray-600" type="checkbox" id="poorAirAlert" checked>
+            <label class="ml-2 block text-sm text-gray-700 dark:text-gray-300" for="poorAirAlert">
+              Poor Air Quality Alerts
+            </label>
+          </div>
+          <div class="mb-3 flex items-center">
+            <input class="rounded text-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-400 dark:bg-gray-700 dark:border-gray-600" type="checkbox" id="forecastAlert" checked>
+            <label class="ml-2 block text-sm text-gray-700 dark:text-gray-300" for="forecastAlert">
+              Daily Forecast Updates
+            </label>
+          </div>
+          <div class="mb-3 flex items-center">
+            <input class="rounded text-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-400 dark:bg-gray-700 dark:border-gray-600" type="checkbox" id="healthAlert">
+            <label class="ml-2 block text-sm text-gray-700 dark:text-gray-300" for="healthAlert">
+              Health Advisories
+            </label>
+          </div>
+          <div class="mb-4 flex items-center">
+            <input class="rounded text-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-400 dark:bg-gray-700 dark:border-gray-600" type="checkbox" id="emergencyAlert">
+            <label class="ml-2 block text-sm text-gray-700 dark:text-gray-300" for="emergencyAlert">
+              Emergency Alerts
+            </label>
+          </div>
+          <div class="mb-4">
+            <label for="alertFrequency" class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Alert Frequency</label>
+            <select class="w-full rounded-xl py-3 px-4 border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-indigo-400 dark:focus:border-indigo-400" id="alertFrequency">
+              <option value="immediate">Immediately</option>
+              <option value="daily" selected>Daily Digest</option>
+              <option value="weekly">Weekly Summary</option>
+            </select>
+          </div>
+          <button type="button" class="w-full bg-gradient-to-r from-indigo-600 to-indigo-500 text-white font-semibold py-3 px-4 rounded-xl shadow-md hover:shadow-lg transition-shadow dark:from-indigo-500 dark:to-indigo-400" id="saveAlertPrefs">Save Preferences</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+  <script>
+    // Initialize Leaflet map
+  
+    // Initialize charts
+    function initializeCharts() {
+      // Forecast chart
+      const forecastCtx = document.getElementById('forecastChart').getContext('2d');
+      if (window.forecastChartInstance) {
+        window.forecastChartInstance.destroy();
+      }
+      window.forecastChartInstance = new Chart(forecastCtx, {
+        type: 'line',
+        data: {
+          labels: ['Now', '+6h', '+12h', '+18h', '+24h', '+30h', '+36h', '+42h', '+48h', '+54h', '+60h', '+66h', '+72h'],
+          datasets: [{
+            label: 'AQI Forecast',
+            data: [35, 42, 50, 58, 65, 70, 78, 72, 65, 58, 52, 48, 45],
+            borderColor: '#4f46e5',
+            backgroundColor: 'rgba(79, 70, 229, 0.1)',
+            tension: 0.4,
+            fill: true,
+            pointBackgroundColor: '#4f46e5',
+            pointRadius: 4,
+            pointHoverRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: false
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: false,
+              grid: {
+                color: 'rgba(0, 0, 0, 0.05)'
+              },
+              ticks: {
+                color: '#111827'
+              }
+            },
+            x: {
+              grid: {
+                display: false
+              },
+              ticks: {
+                color: '#111827'
+              }
+            }
+          }
+        }
+      });
+      
+      // Historical chart
+      const historicalCtx = document.getElementById('historicalChart').getContext('2d');
+      if (window.historicalChartInstance) {
+        window.historicalChartInstance.destroy();
+      }
+      window.historicalChartInstance = new Chart(historicalCtx, {
+        type: 'bar',
+        data: {
+          labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+          datasets: [{
+            label: 'Monthly Avg AQI',
+            data: [65, 59, 70, 72, 68, 75, 80, 78, 65, 58, 52, 48],
+            backgroundColor: [
+              'rgba(79, 70, 229, 0.7)'
+            ],
+            borderColor: [
+              'rgba(79, 70, 229, 1)'
+            ],
+            borderWidth: 1,
+            borderRadius: 6,
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: false
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: false,
+              grid: {
+                color: 'rgba(0, 0, 0, 0.05)'
+              },
+              ticks: {
+                color: '#111827'
+              }
+            },
+            x: {
+              grid: {
+                display: false
+              },
+              ticks: {
+                color: '#111827'
+              }
+            }
+          }
+        }
+      });
+    }
+    
+    // Initialize charts on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      // Hide loading screen after content loads
+      setTimeout(() => {
+        document.getElementById('loadingScreen').style.opacity = '0';
+        setTimeout(() => {
+          document.getElementById('loadingScreen').style.display = 'none';
+        }, 500);
+      }, 1500);
+      
+      initializeCharts();
+      
+      // Simulate data loading
+      setTimeout(() => {
+        document.querySelectorAll('.aqi-value, .forecast-day p').forEach(el => {
+          el.style.opacity = 0;
+          setTimeout(() => {
+            el.style.transition = 'opacity 0.8s ease';
+            el.style.opacity = 1;
+          }, 300);
+        });
+      }, 800);
+      
+      // Modal functionality
+      const modals = document.querySelectorAll('.modal');
+      const modalButtons = document.querySelectorAll('[data-bs-target]');
+      const modalCloses = document.querySelectorAll('.modal-close, .modal .btn-primary');
+      
+      modalButtons.forEach(button => {
+        button.addEventListener('click', () => {
+          const target = button.getAttribute('data-bs-target');
+          document.querySelector(target).classList.remove('hidden');
+        });
+      });
+      
+      modalCloses.forEach(close => {
+        close.addEventListener('click', () => {
+          modals.forEach(modal => modal.classList.add('hidden'));
+        });
+      });
+      
+      // Close modal when clicking outside
+      modals.forEach(modal => {
+        modal.addEventListener('click', (e) => {
+          if (e.target === modal) {
+            modal.classList.add('hidden');
+          }
+        });
+      });
+      
+      // Mobile menu toggle
+      const mobileMenuButton = document.getElementById('mobileMenuButton');
+      const mobileMenu = document.getElementById('mobileMenu');
+      
+      if (mobileMenuButton && mobileMenu) {
+        mobileMenuButton.addEventListener('click', () => {
+          mobileMenu.classList.toggle('hidden');
+          
+          // Animate hamburger icon
+          const spans = mobileMenuButton.querySelectorAll('span');
+          if (mobileMenu.classList.contains('hidden')) {
+            spans[0].style.transform = 'none';
+            spans[1].style.transform = 'none';
+            spans[2].style.transform = 'none';
+          } else {
+            spans[0].style.transform = 'rotate(45deg) translate(5px, 5px)';
+            spans[1].style.opacity = '0';
+            spans[2].style.transform = 'rotate(-45deg) translate(7px, -6px)';
+          }
+        });
+      }
+      
+      // Theme toggle functionality
+      const themeToggle = document.getElementById('themeToggle');
+      const themeIcon = document.getElementById('themeIcon');
+      
+      if (themeToggle) {
+        themeToggle.addEventListener('click', () => {
+          if (document.documentElement.classList.contains('dark')) {
+            document.documentElement.classList.remove('dark');
+            themeIcon.classList.remove('fa-sun');
+            themeIcon.classList.add('fa-moon');
+            localStorage.setItem('theme', 'light');
+          } else {
+            document.documentElement.classList.add('dark');
+            themeIcon.classList.remove('fa-moon');
+            themeIcon.classList.add('fa-sun');
+            localStorage.setItem('theme', 'dark');
+          }
+        });
+      }
+      
+      // Check for saved theme preference
+      if (localStorage.getItem('theme') === 'dark') {
+        document.documentElement.classList.add('dark');
+        themeIcon.classList.remove('fa-moon');
+        themeIcon.classList.add('fa-sun');
+      }
+    });
+    
+    // Add interaction to Apply button
+    document.querySelector('.btn-primary').addEventListener('click', function() {
+      this.classList.add('animate-pulse');
+      setTimeout(() => {
+        this.classList.remove('animate-pulse');
+      }, 2000);
+      
+      // Simulate data loading
+      document.querySelectorAll('.aqi-value, .forecast-day p, table td').forEach(el => {
+        el.style.opacity = 0.3;
+        setTimeout(() => {
+          el.style.transition = 'opacity 0.8s ease';
+          el.style.opacity = 1;
+        }, 800);
+      });
+      
+      // Show notification
+      showAlert('Data updated for selected village', 'success');
+    });
+    
+    // Form submissions
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      document.getElementById('loginModal').classList.add('hidden');
+      showAlert('Login successful! Welcome back.', 'success');
+    });
+    
+    document.getElementById('registerForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      document.getElementById('registerModal').classList.add('hidden');
+      showAlert('Account created successfully! Please check your email to verify your account.', 'success');
+    });
+    
+    document.getElementById('saveAlertPrefs').addEventListener('click', function() {
+      document.getElementById('alertModal').classList.add('hidden');
+      showAlert('Alert preferences saved successfully!', 'success');
+    });
+    
+    // Alert notification system
+    function showAlert(message, type) {
+      const alertContainer = document.getElementById('alertContainer');
+      const alert = document.createElement('div');
+      
+      // Set alert classes and content based on type
+      alert.className = `alert-notification alert-${type} p-4 mb-4 rounded-xl text-white flex items-center animate-slideInRight`;
+      
+      // Set icon based on alert type
+      let icon = 'info-circle';
+      if(type === 'success') icon = 'check-circle';
+      if(type === 'error') icon = 'exclamation-circle';
+      if(type === 'warning') icon = 'exclamation-triangle';
+      
+      alert.innerHTML = `<i class="fas fa-${icon} mr-3 text-xl"></i> ${message}`;
+      
+      // Add alert to container
+      alertContainer.appendChild(alert);
+      
+      // Remove alert after animation completes
+      setTimeout(() => {
+        alert.classList.add('animate-fadeOut');
+        setTimeout(() => {
+          alert.remove();
+        }, 500);
+      }, 4500);
+    }
+    
+    // Demo alerts on page load
+    window.addEventListener('load', () => {
+      setTimeout(() => showAlert('Welcome to Hyperlocal AQI Monitoring', 'info'), 1000);
+      setTimeout(() => showAlert('New air quality data available for your area', 'success'), 3000);
+    });
+  </script>
+</body>
+</html>

@@ -7,7 +7,7 @@ import pandas as pd
 from testc import save_aqi_to_mongo   # <-- updated function from before
 
 def index():
-    start_date = '2025-01-01'
+    start_date = '2025-08-01'
     date_list = next_seven_days(start_date)
     village_list = ['VillageA', 'VillageB']   # Add more if needed
 
@@ -29,7 +29,7 @@ def index():
                     if pd.api.types.is_numeric_dtype(df[col]) and col.lower() != 'time':
                         col_mean = df[col].mean()
                         if pd.notna(col_mean):
-                            mean_dict[col.replace("(ug/m³)", "").replace("(°C)", "").replace("(%)", "").strip() + "_mean"] = int(col_mean)
+                            mean_dict[col.replace("(ug/m³)", "").replace("(°C)", "").replace("(%)", "").strip() ] = int(col_mean)
 
                 # Store date in dict
                 mean_dict['date'] = date_i
@@ -46,9 +46,9 @@ def index():
         if mean_list:
             save_aqi_to_mongo(mean_list, city=village)
 
-        # Optional: map for first avg only
-    if avg_list:
-            mapgenerator(avg_list[0])
+    #     # Optional: map for first avg only
+    # if avg_list:
+    #         mapgenerator({village: avg_list[0]})
     
 if __name__ == "__main__":
     index()

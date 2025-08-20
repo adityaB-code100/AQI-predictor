@@ -59,63 +59,7 @@ def get_aqi_data(date: str, village: str = None, mongo_uri="mongodb://localhost:
         
 
 
-        
-# Using YYYY-MM-DD format
-# village_data = get_aqi_data("2025-09-12", "VillageB")
-# print(village_data)
 
-# # Using DD-MM-YYYY format
-# all_data = get_aqi_data("12-09-2025")
-# print(all_data)
-
-
-# def get_aqi_by_village(date: str, db_name="AQI_Project", collection_name="aqi_records"):
-#     """
-#     Fetch only Predicted_AQI_mean for all villages on a given date.
-    
-#     Args:
-#         date (str): Date in 'DD-MM-YYYY' or 'YYYY-MM-DD' format.
-#         db_name (str): MongoDB database name.
-#         collection_name (str): MongoDB collection name.
-    
-#     Returns:
-#         dict: { "VillageA": 56, "VillageB": 267, ... } or None if date not found.
-#     """
-#     # Convert date to both formats
-#     try:
-#         dt_obj = datetime.strptime(date, "%d-%m-%Y")
-#         date_dmy = dt_obj.strftime("%d-%m-%Y")
-#         date_ymd = dt_obj.strftime("%Y-%m-%d")
-#     except ValueError:
-#         raise ValueError("Date must be in DD-MM-YYYY or YYYY-MM-DD format")
-
-#     client = MongoClient("mongodb://localhost:27017/")
-#     db = client[db_name]
-#     collection = db[collection_name]
-
-#     # Try both date formats
-#     result = collection.find_one({"date": date_dmy})
-#     if not result:
-#         result = collection.find_one({"date": date_ymd})
-
-#     if result and "data" in result:
-#         village_aqi = {}
-#         for village, pollutants in result["data"].items():
-#             aqi = pollutants.get("Predicted_AQI_mean")
-#             if aqi is not None:
-#                 village_aqi[village] = aqi
-#         return village_aqi
-#     else:
-#         print(f"No AQI data found for date {date}")
-#         return None
-
-# # Example usage:
-# # date_input = "12-09-2025"
-# # village_aqi_data = get_aqi_by_village(date_input)
-# # print(village_aqi_data)
-# # # Output: {'VillageA': 56, 'VillageB': 267}
-from pymongo import MongoClient
-from datetime import datetime
 
 def get_aqi_by_village(date: str, db_name="AQI_Project", collection_name="aqi_records"):
     """
@@ -157,7 +101,7 @@ def get_aqi_by_village(date: str, db_name="AQI_Project", collection_name="aqi_re
     if result and "data" in result:
         village_aqi = {}
         for village, pollutants in result["data"].items():
-            aqi = pollutants.get("Predicted_AQI_mean")
+            aqi = pollutants.get("Predicted_AQI")
             if aqi is not None:
                 village_aqi[village] = aqi
         return village_aqi
@@ -166,5 +110,5 @@ def get_aqi_by_village(date: str, db_name="AQI_Project", collection_name="aqi_re
         return None
 
 # # Example usage:
-# village_aqi_data = get_aqi_by_village("2025-09-12")
-# print(village_aqi_data)
+village_aqi_data = get_aqi_data("2025-07-12",'VillageA')
+print(village_aqi_data)

@@ -1,205 +1,507 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Weather & AQI Dashboard</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-  <link rel="stylesheet" href="style.css">
-  
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width">
+    <title>Hyperlocal Air Quality Monitoring</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"/>
+    <style>
+        body.light-theme {
+            background: #f5f7fa;
+            color: #222;
+        }
+        body.dark-theme {
+            background: #181818;
+            color: #fff;
+        }
+        .header {
+            background: linear-gradient(135deg, #1e5799 0%, #207cca 100%);
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+        }
+        .aqi-card, .forecast-card {
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+            margin-bottom: 20px;
+        }
+        .aqi-card:hover, .forecast-card:hover {
+            transform: translateY(-5px);
+        }
+        .aqi-value {
+            font-size: 3rem;
+            font-weight: bold;
+        }
+        .good { background-color: #4CAF50; color: white; }
+        .moderate { background-color: #FFC107; color: black; }
+        .unhealthy-sensitive { background-color: #FF9800; color: white; }
+        .unhealthy { background-color: #F44336; color: white; }
+        .very-unhealthy { background-color: #9C27B0; color: white; }
+        .hazardous { background-color: #673AB7; color: white; }
+        #map {
+            height: 400px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        .health-advisory {
+            border-left: 4px solid;
+            padding-left: 15px;
+        }
+        .forecast-chart, .seven-day-prediction {
+            height: 300px;
+        }
+        .village-selector {
+            margin-bottom: 20px;
+        }
+        .aqi-card-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            justify-content: center;
+            margin-bottom: 2rem;
+        }
+        .aqi-pred-card {
+            flex: 1 1 200px;
+            max-width: 270px;
+            min-width: 210px;
+            background: #ffe066;
+            border-radius: 20px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.15);
+            padding: 2rem 1rem 1rem 1rem;
+            text-align: center;
+            transition: transform 0.2s, background 0.3s, color 0.3s;
+            font-size: 1.1rem;
+        }
+        .aqi-pred-card .aqi-date {
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        .aqi-pred-card .aqi-value {
+            font-size: 2.2rem;
+            font-weight: 800;
+        }
+        .aqi-good      { background: #6ee596; color: #235f3b; }
+        .aqi-moderate  { background: #ffe066; color: #564600; }
+        .aqi-unhealthy { background: #ff6363; color: #fff; }
+        .aqi-severe    { background: #a259f7; color: #fff; }
+        .dark-theme .header { color: #ffe066; }
+        .dark-theme .aqi-pred-card { box-shadow: 0 5px 30px rgba(0,0,0,0.5); }
+        .theme-toggle-btn {
+            background: #222;
+            color: #ffe066;
+            border: none;
+            border-radius: 20px;
+            padding: 7px 20px;
+            font-size: 1rem;
+            font-weight: 700;
+            position: fixed;
+            top: 20px;
+            right: 25px;
+            z-index: 999;
+            transition: background 0.3s, color 0.3s;
+        }
+        .light-theme .theme-toggle-btn {
+            background: #ffe066;
+            color: #222;
+        }
+    </style>
 </head>
-<body>
-  <div class="dashboard">
-    <!-- Dashboard Header -->
-    <div class="dashboard-header">
-      <div class="dashboard-title">
-        <i class="fas fa-cloud-sun"></i> Weather & AQI Dashboard
-      </div>
-      <div class="current-time">
-        <i class="fas fa-clock"></i> <span id="current-time">10:30 AM, August 10, 2025</span>
-      </div>
+<body class="light-theme">
+    <button class="theme-toggle-btn" id="themeSwitcher">Switch Theme</button>
+    <div class="header text-center">
+        <div class="container">
+            <h1>Hyperlocal Air Quality Monitoring</h1>
+            <p class="lead">Real-time air quality predictions for villages and underserved areas</p>
+        </div>
     </div>
-    
-    <!-- LEFT COLUMN -->
-    <div class="card left">
-      <div style="display:flex; justify-content:space-between; align-items:center;">
-        <div>
-          <div class="muted"><i class="fas fa-map-marker-alt" style="margin-right:6px;"></i>Almora • Last Updated, 26 Jul</div>
-          <div class="big-temp" style="margin-top:12px">
-            <div class="temp-box">
-              <div class="temp-big">29.5<span style="font-size:18px; font-weight:600; color:var(--accent-2)">°C</span></div>
-              <div class="temp-sub"><i class="fas fa-cloud-sun" style="margin-right:4px;"></i>Partly Cloudy</div>
+    <div class="container">
+        <div class="card village-selector mb-4">
+            <div class="card-body">
+                <h5 class="card-title">Select Location</h5>
+                <div class="row">
+                    <div class="col-md-6">
+                        <label for="state-select" class="form-label">State</label>
+                        <select class="form-select" id="state-select">
+                            <option value="">Select State</option>
+                            <option value="maharashtra">Maharashtra</option>
+                            <option value="up">Uttar Pradesh</option>
+                            <option value="bihar">Bihar</option>
+                            <option value="west-bengal">West Bengal</option>
+                            <option value="rajasthan">Rajasthan</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="village-select" class="form-label">Village</label>
+                        <select class="form-select" id="village-select" disabled>
+                            <option value="">Select Village</option>
+                        </select>
+                    </div>
+                </div>
+                <button id="fetch-aqi-btn" class="btn btn-primary mt-3" disabled>Get Air Quality Data</button>
             </div>
-            <div style="display:flex;flex-direction:column;gap:8px">
-              <div style="background:var(--glass); padding:12px; border-radius:10px; min-width:140px;">
-                <div class="muted"><i class="fas fa-eye" style="margin-right:4px;"></i>Visibility</div>
-                <div class="value">10 km</div>
-              </div>
-              <div style="background:var(--glass); padding:12px; border-radius:10px; min-width:140px;">
-                <div class="muted"><i class="fas fa-wind" style="margin-right:4px;"></i>Wind Speed</div>
-                <div class="value">17 Kph</div>
-              </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-8 mb-4">
+                <div id="map"></div>
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <div class="card aqi-card h-100">
+                            <div class="card-body text-center">
+                                <h5 class="card-title">Current Air Quality Index (AQI)</h5>
+                                <div id="aqi-display" class="aqi-value p-4 mb-3 rounded d-inline-block">--</div>
+                                <div id="aqi-category" class="h4 mb-3">Select a village to view AQI</div>
+                                <div id="aqi-description" class="lead">Air quality data will appear here after selecting a location</div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 7-Day Prediction Card Grid (replaces old chart) -->
+                    <div class="col-md-6 mb-4">
+                        <div class="card forecast-card h-100">
+                            <div class="card-body">
+                                <h5 class="card-title">7-Day AQI Prediction</h5>
+                                <div class="aqi-card-grid" id="seven-day-aqi-card-grid">
+                                    <p class="text-muted">Prediction will appear here after selecting a location.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- The remainder of your content/cards -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title">72-Hour AQI Forecast</h5>
+                        <div class="forecast-chart" id="forecast-chart">
+                            <p class="text-muted">Forecast data will appear here after selecting a location</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Historical Trends</h5>
+                        <div class="historical-chart" id="historical-chart">
+                            <p class="text-muted">Historical trend data will appear here after selecting a location</p>
+                        </div>
+                    </div>
+                </div>
             </div>
-          </div>
+            <div class="col-lg-4 mb-4">
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title">Health Advisory</h5>
+                        <div id="health-advisory" class="health-advisory">
+                            <p>Select a village to view health recommendations based on current air quality.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title">Air Quality Components</h5>
+                        <div id="pollutant-levels">
+                            <p class="text-muted">Pollutant data will appear here</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Subscribe for Alerts</h5>
+                        <div class="mb-3">
+                            <label for="email-input" class="form-label">Email address</label>
+                            <input type="email" class="form-control" id="email-input" placeholder="name@example.com">
+                        </div>
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="sms-check">
+                            <label class="form-check-label" for="sms-check">Also receive SMS alerts</label>
+                        </div>
+                        <button id="subscribe-btn" class="btn btn-success">Subscribe</button>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
-      <div class="small-stats">
-        <div class="stat"><div class="muted"><i class="fas fa-tint" style="margin-right:4px;"></i>Humidity</div><div class="value">66%</div></div>
-        <div class="stat"><div class="muted"><i class="fas fa-tachometer-alt" style="margin-right:4px;"></i>Pressure</div><div class="value">29.4 in</div></div>
-        <div class="stat"><div class="muted"><i class="fas fa-sun" style="margin-right:4px;"></i>UV Index</div><div class="value">0.0</div></div>
-        <div class="stat"><div class="muted"><i class="fas fa-cloud-rain" style="margin-right:4px;"></i>Precipitation</div><div class="value">0.0</div></div>
-      </div>
     </div>
+    <footer class="bg-dark text-white mt-5 py-4">
+        <div class="container text-center">
+            <p>Hyperlocal Air Quality Monitoring System &copy; 2023</p>
+            <p class="mb-0">Data sources: CPCB, INSAT Satellite, Weather API</p>
+        </div>
+    </footer>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Theme switcher
+        const body = document.body;
+        const themeBtn = document.getElementById('themeSwitcher');
+        themeBtn.addEventListener('click', function() {
+            if (body.classList.contains('dark-theme')) {
+                body.classList.remove('dark-theme');
+                body.classList.add('light-theme');
+                themeBtn.textContent = "Switch Theme";
+            } else {
+                body.classList.remove('light-theme');
+                body.classList.add('dark-theme');
+                themeBtn.textContent = "Switch to Light";
+            }
+        });
 
-    <!-- MIDDLE COLUMN -->
-    <div class="middle">
-      <div class="card forecast-top">
-        <div style="display:flex; gap:8px; align-items:center">
-          <div class="day-pill active">Fri<br><span class="muted">21°C</span></div>
-          <div class="day-pill">Mon<br><span class="muted">28°C</span></div>
-          <div class="day-pill">Sat<br><span class="muted">30°C</span></div>
-          <div class="day-pill">Sun<br><span class="muted">29°C</span></div>
-        </div>
-        <div class="muted">Forecast Weather</div>
-      </div>
+        // Sample village data (same as before)
+        const villageData = {
+            maharashtra: [
+                { id: 'v1', name: 'Wada', lat: 19.6536, lon: 73.1351 },
+                { id: 'v2', name: 'Shahapur', lat: 19.4526, lon: 73.3257 },
+                { id: 'v3', name: 'Mokhada', lat: 19.9333, lon: 73.3333 }
+            ],
+            up: [
+                { id: 'v4', name: 'Chandpur', lat: 29.1349, lon: 78.2719 },
+                { id: 'v5', name: 'Naugarh', lat: 27.1333, lon: 83.9167 }
+            ],
+            bihar: [
+                { id: 'v6', name: 'Barauni', lat: 25.4333, lon: 85.9833 },
+                { id: 'v7', name: 'Barbigha', lat: 25.2180, lon: 85.7230 }
+            ],
+            'west-bengal': [
+                { id: 'v8', name: 'Ghatal', lat: 22.6667, lon: 87.7167 },
+                { id: 'v9', name: 'Chandrakona', lat: 22.7333, lon: 87.5167 }
+            ],
+            rajasthan: [
+                { id: 'v10', name: 'Nimbahera', lat: 24.6200, lon: 74.6800 },
+                { id: 'v11', name: 'Rawatbhata', lat: 24.9300, lon: 75.5800 }
+            ]
+        };
 
-      <div class="card forecast-chart">
-        <div id="indiaMap"></div>
-        <svg class="sparkline" viewBox="0 0 600 150" preserveAspectRatio="none">
-          <defs>
-            <linearGradient id="g1" x1="0" x2="1">
-              <stop offset="0%" stop-color="#ff7a59" stop-opacity="0.9"/>
-              <stop offset="100%" stop-color="#ffb561" stop-opacity="0.6"/>
-            </linearGradient>
-          </defs>
-          <polyline points="0,110 100,80 200,120 300,60 400,100 500,90 600,95" fill="none" stroke="url(#g1)" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" />
-          <circle cx="100" cy="80" r="3" fill="#ffb561" />
-          <circle cx="300" cy="60" r="3" fill="#ffb561" />
-        </svg>
-        <div class="aqi-legend">
-          <div class="aqi-legend-item">
-            <div class="aqi-dot" style="background:var(--good-aqi);"></div>
-            <div>Good</div>
-          </div>
-          <div class="aqi-legend-item">
-            <div class="aqi-dot" style="background:var(--moderate-aqi);"></div>
-            <div>Moderate</div>
-          </div>
-          <div class="aqi-legend-item">
-            <div class="aqi-dot" style="background:var(--unhealthy-aqi);"></div>
-            <div>Unhealthy</div>
-          </div>
-        </div>
-      </div>
-    </div>
+        // Map and dropdown functionality (as before)
+        const map = L.map('map').setView([20.5937, 78.9629], 5);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap contributors' }).addTo(map);
+        document.getElementById('state-select').addEventListener('change', function() {
+            const state = this.value;
+            const villageSelect = document.getElementById('village-select');
+            villageSelect.innerHTML = '<option value="">Select Village</option>';
+            villageSelect.disabled = !state;
+            document.getElementById('fetch-aqi-btn').disabled = !state;
+            if (state && villageData[state]) {
+                villageData[state].forEach(village => {
+                    const option = document.createElement('option');
+                    option.value = village.id;
+                    option.textContent = village.name;
+                    villageSelect.appendChild(option);
+                });
+            }
+        });
 
-    <!-- RIGHT COLUMN -->
-    <div class="right">
-      <!-- AQI Breakdown Card -->
-      <div class="card aqi-breakdown">
-        <div class="aqi-title">
-          <div class="aqi-icon">
-            <i class="fas fa-wind" style="color: white;"></i>
-          </div>
-          <div>
-            <div class="muted">Air Quality Index</div>
-            <div class="value">Breakdown by Pollutant</div>
-          </div>
-        </div>
-        
-        <div class="aqi-status">
-          <div class="aqi-status-label">Current AQI</div>
-          <div class="aqi-status-value">42 • Good</div>
-        </div>
-        
-        <div class="aqi-grid">
-          <div class="aqi-item">
-            <div class="aqi-value">76.0</div>
-            <div class="aqi-label">PM10</div>
-          </div>
-          <div class="aqi-item">
-            <div class="aqi-value">76.0</div>
-            <div class="aqi-label">PM10</div>
-          </div>
-          <div class="aqi-item">
-            <div class="aqi-value">76.0</div>
-            <div class="aqi-label">PM10</div>
-          </div>
-          <div class="aqi-item">
-            <div class="aqi-value">381.0</div>
-            <div class="aqi-label">CO</div>
-          </div>
-          <div class="aqi-item">
-            <div class="aqi-value">24.4</div>
-            <div class="aqi-label">NO2</div>
-          </div>
-          <div class="aqi-item">
-            <div class="aqi-value">40.1</div>
-            <div class="aqi-label">PM2.5</div>
-          </div>
-          <div class="aqi-item">
-            <div class="aqi-value">58</div>
-            <div class="aqi-label">O3</div>
-          </div>
-          <div class="aqi-item">
-            <div class="aqi-value">6.3</div>
-            <div class="aqi-label">SO2</div>
-          </div>
-          <div class="aqi-item">
-            <div class="aqi-value">42</div>
-            <div class="aqi-label">AQI</div>
-          </div>
-        </div>
-      </div>
-      
-      <!-- Sun Card with Animation -->
-      <div class="sun-card">
-        <div class="muted"><i class="fas fa-sun" style="margin-right:6px;"></i>Sunrise & Sunset</div>
-        
-        <div class="sun-animation">
-          <div class="sun"></div>
-          <div class="horizon"></div>
-        </div>
-        
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:12px">
-          <div>
-            <div class="muted">Sunrise</div>
-            <div class="value">05:54 AM</div>
-          </div>
-          <div>
-            <div class="muted">Sunset</div>
-            <div class="value">07:17 PM</div>
-          </div>
-        </div>
-      </div>
+        document.getElementById('fetch-aqi-btn').addEventListener('click', function() {
+            const villageId = document.getElementById('village-select').value;
+            if (!villageId) return;
+            let selectedVillage = null;
+            for (const state in villageData) {
+                const village = villageData[state].find(v => v.id === villageId);
+                if (village) { selectedVillage = village; break; }
+            }
+            if (selectedVillage) {
+                map.setView([selectedVillage.lat, selectedVillage.lon], 12);
+                map.eachLayer(layer => { if (layer instanceof L.Marker) map.removeLayer(layer); });
+                L.marker([selectedVillage.lat, selectedVillage.lon]).addTo(map)
+                    .bindPopup(`<b>${selectedVillage.name}</b><br>Air quality monitoring station`).openPopup();
+                simulateAqiDataFetch(selectedVillage);
+            }
+        });
 
-      <div class="chance-card">
-        <div class="muted"><i class="fas fa-umbrella" style="margin-right:6px;"></i>Chances of Rain</div>
-        <div style="margin-top:10px; display:flex; flex-direction:column; gap:10px">
-          <div class="muted">Saturday<div class="bar" style="margin-top:6px"><div class="bar-inner" style="width:82%; background:linear-gradient(90deg,var(--accent),var(--accent-2))"></div></div></div>
-          <div class="muted">Sunday<div class="bar" style="margin-top:6px"><div class="bar-inner" style="width:70%; background:linear-gradient(90deg,#7bd389,#6ac3ff)"></div></div></div>
-          <div class="muted">Monday<div class="bar" style="margin-top:6px"><div class="bar-inner" style="width:40%; background:linear-gradient(90deg,#ffd166,#ff7a59)"></div></div></div>
-        </div>
-      </div>
+        function simulateAqiDataFetch(village) {
+            setTimeout(() => {
+                const aqi = Math.floor(Math.random() * 350) + 50;
+                const aqiCategory = getAqiCategory(aqi);
+                const aqiDescription = getAqiDescription(aqi);
+                const aqiDisplay = document.getElementById('aqi-display');
+                aqiDisplay.textContent = aqi;
+                aqiDisplay.className = `aqi-value p-4 mb-3 rounded d-inline-block ${aqiCategory.className}`;
+                document.getElementById('aqi-category').textContent = aqiCategory.name;
+                document.getElementById('aqi-description').textContent = aqiDescription;
+                updateHealthAdvisory(aqi);
+                updatePollutantLevels();
+                updateForecastChart(village.name);
+                updateHistoricalChart(village.name);
+                updateSevenDayPredictionGrid(village.name); // <-- Update card grid
+            }, 800);
+        }
 
-      <div class="location-card">
-        <div class="location-icon">
-          <i class="fas fa-location-dot" style="color:white; font-size:14px;"></i>
-        </div>
-        <div>
-          <div class="muted">Location</div>
-          <div class="value">Almora, India</div>
-        </div>
-      </div>
-    </div>
-  </div>
+        function getAqiCategory(aqi) {
+            if (aqi <= 50) return { name: "Good", className: "good" };
+            if (aqi <= 100) return { name: "Satisfactory", className: "moderate" };
+            if (aqi <= 200) return { name: "Moderate", className: "unhealthy-sensitive" };
+            if (aqi <= 300) return { name: "Poor", className: "unhealthy" };
+            if (aqi <= 400) return { name: "Very Poor", className: "very-unhealthy" };
+            return { name: "Severe", className: "hazardous" };
+        }
 
-  <!-- Leaflet JS -->
-  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-    <script src="script.js"></script>
+        function getAqiDescription(aqi) {
+            if (aqi <= 50) return "Air quality is considered satisfactory, and air pollution poses little or no risk.";
+            if (aqi <= 100) return "Air quality is acceptable; however, there may be a moderate health concern for a very small number of people.";
+            if (aqi <= 200) return "Members of sensitive groups may experience health effects. The general public is not likely to be affected.";
+            if (aqi <= 300) return "Everyone may begin to experience health effects; members of sensitive groups may experience more serious health effects.";
+            if (aqi <= 400) return "Health warnings of emergency conditions. The entire population is more likely to be affected.";
+            return "Health alert: everyone may experience more serious health effects.";
+        }
 
+        function updateHealthAdvisory(aqi) {
+            const advisory = document.getElementById('health-advisory');
+            let html = '<h6>Recommended Actions:</h6><ul>';
+            if (aqi <= 50) html += '<li>Ideal air quality for outdoor activities</li><li>No restrictions needed</li>';
+            else if (aqi <= 100) html += '<li>Unusually sensitive individuals should consider reducing prolonged outdoor exertion</li>';
+            else if (aqi <= 200) {
+                html += '<li>Sensitive groups should reduce prolonged outdoor exertion</li>';
+                html += '<li>People with heart or lung disease, older adults, and children should limit outdoor activity</li>';
+            } else if (aqi <= 300) {
+                html += '<li>Sensitive groups should avoid prolonged outdoor exertion</li>';
+                html += '<li>Everyone else should reduce prolonged outdoor exertion</li>';
+                html += '<li>Consider rescheduling outdoor activities</li>';
+            } else if (aqi <= 400) {
+                html += '<li>Sensitive groups should avoid all outdoor exertion</li>';
+                html += '<li>Everyone else should avoid prolonged outdoor exertion</li>';
+                html += '<li>Keep windows and doors closed</li>';
+                html += '<li>Use air purifiers if available</li>';
+            } else {
+                html += '<li>Everyone should avoid all outdoor exertion</li>';
+                html += '<li>Remain indoors and keep activity levels low</li>';
+                html += '<li>Follow tips for keeping particle levels low indoors</li>';
+                html += '<li>Consult doctor if experiencing symptoms like difficulty in breathing</li>';
+            }
+            html += '</ul>';
+            advisory.innerHTML = html;
+        }
+
+        function updatePollutantLevels() {
+            const pollutants = [
+                { name: "PM2.5", value: (Math.random() * 200).toFixed(1), unit: "µg/m³", safe: 60 },
+                { name: "PM10", value: (Math.random() * 300).toFixed(1), unit: "µg/m³", safe: 100 },
+                { name: "NO₂", value: (Math.random() * 50).toFixed(1), unit: "ppb", safe: 40 },
+                { name: "SO₂", value: (Math.random() * 30).toFixed(1), unit: "ppb", safe: 20 },
+                { name: "O₃", value: (Math.random() * 100).toFixed(1), unit: "ppb", safe: 70 },
+                { name: "CO", value: (Math.random() * 2).toFixed(1), unit: "ppm", safe: 1 }
+            ];
+            let html = '<table class="table table-sm"><thead><tr><th>Pollutant</th><th>Concentration</th><th>Safe Level</th></tr></thead><tbody>';
+            pollutants.forEach(p => {
+                const isUnsafe = parseFloat(p.value) > p.safe;
+                html += `<tr class="${isUnsafe ? 'table-warning' : ''}">`;
+                html += `<td>${p.name}</td>`;
+                html += `<td>${p.value} ${p.unit}</td>`;
+                html += `<td>${p.safe} ${p.unit}</td></tr>`;
+            });
+            html += '</tbody></table>';
+            document.getElementById('pollutant-levels').innerHTML = html;
+        }
+
+        function updateForecastChart(locationName) {
+            const ctx = document.createElement('canvas');
+            document.getElementById('forecast-chart').innerHTML = '';
+            document.getElementById('forecast-chart').appendChild(ctx);
+            // Generate forecast data
+            const labels = [];
+            const data = [];
+            const now = new Date();
+            for (let i = 0; i < 7; i++) {
+                const date = new Date(now);
+                date.setDate(now.getDate() + i);
+                labels.push(date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }));
+                data.push(Math.floor(Math.random() * 100) + 50 + (i * 10));
+            }
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Predicted AQI',
+                        data: data,
+                        borderColor: 'rgb(75, 192, 192)',
+                        tension: 0.1,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { title: { display: true, text: `7-Day AQI Forecast for ${locationName}` } },
+                    scales: { y: { beginAtZero: false } }
+                }
+            });
+        }
+
+        function updateHistoricalChart(locationName) {
+            const ctx = document.createElement('canvas');
+            document.getElementById('historical-chart').innerHTML = '';
+            document.getElementById('historical-chart').appendChild(ctx);
+            // Generate historical data (12 months)
+            const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+            const data = months.map(() => Math.floor(Math.random() * 200) + 50);
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: months,
+                    datasets: [{
+                        label: 'Monthly Average AQI',
+                        data: data,
+                        backgroundColor: months.map((_, i) => {
+                            const aqi = data[i];
+                            if (aqi <= 50) return '#4CAF50';
+                            if (aqi <= 100) return '#8BC34A';
+                            if (aqi <= 200) return '#FFC107';
+                            if (aqi <= 300) return '#FF9800';
+                            return '#F44336';
+                        })
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { title: { display: true, text: `Monthly AQI Trends for ${locationName} (2023)` }},
+                    scales: { y: { beginAtZero: false } }
+                }
+            });
+        }
+
+        // 7-day AQI card grid, like your screenshot
+        function updateSevenDayPredictionGrid(locationName) {
+            // Simulate AQI data (replace with real data if desired)
+            const today = new Date();
+            const prediction = [];
+            for (let i = 0; i < 7; i++) {
+                const d = new Date(today);
+                d.setDate(today.getDate() + i);
+                // For demo: random, but you could fetch actual/predicted data here
+                let aqi = [99,120,103,99,91,99,99][i]; // Your screenshot numbers
+                prediction.push({ 
+                    date: d.toISOString().slice(0,10).split('-').reverse().join('-'), // dd-mm-yyyy
+                    aqi: aqi 
+                });
+            }
+
+            // Card color logic
+            function getAqiClass(aqi) {
+                if (aqi <= 100) return "aqi-moderate";
+                if (aqi <= 200) return "aqi-unhealthy";
+                return "aqi-severe";
+            }
+            let html = '';
+            prediction.forEach(d => {
+                html += `
+                    <div class="aqi-pred-card ${getAqiClass(d.aqi)}">
+                        <div class="aqi-date">AQI on ${d.date}</div>
+                        <div class="aqi-value">${d.aqi}</div>
+                    </div>
+                `;
+            });
+            document.getElementById('seven-day-aqi-card-grid').innerHTML = html;
+        }
+
+        document.getElementById('subscribe-btn').addEventListener('click', function() {
+            const email = document.getElementById('email-input').value;
+            const smsChecked = document.getElementById('sms-check').checked;
+            if (email) {
+                alert(`Thank you for subscribing! ${smsChecked ? 'You will receive both email and SMS alerts.' : 'You will receive email alerts.'}`);
+                document.getElementById('email-input').value = '';
+                document.getElementById('sms-check').checked = false;
+            } else {
+                alert('Please enter your email address to subscribe.');
+            }
+        });
+    </script>
 </body>
 </html>
