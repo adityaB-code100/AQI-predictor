@@ -128,7 +128,8 @@ def index_route():
             pollutants=pollutants,
             passing_pollutant=passing_pollutant,
              graph_html=graph_html,
-                 village=village
+                 village=village,
+                 date=date
 
 
             
@@ -169,7 +170,7 @@ def Home_page():
     pollutants=None
     pm_list=[]
     date = get_current_date()
-    village='VillageA'
+    village='Pune'
 
     if date:
         

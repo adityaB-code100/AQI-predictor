@@ -7,8 +7,12 @@ from model import predict_aqi_from_csv
 
 def get_file_train(train_village):
     train_dict = {
-        "VillageA": os.path.join(base_dir, 'Data_set', 'Training_data', 'abc.csv'),
-        "VillageB": os.path.join(base_dir, 'Data_set', 'Training_data', 'abc1.csv'),
+        "Mumbai": os.path.join(base_dir, 'Data_set', 'Training_data', 'Mumbai_train.csv'),
+        "Nagpur": os.path.join(base_dir, 'Data_set', 'Training_data', 'Nagpur_train.csv'),
+          "Nanded": os.path.join(base_dir, 'Data_set', 'Training_data', 'Nanded_train.csv'),
+        "Nashik": os.path.join(base_dir, 'Data_set', 'Training_data', 'Nashik_train.csv'),
+          "Pune": os.path.join(base_dir, 'Data_set', 'Training_data', 'Pune_train.csv')
+
 
         # Add more villages here if needed
     }
@@ -16,8 +20,12 @@ def get_file_train(train_village):
 
 def get_file_input(input_village):
     input_dict = {
-        "VillageA": os.path.join(base_dir, 'Data_set', 'input_data', 'abcd.csv'),
-        "VillageB": os.path.join(base_dir, 'Data_set', 'input_data', 'abcd1.csv')
+        "Mumbai": os.path.join(base_dir, 'Data_set', 'input_data', 'Mumbai.csv'),
+        "Nagpur": os.path.join(base_dir, 'Data_set', 'input_data', 'Nagpur.csv'),
+          "Nanded": os.path.join(base_dir, 'Data_set', 'input_data', 'Nanded.csv'),
+        "Nashik": os.path.join(base_dir, 'Data_set', 'input_data', 'Nashik.csv'),
+          "Pune": os.path.join(base_dir, 'Data_set', 'input_data', 'Pune.csv')
+
 
         # Add more villages if needed
     }
@@ -45,7 +53,7 @@ def get_data_by_date(village, input_date):
     filtered_df = df[df['Timestamp'].dt.date == search_date.date()]
     filtered_df = filtered_df.sort_values(by='Timestamp')
 
-    #print('Filtered data for prediction:\n', filtered_df)
+    print('Filtered data for prediction:\n', filtered_df)
 
     if filtered_df.empty:
         return pd.DataFrame()  # Empty DataFrame instead of None
@@ -53,4 +61,4 @@ def get_data_by_date(village, input_date):
     return predict_aqi_from_csv(train_file, filtered_df)
 
 
-#get_data_by_date('VillageA', '12-02-2025')
+get_data_by_date('Mumbai', '12-02-2025')

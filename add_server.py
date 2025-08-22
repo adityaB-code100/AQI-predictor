@@ -9,7 +9,7 @@ from testc import save_aqi_to_mongo   # <-- updated function from before
 def index():
     start_date = '2025-08-01'
     date_list = next_seven_days(start_date)
-    village_list = ['VillageA', 'VillageB']   # Add more if needed
+    village_list = ['Mumbai', 'Nagpur','Nanded','Nashik','Pune']   # Add more if needed
 
     for village in village_list:
         avg_list = []
