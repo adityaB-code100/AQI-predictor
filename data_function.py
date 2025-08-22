@@ -7,3 +7,7 @@ def next_seven_days(start_date_str):
     # Return dates in DD-MM-YYYY format
     date_list = [(start_date + timedelta(days=i)).strftime("%d-%m-%Y") for i in range(7)]
     return date_list
+
+def get_current_date():
+    # Format: YYYY-MM-DD
+    return datetime.now().strftime("%Y-%m-%d")

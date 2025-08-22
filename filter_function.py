@@ -12,3 +12,65 @@ def filter_off(pollutants: dict) -> dict:
 
     # keep only those pollutants which exist in data
     return {required_keys[k]: pollutants[k] for k in required_keys if k in pollutants}
+
+
+def classify_pollutants(data):
+    # CPCB 24-hr / 8-hr standards (µg/m³ except CO in mg/m³)
+    standards = {
+        "PM2.5": 60,
+        "PM10": 100,
+        "NO2": 80,
+        "SO2": 80,
+        "O3": 100,   # 8-hr
+        "CO": 2,     # mg/m³ (8-hr)
+        "NH3": 400
+    }
+
+    # AQI-like classification levels (based on % of standard)
+    levels = [
+        (50, "Good", "bg-green-500", "pollutant-good"),
+        (100, "Satisfactory", "bg-yellow-500", "pollutant-satisfactory"),
+        (200, "Moderate", "bg-orange-500", "pollutant-moderate"),
+        (300, "Poor", "bg-red-500", "pollutant-poor"),
+        (400, "Very Poor", "bg-purple-500", "pollutant-very-poor"),
+        (9999, "Severe", "bg-gray-800", "pollutant-severe")
+    ]
+
+    results = []
+    for pollutant, value in data.items():
+        if value is None or value < 0:
+            continue  # Skip invalid values
+
+        # Normalize pollutant key (e.g., "PM₂.₅" → "PM2.5")
+        key = pollutant.replace("₂", "2").replace("₅", "5").replace("_", ".")
+        standard = standards.get(key, None)
+
+        if not standard:  
+            continue  # Skip pollutants not in standard list
+
+        # Calculate % of standard
+        percentage = (value / standard) * 100
+
+        # Find AQI category
+        for limit, status, color, css_class in levels:
+            if percentage <= limit:
+                results.append({
+                    "name": pollutant,
+                    "value": round(value, 2),
+                    "standard": standard,
+                    "percentage": (round(percentage, 1))%100,
+                    "status": status,
+                    "color": color,
+                    "class": css_class
+                })
+                break
+
+    # Sort pollutants by % exceedance (worst first)
+    #results.sort(key=lambda x: x["percentage"], reverse=True)
+
+    return results
+
+
+# # # Example usage
+# # pollutants = {"PM2.5": 75, "PM10": 160, "NO2": 60, "SO2": 10, "O3": 120, "CO": 0.8, "NH3": 380}
+# # print(classify_pollutants(pollutants))

@@ -7,6 +7,8 @@
 
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
   <script>
     tailwind.config = {
       darkMode: 'class',
@@ -332,6 +334,7 @@
     </div>
   </div>
 
+  <form action="/dashbord" method="post">
   <div class="container mx-auto px-4">
     <!-- VILLAGE + DATE FILTER -->
     <div class="card bg-white rounded-2xl shadow-lg mb-6 p-6 animate-fadeIn dark:bg-gray-800 hover-lift">
@@ -341,25 +344,30 @@
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label class="form-label block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Village</label>
-          <select class="form-select w-full rounded-xl py-3 px-4 border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-indigo-400 dark:focus:border-indigo-400">
-            <option selected>Select Village</option>
-            <option value="village1">Village A</option>
-            <option value="village2">Village B</option>
+          <select name="village" class="form-select w-full rounded-xl py-3 px-4 border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-indigo-400 dark:focus:border-indigo-400">
+            <option selected >Select Village</option>
+            <option value="VillageA">Village A</option>
+            <option value="VillageB">Village B</option>
             <option value="village3">Village C</option>
           </select>
         </div>
         <div>
-          <label class="form-label block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Date</label>
-          <input type="date" class="form-control w-full rounded-xl py-3 px-4 border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-indigo-400 dark:focus:border-indigo-400">
+          <label class="form-label block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300" >Date</label>
+          <input type="date" name="date" class="form-control w-full rounded-xl py-3 px-4 border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-indigo-400 dark:focus:border-indigo-400">
         </div>
       </div>
-      <button class="btn-primary mt-4 bg-gradient-to-r from-indigo-600 to-indigo-500 text-white font-semibold py-2 px-6 rounded-xl shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-300 animate-pulse dark:from-indigo-500 dark:to-indigo-400 flex items-center justify-center">
+      <button type="submit"   class="btn-primary mt-4 bg-gradient-to-r from-indigo-600 to-indigo-500 text-white font-semibold py-2 px-6 rounded-xl shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-300 animate-pulse dark:from-indigo-500 dark:to-indigo-400 flex items-center justify-center">
         <i class="fas fa-sync-alt mr-2"></i> Apply Filters
       </button>
     </div>
+    </form>
 
     <!-- MAP -->
-    <div  class="h-96 rounded-2xl shadow-lg mb-5 animate-fadeIn hover-lift">{{ map_html | safe }}</div>
+<div class="h-96 rounded-2xl shadow-lg mb-5 animate-fadeIn hover-lift">
+  <iframe src="{{ url_for('static', filename='Full_Final_AQI_Map_change.html') }}" 
+          class="w-full h-full rounded-2xl border-0">
+  </iframe>
+</div>
 
     <!-- AQI SUMMARY CARDS -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-5 text-center mb-6">
@@ -416,7 +424,7 @@
         <i class="fas fa-calendar-alt mr-2 text-indigo-600 dark:text-indigo-400"></i> 📅 7-Day Forecast
       </h4>
       <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-4">
-        {% for aqi, date in paired_data.items() %}
+        {% for date,aqi in   passing_data.items() %}
 
         <div class="forecast-day bg-gray-50 p-4 rounded-xl shadow text-center cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-lg animate-fadeIn dark:bg-gray-700">
           <h6 class="font-medium">{{ date }}</h6>
@@ -436,7 +444,7 @@
               {% else %} Very Unhealthy
               {% endif %}
             </small>          
-            <div class="mt-2 text-xs text-gray-400 dark:text-gray-500">PM2.5: 12</div>
+            <div class="mt-2 text-xs text-gray-400 dark:text-gray-500">PM2.5:-{{passing_pollutant[date]}}</div>
         </div>
         {% endfor %}
       </div>
@@ -456,121 +464,46 @@
             <th class="px-6 py-4 text-left text-xs font-medium text-gray-700 uppercase tracking-wider dark:text-gray-300">Status</th>
           </tr>
         </thead>
-        <!-- <tbody class="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
-          <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">PM2.5</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">12.5</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-              <div>50%</div>
-              <div class="pollutant-bar h-2 bg-gray-200 rounded-full mt-1 overflow-hidden dark:bg-gray-700">
-                <div class="pollutant-fill h-full rounded-full pollutant-good" style="width: 80%"></div>
-              </div>
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100"><span class="status-indicator w-3 h-3 rounded-full bg-green-500 inline-block mr-2"></span> Good</td>
-          </tr>
-          <tr class="bg-gray-50 hover:bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 transition-colors">
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">PM10</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">54</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-              <div>36%</div>
-              <div class="pollutant-bar h-2 bg-gray-200 rounded-full mt-1 overflow-hidden dark:bg-gray-600">
-                <div class="pollutant-fill h-full rounded-full pollutant-good" style="width: 36%"></div>
-              </div>
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100"><span class="status-indicator w-3 h-3 rounded-full bg-green-500 inline-block mr-2"></span> Good</td>
-          </tr>
-          <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">NO (Nitric Oxide)</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">20</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-              <div>25%</div>
-              <div class="pollutant-bar h-2 bg-gray-200 rounded-full mt-1 overflow-hidden dark:bg-gray-700">
-                <div class="pollutant-fill h-full rounded-full pollutant-good" style="width: 25%"></div>
-              </div>
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100"><span class="status-indicator w-3 h-3 rounded-full bg-green-500 inline-block mr-2"></span> Good</td>
-          </tr>
-          <tr class="bg-gray-50 hover:bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 transition-colors">
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">NO₂ (Nitrogen Dioxide)</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">30</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-              <div>60%</div>
-              <div class="pollutant-bar h-2 bg-gray-200 rounded-full mt-1 overflow-hidden dark:bg-gray-600">
-                <div class="pollutant-fill h-full rounded-full pollutant-moderate" style="width: 60%"></div>
-              </div>
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100"><span class="status-indicator w-3 h-3 rounded-full bg-yellow-500 inline-block mr-2"></span> Moderate</td>
-          </tr>
-          <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">NOx (Nitrogen Oxides)</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">45</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-              <div>45%</div>
-              <div class="pollutant-bar h-2 bg-gray-200 rounded-full mt-1 overflow-hidden dark:bg-gray-700">
-                <div class="pollutant-fill h-full rounded-full pollutant-good" style="width: 45%"></div>
-              </div>
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100"><span class="status-indicator w-3 h-3 rounded-full bg-green-500 inline-block mr-2"></span> Good</td>
-          </tr>
-          <tr class="bg-gray-50 hover:bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 transition-colors">
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">NH₃ (Ammonia)</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">100</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-              <div>67%</div>
-              <div class="pollutant-bar h-2 bg-gray-200 rounded-full mt-1 overflow-hidden dark:bg-gray-600">
-                <div class="pollutant-fill h-full rounded-full pollutant-moderate" style="width: 67%"></div>
-              </div>
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100"><span class="status-indicator w-3 h-3 rounded-full bg-yellow-500 inline-block mr-2"></span> Moderate</td>
-          </tr>
-          <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">SO₂ (Sulfur Dioxide)</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">35</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-              <div>23%</div>
-              <div class="pollutant-bar h-2 bg-gray-200 rounded-full mt-1 overflow-hidden dark:bg-gray-700">
-                <div class="pollutant-fill h-full rounded-full pollutant-good" style="width: 23%"></div>
-              </div>
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100"><span class="status-indicator w-3 h-3 rounded-full bg-green-500 inline-block mr-2"></span> Good</td>
-          </tr>
-        </tbody> -->
         <tbody class="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
-  {% for name,value in data_f.items() %}
+  {% for pollutant in pollutants %}
   <tr class="{% if loop.index % 2 == 0 %}bg-gray-50 hover:bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600{% else %}hover:bg-gray-50 dark:hover:bg-gray-700{% endif %} transition-colors">
     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-      {{ name }}
+      {{ pollutant.name }}
     </td>
     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-      {{ value }}
+      {{ pollutant.value }}
     </td>
     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-      <!-- <div>{{ name}}%</div> -->
+      <div>{{ pollutant.percentage }}%</div>
       <div class="pollutant-bar h-2 bg-gray-200 rounded-full mt-1 overflow-hidden dark:bg-gray-700">
-        <!-- <div class="pollutant-fill h-full rounded-full {{ name }}" style="width: {{ name }}%"></div> -->
+      <div class="pollutant-fill h-full rounded-full {{ pollutant.class }}" style="width: {{ pollutant.percentage }}%;"></div>
       </div>
     </td>
     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-      <span class="status-indicator w-3 h-3 rounded-full {{ name }} inline-block mr-2"></span>
-      <!-- {{ name}} -->
+      <span class="status-indicator w-3 h-3 rounded-full {{ pollutant.color }} inline-block mr-2"></span>
+      {{ pollutant.status }}
     </td>
   </tr>
   {% endfor %}
 </tbody>
 
+
       </table>
     </div>
 
     <!-- FORECAST + HISTORICAL GRAPHS -->
+  <div>
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-      <div class="forecast-card bg-white rounded-2xl shadow-lg p-6 animate-fadeIn hover-lift dark:bg-gray-800">
+            <div class="forecast-card bg-white rounded-2xl shadow-lg p-6 animate-fadeIn hover-lift dark:bg-gray-800">
         <h5 class="text-lg font-semibold mb-4 flex items-center">
-          <i class="fas fa-chart-line mr-2 text-indigo-600 dark:text-indigo-400"></i> 72-Hour Forecast
+          <i class="fas fa-chart-line mr-2 text-indigo-600 dark:text-indigo-400"></i>
+          72-Hour Forecast
         </h5>
         <div class="forecast-chart" id="forecast-chart">
-          <canvas id="forecastChart"></canvas>
+          {{ graph_html | safe }}
         </div>
       </div>
+
       <div class="forecast-card bg-white rounded-2xl shadow-lg p-6 animate-fadeIn hover-lift dark:bg-gray-800">
         <h5 class="text-lg font-semibold mb-4 flex items-center">
           <i class="fas fa-history mr-2 text-indigo-600 dark:text-indigo-400"></i> Historical Trends
@@ -734,58 +667,7 @@
   <script>
     // Initialize Leaflet map
   
-    // Initialize charts
-    function initializeCharts() {
-      // Forecast chart
-      const forecastCtx = document.getElementById('forecastChart').getContext('2d');
-      if (window.forecastChartInstance) {
-        window.forecastChartInstance.destroy();
-      }
-      window.forecastChartInstance = new Chart(forecastCtx, {
-        type: 'line',
-        data: {
-          labels: ['Now', '+6h', '+12h', '+18h', '+24h', '+30h', '+36h', '+42h', '+48h', '+54h', '+60h', '+66h', '+72h'],
-          datasets: [{
-            label: 'AQI Forecast',
-            data: [35, 42, 50, 58, 65, 70, 78, 72, 65, 58, 52, 48, 45],
-            borderColor: '#4f46e5',
-            backgroundColor: 'rgba(79, 70, 229, 0.1)',
-            tension: 0.4,
-            fill: true,
-            pointBackgroundColor: '#4f46e5',
-            pointRadius: 4,
-            pointHoverRadius: 6
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              display: false
-            }
-          },
-          scales: {
-            y: {
-              beginAtZero: false,
-              grid: {
-                color: 'rgba(0, 0, 0, 0.05)'
-              },
-              ticks: {
-                color: '#111827'
-              }
-            },
-            x: {
-              grid: {
-                display: false
-              },
-              ticks: {
-                color: '#111827'
-              }
-            }
-          }
-        }
-      });
+
       
       // Historical chart
       const historicalCtx = document.getElementById('historicalChart').getContext('2d');
@@ -838,7 +720,7 @@
           }
         }
       });
-    }
+    
     
     // Initialize charts on page load
     document.addEventListener('DOMContentLoaded', function() {

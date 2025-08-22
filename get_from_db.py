@@ -110,5 +110,5 @@ def get_aqi_by_village(date: str, db_name="AQI_Project", collection_name="aqi_re
         return None
 
 # # Example usage:
-village_aqi_data = get_aqi_data("2025-07-12",'VillageA')
-print(village_aqi_data)
+#village_aqi_data = get_aqi_data("2025-07-12",'VillageA')
+#print(village_aqi_data)
