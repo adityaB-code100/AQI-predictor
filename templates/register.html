@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+{% block title %}Register · AQI Project{% endblock %}
+{% block content %}
+<div class="max-w-3xl mx-auto">
+  <div class="bg-white rounded-2xl shadow p-6">
+    <h1 class="text-xl font-semibold mb-4">Create an account</h1>
+
+    <div class="grid md:grid-cols-2 gap-6">
+      <!-- Personal Registration -->
+      <div class="border rounded-xl p-4">
+        <h2 class="font-semibold mb-2">Personal</h2>
+        <form action="{{ url_for('register') }}" method="post" class="space-y-3">
+          <input type="hidden" name="reg_type" value="personal" />
+
+          <div>
+            <label class="block text-sm mb-1">Name</label>
+            <input name="name" class="w-full rounded-lg border px-3 py-2" required />
+          </div>
+
+          <div>
+            <label class="block text-sm mb-1">Email</label>
+            <input type="email" name="email" class="w-full rounded-lg border px-3 py-2" required />
+          </div>
+
+          <div>
+            <label class="block text-sm mb-1">Mobile No.</label>
+            <input name="mobile" pattern="[0-9]{10}" maxlength="10" class="w-full rounded-lg border px-3 py-2" required />
+          </div>
+
+          <div>
+            <label class="block text-sm mb-1">Village</label>
+            <select name="village" class="w-full rounded-lg border px-3 py-2" required>
+              <option value="">Select village</option>
+              <option value="Village 1">Village 1</option>
+              <option value="Village 2">Village 2</option>
+              <option value="Nanded">Nanded</option>
+              <option value="Pune">Pune</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-sm mb-1">Any disease (lungs/air related)</label>
+            <select name="disease" class="w-full rounded-lg border px-3 py-2" required>
+              <option value="">Select</option>
+              <option>None</option>
+              <option>Asthma</option>
+              <option>Bronchitis</option>
+              <option>COPD</option>
+              <option>Allergic Rhinitis</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-sm mb-1">Age</label>
+            <input name="age" type="number" min="1" max="120" class="w-full rounded-lg border px-3 py-2" required />
+          </div>
+
+          <div>
+            <label class="block text-sm mb-1">Password</label>
+            <div class="relative">
+              <input type="password" name="password" id="pw_personal" class="w-full rounded-lg border px-3 py-2 pr-10" required />
+              <button type="button" class="absolute inset-y-0 right-2 text-sm text-gray-500" onclick="togglePw('pw_personal')">Show</button>
+            </div>
+          </div>
+
+          <button class="w-full py-2 rounded-xl bg-gray-900 text-white">Register (Personal)</button>
+        </form>
+      </div>
+
+      <!-- Institution Registration -->
+      <div class="border rounded-xl p-4">
+        <h2 class="font-semibold mb-2">Institution</h2>
+        <form action="{{ url_for('register') }}" method="post" class="space-y-3">
+          <input type="hidden" name="reg_type" value="institution" />
+
+          <div>
+            <label class="block text-sm mb-1">Institution Name</label>
+            <input name="institution_name" class="w-full rounded-lg border px-3 py-2" required />
+          </div>
+
+          <div>
+            <label class="block text-sm mb-1">Type</label>
+            <select name="institution_type" class="w-full rounded-lg border px-3 py-2" required>
+              <option value="">Select type</option>
+              <option value="hospital">Hospital</option>
+              <option value="school">School</option>
+              <option value="college">College</option>
+              <option value="village">Village Office</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-sm mb-1">Email</label>
+            <input type="email" name="email" class="w-full rounded-lg border px-3 py-2" required />
+          </div>
+
+          <div>
+            <label class="block text-sm mb-1">Contact No.</label>
+            <input name="contact" pattern="[0-9]{10}" maxlength="10" class="w-full rounded-lg border px-3 py-2" required />
+          </div>
+
+          <div>
+            <label class="block text-sm mb-1">Password</label>
+            <div class="relative">
+              <input type="password" name="password" id="pw_inst" class="w-full rounded-lg border px-3 py-2 pr-10" required />
+              <button type="button" class="absolute inset-y-0 right-2 text-sm text-gray-500" onclick="togglePw('pw_inst')">Show</button>
+            </div>
+          </div>
+
+          <button class="w-full py-2 rounded-xl bg-gray-900 text-white">Register (Institution)</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function togglePw(id){
+  const i = document.getElementById(id);
+  i.type = i.type === 'password' ? 'text' : 'password';
+}
+</script>
+{% endblock %}

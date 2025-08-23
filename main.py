@@ -1,283 +1,267 @@
+from flask import Flask, request, redirect, url_for, session, render_template, flash, jsonify
+from flask_pymongo import PyMongo
+from werkzeug.security import generate_password_hash, check_password_hash
+from bson.objectid import ObjectId
+from functools import wraps
 
-from flask import Flask, render_template, request,jsonify
-import statistics,math
+# AQI imports
+import statistics, math
 from datetime import datetime
-from get_map import mapgenerator
-from data_function import next_seven_days
-from get_from_db import get_aqi_data ,get_aqi_by_village # your function from previous step
 import pandas as pd
 import numpy as np
-from filter_function import filter_off,classify_pollutants
+from get_map import mapgenerator
+from data_function import next_seven_days
+from get_from_db import get_aqi_data, get_aqi_by_village
+from filter_function import filter_off, classify_pollutants
 from data_graph import create_aqi_forecast_chart
-app = Flask(__name__)
 
+app = Flask(__name__)
+app.secret_key = "secretkey"
+
+# MongoDB Config
+app.config["MONGO_URI"] = "mongodb://localhost:27017/AQI_Project"
+mongo = PyMongo(app)
+
+# Collections
+users_collection = mongo.db.users
+institutions_collection = mongo.db.institutions
+
+# ---------- Helpers ----------
 def get_current_date():
-    # Format: YYYY-MM-DD
     return datetime.now().strftime("%Y-%m-%d")
 
-@app.route('/dashbord', methods=['GET', 'POST'])
-def index_route():
-    aqi_list = []
-    mean_list = []
-    paired_data = []
-    pollutant_data = {}
-    avg_aqi_7_days=None
-    worst_aqi=None
-    best_aqi=None
-    avg_3card_dict={}
-    avg_3date_dict={}
-    passing_data={}
-    pollutants=None
-    pm_list=[]
-    if request.method == 'POST':
-        village = request.form.get('village')
-        date = request.form.get('date')
-        date_list = next_seven_days(date)
-        print(date_list)  # Get next 7 days including this one
+def login_required(f):
+    """Protect routes from unauthorized access"""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if "type" not in session:
+            flash("Please login first!", "danger")
+            return redirect(url_for("login"))
+        return f(*args, **kwargs)
+    return decorated_function
 
-        for date_i in date_list:
-            # Fetch AQI data from MongoDB for this date and village
-            #print(date_i,village)
-            data = get_aqi_data(date_i, village=village)
-            #print(data)
-            if data:
-                mean_list.append(data)
-                # For average AQI card
-                if 'Predicted_AQI' in data:
-                    aqi_list.append(data['Predicted_AQI'])
-                    print(data['Predicted_AQI'])
+# ---------- Home ----------
+@app.route("/")
+def home():
+    return render_template("index.html")
 
-                if 'PM2.5' in data:
-                    pm_list.append(data['PM2.5'])
-                    print("pm2.3",data['PM2.5'])
-            else:
+# ---------- REGISTER ----------
+@app.route("/register", methods=["GET", "POST"])
+def register():
+    if request.method == "POST":
+        reg_type = request.form.get("reg_type")
 
-                print(f"No data found for {village} on {date_i}")
+        if reg_type == "personal":
+            if users_collection.find_one({"email": request.form["email"]}):
+                flash("Email already exists! Please login.", "danger")
+                return redirect(url_for("login"))
 
-        data = get_aqi_data(date, village=village)
-        print(data)
-        pollutants=classify_pollutants(filter_off(data))
-        print(pollutants)
-        # Get AQI by village (for map)
-        village_aqi_data = get_aqi_by_village(date)
-        print(village_aqi_data )
+            data = {
+                "name": request.form["name"],
+                "email": request.form["email"],
+                "mobile": request.form["mobile"],
+                "village": request.form["village"],
+                "disease": request.form["disease"],
+                "age": request.form["age"],
+                "password": generate_password_hash(request.form["password"])
+            }
+            users_collection.insert_one(data)
+            flash("Personal account registered successfully!", "success")
+            return redirect(url_for("login"))
 
+        elif reg_type == "institution":
+            if institutions_collection.find_one({"email": request.form["email"]}):
+                flash("Email already exists! Please login.", "danger")
+                return redirect(url_for("login"))
 
-        # Average AQI for 7 days
-        if aqi_list and not math.isnan(np.mean(aqi_list)):
-            avg_aqi_7_days = int(np.mean(aqi_list))
-        else:
-            avg_aqi_7_days = None
+            data = {
+                "institution_name": request.form["institution_name"],
+                "institution_type": request.form["institution_type"],
+                "email": request.form["email"],
+                "contact": request.form["contact"],
+                "password": generate_password_hash(request.form["password"])
+            }
+            institutions_collection.insert_one(data)
+            flash("Institution account registered successfully!", "success")
+            return redirect(url_for("login"))
 
-        # Worst AQI
-        if aqi_list:
-            worst_aqi = np.max(aqi_list)
-        else:
-            worst_aqi = None
+    return render_template("register.html")
 
-        # Best AQI (cleaning out None/NaN first)
-        aqi_clean = [x for x in aqi_list if x is not None and not np.isnan(x)]
-        if aqi_clean:
-            best_aqi = np.min(aqi_clean)
-        else:
-            best_aqi = None
+# ---------- LOGIN ----------
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        login_type = request.form.get("login_type")
+        email = request.form["email"]
+        password = request.form["password"]
 
-        print(worst_aqi, best_aqi, "aqi")
-        print("avg", avg_aqi_7_days)
+        if login_type == "personal":
+            user = users_collection.find_one({"email": email})
+            if user and check_password_hash(user["password"], password):
+                session["user"] = str(user["_id"])
+                session["type"] = "personal"
+                flash(f"Welcome, {user['name']}!", "success")
+                return redirect(url_for("dashboard"))
 
-        # Generate map if we have AQI data
-        if village_aqi_data:
-           mapgenerator(village_aqi_data)
+        elif login_type == "institution":
+            inst = institutions_collection.find_one({"email": email})
+            if inst and check_password_hash(inst["password"], password):
+                session["institution"] = str(inst["_id"])
+                session["type"] = "institution"
+                flash(f"Welcome, {inst['institution_name']}!", "success")
+                return redirect(url_for("dashboard"))
 
-        # Build paired data safely
-        if aqi_list and date_list:
-            paired_data = dict(zip(aqi_list, date_list))
+        flash("Invalid credentials!", "danger")
 
-        # Fill 3-card dictionary safely
-        if worst_aqi in paired_data:
-            avg_3card_dict['worst_aqi'] = paired_data[worst_aqi]
-        else:
-            avg_3card_dict['worst_aqi'] = None
+    return render_template("login.html")
 
-        if best_aqi in paired_data:
-            avg_3card_dict['best_aqi'] = paired_data[best_aqi]
-        else:
-            avg_3card_dict['best_aqi'] = None
+# ---------- FORGOT PASSWORD ----------
+@app.route("/forgot", methods=["GET", "POST"])
+def forgot_password():
+    if request.method == "POST":
+        account_type = request.form.get("account_type")
+        email = request.form["email"]
+        new_password = generate_password_hash(request.form["new_password"])
 
-        print(avg_3card_dict)
-        print(paired_data)
+        if account_type == "personal":
+            users_collection.update_one({"email": email}, {"$set": {"password": new_password}})
+            flash("Password updated successfully!", "success")
+            return redirect(url_for("login"))
 
-        # Default pollutant data
-        pollutant_data = mean_list[0] if mean_list else None
-        passing_data = dict(zip(date_list,aqi_list))
-        passing_pollutant = dict(zip(date_list,pm_list))
+        elif account_type == "institution":
+            institutions_collection.update_one({"email": email}, {"$set": {"password": new_password}})
+            flash("Password updated successfully!", "success")
+            return redirect(url_for("login"))
 
-        print(passing_data)
-       
-        graph_html = create_aqi_forecast_chart(date_list, aqi_list)
+    return render_template("forgot.html")
 
+# ---------- EDIT PROFILE ----------
+@app.route("/edit", methods=["GET", "POST"])
+@login_required
+def edit_profile():
+    if session.get("type") == "personal":
+        user = users_collection.find_one({"_id": ObjectId(session["user"])})
 
-        # Render template
-        return render_template(
-            'aqi.html',
-            passing_data=passing_data,
-            avg_3card_dict=avg_3card_dict,
-            avg_aqi_7_days=avg_aqi_7_days,
-            worst_aqi=worst_aqi,
-            best_aqi=best_aqi,
-            pollutants=pollutants,
-            passing_pollutant=passing_pollutant,
-             graph_html=graph_html,
-                 village=village,
-                 date=date
+        if request.method == "POST":
+            update_data = {
+                "name": request.form["name"],
+                "mobile": request.form["mobile"],
+                "village": request.form["village"],
+                "disease": request.form["disease"],
+                "age": request.form["age"]
+            }
+            if request.form.get("password"):
+                update_data["password"] = generate_password_hash(request.form["password"])
 
+            users_collection.update_one({"_id": user["_id"]}, {"$set": update_data})
+            flash("Profile updated successfully!", "success")
+            return redirect(url_for("aqi_dashboard"))
 
-            
-        )
+        return render_template("edit_personal.html", user=user)
 
+    elif session.get("type") == "institution":
+        inst = institutions_collection.find_one({"_id": ObjectId(session["institution"])})
 
+        if request.method == "POST":
+            update_data = {
+                "institution_name": request.form["institution_name"],
+                "institution_type": request.form["institution_type"],
+                "contact": request.form["contact"]
+            }
+            if request.form.get("password"):
+                update_data["password"] = generate_password_hash(request.form["password"])
 
+            institutions_collection.update_one({"_id": inst["_id"]}, {"$set": update_data})
+            flash("Institution profile updated successfully!", "success")
+            return redirect(url_for("aqi_dashboard"))
 
+        return render_template("edit_institution.html", inst=inst)
 
+    return redirect(url_for("login"))
 
+# ---------- AQI Dashboard ----------
+@app.route("/dashboard", methods=["GET", "POST"])
+@login_required
+def dashboard():
+    aqi_list, mean_list, pm_list = [], [], []
+    avg_aqi_7_days = worst_aqi = best_aqi = None
+    avg_3card_dict, passing_data, pollutants = {}, {}, None
 
+    if request.method == "POST":
+        village = request.form.get("village")
+        date = request.form.get("date")
+    else:
+        village = "Pune"  # default
+        date = get_current_date()
+
+    date_list = next_seven_days(date)
+
+    for date_i in date_list:
+        data = get_aqi_data(date_i, village=village)
+        if data:
+            mean_list.append(data)
+            if "Predicted_AQI" in data:
+                aqi_list.append(data["Predicted_AQI"])
+            if "PM2.5" in data:
+                pm_list.append(data["PM2.5"])
+
+    data = get_aqi_data(date, village=village)
+    if data:
+        pollutants = classify_pollutants(filter_off(data))
+
+    village_aqi_data = get_aqi_by_village(date)
+    if village_aqi_data:
+        mapgenerator(village_aqi_data)
+
+    if aqi_list:
+        avg_aqi_7_days = int(np.mean(aqi_list)) if not math.isnan(np.mean(aqi_list)) else None
+        worst_aqi = np.max(aqi_list)
+        best_aqi = np.min([x for x in aqi_list if x is not None and not np.isnan(x)])
+
+    paired_data = dict(zip(aqi_list, date_list))
+    avg_3card_dict["worst_aqi"] = paired_data.get(worst_aqi)
+    avg_3card_dict["best_aqi"] = paired_data.get(best_aqi)
+
+    passing_data = dict(zip(date_list, aqi_list))
+    passing_pollutant = dict(zip(date_list, pm_list))
+    graph_html = create_aqi_forecast_chart(date_list, aqi_list)
+
+    return render_template(
+        "aqi.html",
+        passing_data=passing_data,
+        avg_3card_dict=avg_3card_dict,
+        avg_aqi_7_days=avg_aqi_7_days,
+        worst_aqi=worst_aqi,
+        best_aqi=best_aqi,
+        pollutants=pollutants,
+        passing_pollutant=passing_pollutant,
+        graph_html=graph_html,
+        date=date,
+        village=village,
+    )
+
+# ---------- Save Coordinates ----------
 @app.route("/save_coords", methods=["POST"])
 def save_coords():
     data = request.json
-    lat = data.get("lat")
-    lng = data.get("lng")
-
-    print(f"Received coordinates: {lat}, {lng}")  # <-- You can save to DB instead
-
+    lat, lng = data.get("lat"), data.get("lng")
+    print(f"Received coordinates: {lat}, {lng}")
     return jsonify({"status": "success", "lat": lat, "lng": lng})
 
+# ---------- Logout ----------
+@app.route("/logout")
+def logout():
+    session.clear()
+    flash("Logged out successfully!", "info")
+    return redirect(url_for("home"))
 
-
-
-
-@app.route('/')
-def Home_page():
-    aqi_list = []
-    mean_list = []
-    paired_data = []
-    pollutant_data = {}
-    avg_aqi_7_days=None
-    worst_aqi=None
-    best_aqi=None
-    avg_3card_dict={}
-    avg_3date_dict={}
-    passing_data={}
-    pollutants=None
-    pm_list=[]
-    date = get_current_date()
-    village='Pune'
-
-    if date:
-        
-        date_list = next_seven_days(date)
-        print(date_list)  # Get next 7 days including this one
-
-        for date_i in date_list:
-            # Fetch AQI data from MongoDB for this date and village
-            #print(date_i,village)
-            data = get_aqi_data(date_i, village=village)
-            #print(data)
-            if data:
-                mean_list.append(data)
-                # For average AQI card
-                if 'Predicted_AQI' in data:
-                    aqi_list.append(data['Predicted_AQI'])
-                    print(data['Predicted_AQI'])
-
-                if 'PM2.5' in data:
-                    pm_list.append(data['PM2.5'])
-                    print("pm2.3",data['PM2.5'])
-            else:
-
-                print(f"No data found for {village} on {date_i}")
-
-        data = get_aqi_data(date, village=village)
-        print(data)
-        pollutants=classify_pollutants(filter_off(data))
-        print(pollutants)
-        # Get AQI by village (for map)
-        village_aqi_data = get_aqi_by_village(date)
-        print(village_aqi_data )
-
-
-        # Average AQI for 7 days
-        if aqi_list and not math.isnan(np.mean(aqi_list)):
-            avg_aqi_7_days = int(np.mean(aqi_list))
-        else:
-            avg_aqi_7_days = None
-
-        # Worst AQI
-        if aqi_list:
-            worst_aqi = np.max(aqi_list)
-        else:
-            worst_aqi = None
-
-        # Best AQI (cleaning out None/NaN first)
-        aqi_clean = [x for x in aqi_list if x is not None and not np.isnan(x)]
-        if aqi_clean:
-            best_aqi = np.min(aqi_clean)
-        else:
-            best_aqi = None
-
-        print(worst_aqi, best_aqi, "aqi")
-        print("avg", avg_aqi_7_days)
-
-        # Generate map if we have AQI data
-        if village_aqi_data:
-           mapgenerator(village_aqi_data)
-
-        # Build paired data safely
-        if aqi_list and date_list:
-            paired_data = dict(zip(aqi_list, date_list))
-
-        # Fill 3-card dictionary safely
-        if worst_aqi in paired_data:
-            avg_3card_dict['worst_aqi'] = paired_data[worst_aqi]
-        else:
-            avg_3card_dict['worst_aqi'] = None
-
-        if best_aqi in paired_data:
-            avg_3card_dict['best_aqi'] = paired_data[best_aqi]
-        else:
-            avg_3card_dict['best_aqi'] = None
-
-        print(avg_3card_dict)
-        print(paired_data)
-
-        # Default pollutant data
-        pollutant_data = mean_list[0] if mean_list else None
-        passing_data = dict(zip(date_list,aqi_list))
-        passing_pollutant = dict(zip(date_list,pm_list))
-
-        print(passing_data)
-       
-        graph_html = create_aqi_forecast_chart(date_list, aqi_list)
-
-
-        # Render template
-        return render_template(
-            'aqi.html',
-            passing_data=passing_data,
-            avg_3card_dict=avg_3card_dict,
-            avg_aqi_7_days=avg_aqi_7_days,
-            worst_aqi=worst_aqi,
-            best_aqi=best_aqi,
-            pollutants=pollutants,
-            passing_pollutant=passing_pollutant,
-             graph_html=graph_html,
-             date = date,
-    village=village
-            
-        )
-
-
-
-
+# ---------- Disable caching ----------
+@app.after_request
+def add_header(response):
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+    return response
 
 if __name__ == "__main__":
     app.run(debug=True)

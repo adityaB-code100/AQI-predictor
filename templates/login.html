@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Login · AQI Project{% endblock %}
+{% block content %}
+<div class="max-w-lg mx-auto">
+  <div class="bg-white rounded-2xl shadow p-6">
+    <h1 class="text-xl font-semibold mb-4">Login</h1>
+
+    <form action="{{ url_for('login') }}" method="post" class="space-y-4" id="loginForm">
+      <div>
+        <label class="block text-sm text-gray-700 mb-1">Login Type</label>
+        <select name="login_type" id="login_type" class="w-full rounded-lg border px-3 py-2" required>
+          <option value="personal">Personal</option>
+          <option value="institution">Institution</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="block text-sm text-gray-700 mb-1">Email</label>
+        <input type="email" name="email" class="w-full rounded-lg border px-3 py-2" required />
+      </div>
+
+      <div>
+        <label class="block text-sm text-gray-700 mb-1">Password</label>
+        <div class="relative">
+          <input type="password" name="password" id="login_password" class="w-full rounded-lg border px-3 py-2 pr-10" required />
+          <button type="button" class="absolute inset-y-0 right-2 text-sm text-gray-500" onclick="togglePw('login_password')">Show</button>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-between">
+        <a href="{{ url_for('forgot_password') }}" class="text-sm text-blue-700">Forgot password?</a>
+        <button class="px-4 py-2 rounded-xl bg-gray-900 text-white">Login</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+function togglePw(id){
+  const i = document.getElementById(id);
+  i.type = i.type === 'password' ? 'text' : 'password';
+}
+</script>
+{% endblock %}
