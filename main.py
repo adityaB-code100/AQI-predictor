@@ -181,7 +181,7 @@ def edit_profile():
 
 # ---------- AQI Dashboard ----------
 @app.route("/dashboard", methods=["GET", "POST"])
-@login_required
+#@login_required
 def dashboard():
     aqi_list, mean_list, pm_list = [], [], []
     avg_aqi_7_days = worst_aqi = best_aqi = None
@@ -211,7 +211,8 @@ def dashboard():
 
     village_aqi_data = get_aqi_by_village(date)
     if village_aqi_data:
-        mapgenerator(village_aqi_data)
+        # mapgenerator(village_aqi_data)
+        pass
 
     if aqi_list:
         avg_aqi_7_days = int(np.mean(aqi_list)) if not math.isnan(np.mean(aqi_list)) else None
@@ -225,6 +226,7 @@ def dashboard():
     passing_data = dict(zip(date_list, aqi_list))
     passing_pollutant = dict(zip(date_list, pm_list))
     graph_html = create_aqi_forecast_chart(date_list, aqi_list)
+    print(pollutants)
 
     return render_template(
         "aqi.html",
@@ -240,20 +242,14 @@ def dashboard():
         village=village,
     )
 
-# ---------- Save Coordinates ----------
-@app.route("/save_coords", methods=["POST"])
-def save_coords():
-    data = request.json
-    lat, lng = data.get("lat"), data.get("lng")
-    print(f"Received coordinates: {lat}, {lng}")
-    return jsonify({"status": "success", "lat": lat, "lng": lng})
+
 
 # ---------- Logout ----------
 @app.route("/logout")
 def logout():
     session.clear()
     flash("Logged out successfully!", "info")
-    return redirect(url_for("home"))
+    return redirect(url_for("dashboard"))
 
 # ---------- Disable caching ----------
 @app.after_request

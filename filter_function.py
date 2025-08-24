@@ -28,12 +28,12 @@ def classify_pollutants(data):
 
     # AQI-like classification levels (based on % of standard)
     levels = [
-        (50, "Good", "bg-green-500", "pollutant-good"),
-        (100, "Satisfactory", "bg-yellow-500", "pollutant-satisfactory"),
-        (200, "Moderate", "bg-orange-500", "pollutant-moderate"),
-        (300, "Poor", "bg-red-500", "pollutant-poor"),
-        (400, "Very Poor", "bg-purple-500", "pollutant-very-poor"),
-        (9999, "Severe", "bg-gray-800", "pollutant-severe")
+        (50, "Good", "bg-green-500", "bg-green-500"),
+        (100, "Satisfactory", "bg-yellow-500", "bg-yellow-500"),
+        (200, "Moderate", "bg-orange-500", "bg-orange-500"),
+        (300, "Poor", "bg-red-500", "bg-red-500"),
+        (400, "Very Poor", "bg-purple-500", "bg-purple-500"),
+        (9999, "Severe", "bg-gray-800", "bg-gray-800")
     ]
 
     results = []
@@ -58,7 +58,7 @@ def classify_pollutants(data):
                     "name": pollutant,
                     "value": round(value, 2),
                     "standard": standard,
-                    "percentage": (round(percentage, 1))%100,
+                    "percentage": (round(percentage, 1)),
                     "status": status,
                     "color": color,
                     "class": css_class
