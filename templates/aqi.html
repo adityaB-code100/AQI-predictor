@@ -15,7 +15,7 @@
     </div>
   </div>
 
-  <form action="/dashboard" method="post">
+  <form action="/" method="post">
   <div class="container mx-auto px-4">
     <!-- VILLAGE + DATE FILTER -->
     <div class="card bg-white rounded-2xl shadow-lg mb-6 p-6 animate-fadeIn dark:bg-gray-800 hover-lift">
@@ -35,10 +35,31 @@
 
           </select>
         </div>
-        <div>
-          <label class="form-label block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300" >Date</label>
-          <input type="date" name="date" class="form-control w-full rounded-xl py-3 px-4 border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-indigo-400 dark:focus:border-indigo-400">
-        </div>
+        <div class="mb-4">
+  <label for="date" class="form-label block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">
+    Date
+  </label>
+  <div class="relative">
+    <!-- Calendar Input -->
+    <input 
+      type="date" 
+      id="date" 
+      name="date" 
+      class="form-control w-full rounded-xl py-3 pl-10 pr-4 
+             border border-gray-300 shadow-sm 
+             hover:border-indigo-400 
+             focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 
+             dark:bg-gray-700 dark:border-gray-600 dark:text-white 
+             dark:focus:ring-indigo-400 dark:focus:border-indigo-400
+             transition duration-200 ease-in-out"
+    >
+    <!-- Calendar Icon -->
+    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400 pointer-events-none">
+      <i class="fas fa-calendar-alt"></i>
+    </span>
+  </div>
+</div>
+
       </div>
       <button type="submit"   class="btn-primary mt-4 bg-gradient-to-r from-indigo-600 to-indigo-500 text-white font-semibold py-2 px-6 rounded-xl shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-300 animate-pulse dark:from-indigo-500 dark:to-indigo-400 flex items-center justify-center">
         <i class="fas fa-sync-alt mr-2"></i> Apply Filters
@@ -59,16 +80,29 @@
         <h5 class="text-lg font-medium flex items-center justify-center">
           <i class="fas fa-chart-line mr-2 text-indigo-600 dark:text-indigo-400"></i> 7-Day Avg AQI
         </h5>
-        <div class="aqi-value text-4xl font-extrabold bg-clip-text text-transparent good-aqi mt-2">{{avg_aqi_7_days}}</div>
+        <div class="aqi-value text-4xl font-extrabold bg-clip-text text-transparent good-aqi mt-2
+        {% if avg_aqi_7_days <= 50 %} text-green-500
+        {% elif avg_aqi_7_days <= 100 %} text-yellow-500
+        {% elif avg_aqi_7_days <= 200 %} text-orange-500
+        {% else %} text-red-600
+        {% endif %}">{{avg_aqi_7_days}}</div> 
         <div class="aqi-percentage h-1.5 bg-gray-200 rounded-full my-3 overflow-hidden dark:bg-gray-700">
-          <div class="aqi-percentage-fill h-full rounded-full" style="width: 42%; background: linear-gradient(135deg, #10b981 0%, #059669 100%);"></div>
+        <div class="aqi-percentage-fill h-full rounded-full 
+          {% if avg_aqi_7_days <= 50 %} bg-green-500 
+          {% elif avg_aqi_7_days <= 100 %} bg-yellow-500 
+          {% elif avg_aqi_7_days <= 200 %} bg-orange-500 
+          {% else %} bg-red-600 
+          {% endif %}" 
+          style="width: 45%;">
         </div>
-        <p class="text-gray-500 mt-2 dark:text-gray-400">Good air quality</p>
-        <div class="flex justify-between text-xs text-gray-500 mt-1 dark:text-gray-400">
-          <span>0</span>
-          <span>50 (Good)</span>
-          <span>100</span>
         </div>
+        <p class="text-gray-500 mt-2 dark:text-gray-400"> 
+          {% if avg_aqi_7_days <= 50 %} Good
+              {% elif avg_aqi_7_days <= 100 %} Moderate
+              {% elif avg_aqi_7_days <= 200 %} Unhealthy
+              {% else %} Very Unhealthy
+              {% endif %} air quality</p>
+       
       </div>
       <div class="aqi-card bg-white p-6 rounded-2xl shadow-lg animate-fadeIn hover-lift dark:bg-gray-800" style="animation-delay: 0.1s">
         <h5 class="text-lg font-medium flex items-center justify-center">
@@ -79,12 +113,10 @@
           <div class="aqi-percentage-fill h-full rounded-full" style="width: 78%; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);"></div>
         </div>
         <p class="text-gray-500 mt-2 dark:text-gray-400">Worst On{{  avg_3card_dict['worst_aqi']}}</p>
-        <div class="flex justify-between text-xs text-gray-500 mt-1 dark:text-gray-400">
-          <span>0</span>
-          <span>50 (Moderate)</span>
-          <span>100</span>
-        </div>
+        
       </div>
+
+
       <div class="aqi-card bg-white p-6 rounded-2xl shadow-lg animate-fadeIn hover-lift dark:bg-gray-800" style="animation-delay: 0.2s">
         <h5 class="text-lg font-medium flex items-center justify-center">
           <i class="fas fa-trophy mr-2 text-emerald-600 dark:text-emerald-400"></i> Lowest AQI
@@ -95,9 +127,7 @@
         </div>
         <p class="text-gray-500 mt-2 dark:text-gray-400"> Lowest on {{ avg_3card_dict['best_aqi'] }}</p>
         <div class="flex justify-between text-xs text-gray-500 mt-1 dark:text-gray-400">
-          <span>0</span>
-          <span>50 (Excellent)</span>
-          <span>100</span>
+         
         </div>
       </div>
     </div>
@@ -117,8 +147,7 @@
   {% elif aqi <= 100 %} text-yellow-500
   {% elif aqi <= 200 %} text-orange-500
   {% else %} text-red-600
-  {% endif %}
-">
+  {% endif %}">
   {{ aqi }}
 </p>
           <small class="text-gray-500 dark:text-gray-400">

@@ -71,16 +71,20 @@ def register():
 
         elif reg_type == "institution":
             if institutions_collection.find_one({"email": request.form["email"]}):
-                flash("Email already exists! Please login.", "danger")
+                print("Email already exists! Please login.", "danger")
                 return redirect(url_for("login"))
 
             data = {
                 "institution_name": request.form["institution_name"],
                 "institution_type": request.form["institution_type"],
+                "village": request.form["village"],
+                "address": request.form["address"],
+
                 "email": request.form["email"],
                 "contact": request.form["contact"],
                 "password": generate_password_hash(request.form["password"])
             }
+            print(data)
             institutions_collection.insert_one(data)
             flash("Institution account registered successfully!", "success")
             return redirect(url_for("login"))
@@ -109,7 +113,7 @@ def login():
                 session["institution"] = str(inst["_id"])
                 session["type"] = "institution"
                 flash(f"Welcome, {inst['institution_name']}!", "success")
-                return redirect(url_for("dashboard"))
+                return redirect('/')
 
         flash("Invalid credentials!", "danger")
 
@@ -229,6 +233,7 @@ def dashboard():
     if request.method == "POST":
         village = request.form.get("village")
         date = request.form.get("date")
+        print(date)
     else:
         village = "Pune"  # default
         date = get_current_date()
@@ -254,7 +259,7 @@ def dashboard():
         pass
 
     if aqi_list:
-        avg_aqi_7_days = int(np.mean(aqi_list)) if not math.isnan(np.mean(aqi_list)) else None
+        avg_aqi_7_days = int(np.mean(aqi_list)) if not math.isnan(np.mean(aqi_list)) else 0
         worst_aqi = np.max(aqi_list)
         best_aqi = np.min([x for x in aqi_list if x is not None and not np.isnan(x)])
 
@@ -265,7 +270,7 @@ def dashboard():
     passing_data = dict(zip(date_list, aqi_list))
     passing_pollutant = dict(zip(date_list, pm_list))
     graph_html = create_aqi_forecast_chart(date_list, aqi_list)
-    print(pollutants)
+    #print(pollutants)
 
     return render_template(
         "aqi.html",

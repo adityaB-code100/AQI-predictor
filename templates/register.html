@@ -1,559 +1,357 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register · AQI Project</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-        }
-        
-        body {
-            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            color: #334155;
-        }
-        
-        .container {
-            width: 100%;
-            max-width: 1100px;
-            margin: 0 auto;
-        }
-        
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        
-        .header h1 {
-            font-size: 36px;
-            font-weight: 800;
-            margin-bottom: 10px;
-            color: #0c4a6e;
-            letter-spacing: -0.5px;
-        }
-        
-        .header p {
-            font-size: 18px;
-            color: #475569;
-            max-width: 600px;
-            margin: 0 auto;
-            line-height: 1.6;
-        }
-        
-        .card {
-            background: white;
-            border-radius: 24px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08), 0 10px 20px rgba(0, 0, 0, 0.04);
-            padding: 40px;
-            margin-bottom: 30px;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 6px;
-            background: linear-gradient(90deg, #0ea5e9, #0369a1);
-        }
-        
-        .card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.12), 0 15px 25px rgba(0, 0, 0, 0.06);
-        }
-        
-        .form-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
-        }
-        
-        @media (max-width: 900px) {
-            .form-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-        
-        .form-section {
-            border: 1px solid #e2e8f0;
-            border-radius: 20px;
-            padding: 28px;
-            transition: all 0.3s ease;
-            background: #f8fafc;
-            position: relative;
-        }
-        
-        .form-section::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, #0ea5e9, #0369a1);
-            border-radius: 4px 4px 0 0;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-        
-        .form-section:hover {
-            border-color: #0ea5e9;
-            box-shadow: 0 10px 25px rgba(14, 165, 233, 0.1);
-            transform: translateY(-5px);
-        }
-        
-        .form-section:hover::before {
-            opacity: 1;
-        }
-        
-        .form-title {
-            font-size: 22px;
-            font-weight: 700;
-            color: #0c4a6e;
-            margin-bottom: 24px;
-            padding-bottom: 16px;
-            border-bottom: 2px solid #e0f2fe;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        
-        .form-title i {
-            color: #0ea5e9;
-            font-size: 24px;
-        }
-        
-        .form-group {
-            margin-bottom: 24px;
-            position: relative;
-        }
-        
-        label {
-            display: block;
-            font-size: 14px;
-            font-weight: 600;
-            color: #475569;
-            margin-bottom: 8px;
-            padding-left: 4px;
-        }
-        
-        .input-wrapper {
-            position: relative;
-        }
-        
-        input, select {
-            width: 100%;
-            padding: 16px 18px;
-            border: 2px solid #e2e8f0;
-            border-radius: 12px;
-            font-size: 16px;
-            color: #1e293b;
-            transition: all 0.3s;
-            background-color: white;
-        }
-        
-        input:focus, select:focus {
-            outline: none;
-            border-color: #0ea5e9;
-            box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.15);
-        }
-        
-        input:hover, select:hover {
-            border-color: #bae6fd;
-        }
-        
-        .password-toggle {
-            position: absolute;
-            right: 18px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: none;
-            border: none;
-            color: #94a3b8;
-            cursor: pointer;
-            font-size: 16px;
-            padding: 4px;
-            border-radius: 4px;
-            transition: all 0.2s;
-        }
-        
-        .password-toggle:hover {
-            color: #0ea5e9;
-            background: #f0f9ff;
-        }
-        
-        .btn {
-            width: 100%;
-            padding: 18px;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            margin-top: 10px;
-        }
-        
-        .btn-primary {
-            background: linear-gradient(135deg, #0ea5e9 0%, #0369a1 100%);
-            color: white;
-            border: none;
-            box-shadow: 0 4px 12px rgba(14, 165, 233, 0.25);
-        }
-        
-        .btn-primary:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(14, 165, 233, 0.35);
-        }
-        
-        .form-icon {
-            position: absolute;
-            left: 18px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #94a3b8;
-            font-size: 18px;
-        }
-        
-        .input-with-icon {
-            padding-left: 50px !important;
-        }
-        
-        .notification {
-            padding: 20px;
-            border-radius: 12px;
-            margin-bottom: 30px;
-            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
-            color: #1e40af;
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            border-left: 5px solid #3b82f6;
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
-        }
-        
-        .notification i {
-            font-size: 24px;
-            color: #3b82f6;
-        }
-        
-        .notification span {
-            font-weight: 500;
-        }
-        
-        .footer {
-            text-align: center;
-            color: #64748b;
-            margin-top: 40px;
-        }
-        
-        .footer a {
-            color: #0ea5e9;
-            text-decoration: none;
-            font-weight: 600;
-            transition: all 0.2s;
-        }
-        
-        .footer a:hover {
-            color: #0369a1;
-            text-decoration: underline;
-        }
-        
-        .footer p {
-            margin-top: 8px;
-            font-size: 14px;
-        }
-        
-        @media (max-width: 768px) {
-            .header h1 {
-                font-size: 28px;
-            }
-            
-            .header p {
-                font-size: 16px;
-            }
-            
-            .card {
-                padding: 28px;
-            }
-            
-            .form-section {
-                padding: 22px;
-            }
-            
-            .form-title {
-                font-size: 20px;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            body {
-                padding: 16px;
-            }
-            
-            .card {
-                padding: 22px;
-                border-radius: 20px;
-            }
-            
-            .form-section {
-                padding: 18px;
-            }
-            
-            input, select {
-                padding: 14px 16px;
-            }
-        }
-        
-        /* Animation for form sections */
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        .animate-fade-in {
-            animation: fadeInUp 0.6s ease-out forwards;
-        }
-        
-        /* Custom select arrow */
-        select {
-            appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2394a3b8'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 16px center;
-            background-size: 18px;
-        }
-        
-        /* Focus states for accessibility */
-        button:focus, input:focus, select:focus {
-            outline: 2px solid #0ea5e9;
-            outline-offset: 2px;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create Account · AQI Project</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* Reset + base */
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+    body {
+      background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+      display: flex; align-items: center; justify-content: center;
+      min-height: 100vh; padding: 20px;
+    }
+
+    /* Card */
+    .card {
+      background: #fff;
+      border-radius: 20px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+      width: 100%; max-width: 500px;
+      overflow: hidden;
+      animation: fadeIn 0.8s ease;
+    }
+
+    .card-header {
+      background: linear-gradient(135deg, #6366f1, #3b82f6);
+      color: #fff; padding: 24px 28px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .card-header h2 { font-size: 20px; font-weight: 700; }
+    .card-header .close-btn {
+      cursor: pointer; font-size: 20px;
+      opacity: 0.9; transition: opacity 0.2s;
+    }
+    .card-header .close-btn:hover { opacity: 1; }
+
+    .card-body { padding: 30px; }
+
+    .form-group { margin-bottom: 18px; }
+    label { display: block; font-size: 14px; font-weight: 600; margin-bottom: 6px; color: #334155; }
+    input, select {
+      width: 100%; padding: 14px 16px;
+      border: 2px solid #e2e8f0; border-radius: 12px;
+      font-size: 15px; transition: all 0.25s;
+    }
+    input:focus, select:focus {
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 4px rgba(59,130,246,0.1);
+      outline: none;
+    }
+
+    /* Toggle Switch */
+    .toggle-container {
+      display: flex; justify-content: center; align-items: center;
+      margin-bottom: 20px;
+    }
+    .toggle-btn {
+      display: flex;
+      background: #f1f5f9;
+      border-radius: 50px;
+      overflow: hidden;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+    .toggle-btn button {
+      flex: 1; padding: 12px;
+      border: none; background: transparent;
+      font-size: 15px; font-weight: 600;
+      cursor: pointer; color: #475569;
+      transition: all 0.3s ease;
+    }
+    .toggle-btn button.active {
+      background: linear-gradient(135deg, #6366f1, #3b82f6);
+      color: #fff;
+    }
+
+    /* Checkbox */
+    .checkbox { display: flex; align-items: center; gap: 8px; font-size: 14px; margin-top: 8px; color: #475569; }
+    .checkbox input { width: auto; accent-color: #3b82f6; }
+
+    /* Submit */
+    .btn {
+      width: 100%; padding: 14px;
+      border: none; border-radius: 12px;
+      background: linear-gradient(135deg, #6366f1, #3b82f6);
+      color: #fff; font-size: 16px; font-weight: 600;
+      cursor: pointer; transition: all 0.3s;
+      margin-top: 16px;
+    }
+    .btn:hover {
+      background: linear-gradient(135deg, #4f46e5, #2563eb);
+      box-shadow: 0 6px 16px rgba(59,130,246,0.25);
+      transform: translateY(-2px);
+    }
+
+    /* Animation */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Hide forms */
+    .hidden { display: none; }
+    
+    /* Login link */
+    .login-link {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 14px;
+      color: #64748b;
+    }
+    .login-link a {
+      color: #3b82f6;
+      text-decoration: none;
+      font-weight: 600;
+      transition: color 0.2s;
+    }
+    .login-link a:hover {
+      color: #2563eb;
+      text-decoration: underline;
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>Create Your Account</h1>
-            <p>Join the AQI Project to monitor and improve air quality in your community</p>
-        </div>
-        
-        <div class="notification">
-            <i class="fas fa-info-circle"></i>
-            <span>Please select the appropriate registration type and fill all required fields.</span>
-        </div>
-        
-        <div class="card">
-            <div class="form-grid">
-                <!-- Personal Registration -->
-                <div class="form-section animate-fade-in" style="animation-delay: 0.1s">
-                    <h2 class="form-title"><i class="fas fa-user"></i> Personal Account</h2>
-                    <form action="{{ url_for('register') }}" method="post">
-                        <input type="hidden" name="reg_type" value="personal" />
-
-                        <div class="form-group">
-                            <label for="name">Full Name</label>
-                            <div class="input-wrapper">
-                                <i class="fas fa-user form-icon"></i>
-                                <input type="text" id="name" name="name" class="input-with-icon" placeholder="Enter your full name" required />
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="email_personal">Email Address</label>
-                            <div class="input-wrapper">
-                                <i class="fas fa-envelope form-icon"></i>
-                                <input type="email" id="email_personal" name="email" class="input-with-icon" placeholder="your.email@example.com" required />
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="mobile">Mobile Number</label>
-                            <div class="input-wrapper">
-                                <i class="fas fa-phone form-icon"></i>
-                                <input type="tel" id="mobile" name="mobile" pattern="[0-9]{10}" maxlength="10" class="input-with-icon" placeholder="10-digit mobile number" required />
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="village">Village</label>
-                            <div class="input-wrapper">
-                                <i class="fas fa-home form-icon"></i>
-                                <select id="village" name="village" class="input-with-icon" required>
-                                    <option value="">Select your village</option>
-                                    <option value="Village 1">Village 1</option>
-                                    <option value="Village 2">Village 2</option>
-                                    <option value="Nanded">Nanded</option>
-                                    <option value="Pune">Pune</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="disease">Respiratory Conditions</label>
-                            <div class="input-wrapper">
-                                <i class="fas fa-heartbeat form-icon"></i>
-                                <select id="disease" name="disease" class="input-with-icon" required>
-                                    <option value="">Select if applicable</option>
-                                    <option>None</option>
-                                    <option>Asthma</option>
-                                    <option>Bronchitis</option>
-                                    <option>COPD</option>
-                                    <option>Allergic Rhinitis</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="age">Age</label>
-                            <div class="input-wrapper">
-                                <i class="fas fa-birthday-cake form-icon"></i>
-                                <input type="number" id="age" name="age" min="1" max="120" class="input-with-icon" placeholder="Your age" required />
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="pw_personal">Password</label>
-                            <div class="input-wrapper">
-                                <i class="fas fa-lock form-icon"></i>
-                                <input type="password" id="pw_personal" name="password" class="input-with-icon" placeholder="Create a secure password" required />
-                                <button type="button" class="password-toggle" onclick="togglePw('pw_personal')">
-                                    <i class="fas fa-eye"></i>
-                                </button>
-                            </div>
-                        </div>
-
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-user-plus"></i> Register Personal Account
-                        </button>
-                    </form>
-                </div>
-
-                <!-- Institution Registration -->
-                <div class="form-section animate-fade-in" style="animation-delay: 0.2s">
-                    <h2 class="form-title"><i class="fas fa-building"></i> Institution Account</h2>
-                    <form action="{{ url_for('register') }}" method="post">
-                        <input type="hidden" name="reg_type" value="institution" />
-
-                        <div class="form-group">
-                            <label for="institution_name">Institution Name</label>
-                            <div class="input-wrapper">
-                                <i class="fas fa-university form-icon"></i>
-                                <input type="text" id="institution_name" name="institution_name" class="input-with-icon" placeholder="Institution official name" required />
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="institution_type">Institution Type</label>
-                            <div class="input-wrapper">
-                                <i class="fas fa-tag form-icon"></i>
-                                <select id="institution_type" name="institution_type" class="input-with-icon" required>
-                                    <option value="">Select institution type</option>
-                                    <option value="hospital">Hospital</option>
-                                    <option value="school">School</option>
-                                    <option value="college">College</option>
-                                    <option value="village">Village Office</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="email_institution">Email Address</label>
-                            <div class="input-wrapper">
-                                <i class="fas fa-envelope form-icon"></i>
-                                <input type="email" id="email_institution" name="email" class="input-with-icon" placeholder="institution@example.com" required />
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="contact">Contact Number</label>
-                            <div class="input-wrapper">
-                                <i class="fas fa-phone form-icon"></i>
-                                <input type="tel" id="contact" name="contact" pattern="[0-9]{10}" maxlength="10" class="input-with-icon" placeholder="10-digit contact number" required />
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="pw_inst">Password</label>
-                            <div class="input-wrapper">
-                                <i class="fas fa-lock form-icon"></i>
-                                <input type="password" id="pw_inst" name="password" class="input-with-icon" placeholder="Create a secure password" required />
-                                <button type="button" class="password-toggle" onclick="togglePw('pw_inst')">
-                                    <i class="fas fa-eye"></i>
-                                </button>
-                            </div>
-                        </div>
-
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-building"></i> Register Institution Account
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </div>
-        
-        <div class="footer">
-            <p>Already have an account? <a href="/login">Login here</a></p>
-            <p>© 2023 AQI Project. All rights reserved.</p>
-        </div>
+  <div class="card">
+    <div class="card-header">
+      <h2>Create an Account</h2>
+      <span class="close-btn">&times;</span>
     </div>
+    <div class="card-body">
+      <!-- Toggle Buttons -->
+      <div class="toggle-container">
+        <div class="toggle-btn">
+          <button id="personal" class="active" type="button">Personal</button>
+          <button id="institution" type="button">Institute</button>
+        </div>
+      </div>
+      <!-- Personal Form -->
+<form id="personalForm" action="/register" method="POST" novalidate>
+  <input type="hidden" name="reg_type" value="personal">
 
-    <script>
-        function togglePw(id) {
-            const input = document.getElementById(id);
-            const button = input.nextElementSibling;
-            const icon = button.querySelector('i');
-            
-            if (input.type === 'password') {
-                input.type = 'text';
-                icon.classList.remove('fa-eye');
-                icon.classList.add('fa-eye-slash');
-            } else {
-                input.type = 'password';
-                icon.classList.remove('fa-eye-slash');
-                icon.classList.add('fa-eye');
-            }
-        }
-        
-        // Add animation to form elements when page loads
-        document.addEventListener('DOMContentLoaded', function() {
-            const formSections = document.querySelectorAll('.form-section');
-            formSections.forEach((section, index) => {
-                section.style.opacity = '0';
-                section.style.transform = 'translateY(20px)';
-                section.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-                
-                setTimeout(() => {
-                    section.style.opacity = '1';
-                    section.style.transform = 'translateY(0)';
-                }, 300 + (index * 200));
-            });
-        });
-    </script>
-</body>
-</html>
+  <div class="form-group">
+    <label for="firstName">First Name</label>
+    <input type="text" id="firstName" name="name">
+  </div>
+
+  <div class="form-group">
+    <label for="email">Email address</label>
+    <input type="email" id="email" name="email">
+  </div>
+
+  <div class="form-group">
+    <label for="number">Mobile No</label>
+    <input type="number" id="number" name="mobile">
+  </div>
+
+  <div class="form-group">
+    <label for="village">Select Village:</label>
+    <select name="village" id="village" class="form-select">
+      <option value="">--Select Village--</option>
+      <option value="Nanded">Nanded</option>
+      <option value="Pune">Pune</option>
+      <option value="Mumbai">Mumbai</option>
+      <option value="Nagpur">Nagpur</option>
+      <option value="Nashik">Nashik</option>
+    </select>
+  </div>
+
+  <div class="form-group">
+    <label for="disease">Select Disease:</label>
+    <select name="disease" id="disease" class="form-select">
+      <option value="">--Select Disease--</option>
+      <option value="None">None</option>
+      <option value="Asthma">Asthma</option>
+      <option value="Bronchitis">Bronchitis</option>
+      <option value="COPD">COPD</option>
+      <option value="Allergic Rhinitis">Allergic Rhinitis</option>
+    </select>
+  </div>
+
+  <div class="form-group">
+    <label for="age">Age</label>
+    <input type="number" id="age" name="age">
+  </div>
+
+  <div class="form-group">
+    <label for="personalPassword">Password</label>
+    <input type="password" id="personalPassword" name="password">
+  </div>
+
+  <div class="form-group">
+    <label for="personalPwConfirm">Confirm Password</label>
+    <input type="password" id="personalPwConfirm" name="pwConfirm">
+  </div>
+
+  <label class="checkbox">
+    <input type="checkbox" id="personalAgree">
+    I agree to the Terms and Conditions
+  </label>
+
+  <button class="btn" type="submit">Register</button>
+</form>
+<!-- Institute Form -->
+<form id="instituteForm" class="hidden" action="/register" method="POST" novalidate>
+  <input type="hidden" name="reg_type" value="institution">
+
+  <div class="form-group">
+    <label for="instName">Institute Name</label>
+    <input type="text" id="instName" name="institution_name">
+  </div>
+
+  <div class="form-group">
+  <label for="instType">Institute Type</label>
+  <select id="instType" name="institution_type" class="form-select">
+    <option value="" disabled selected>Select Institute Type</option>
+    <option value="hospital">Hospital</option>
+    <option value="school">School</option>
+    <option value="college">College</option>
+    <option value="other">Other</option>
+  </select>
+</div>
+
+<div class="form-group">
+    <label for="village">Select Village:</label>
+    <select name="village" id="village" class="form-select">
+      <option value="">--Select Village--</option>
+      <option value="Nanded">Nanded</option>
+      <option value="Pune">Pune</option>
+      <option value="Mumbai">Mumbai</option>
+      <option value="Nagpur">Nagpur</option>
+      <option value="Nashik">Nashik</option>
+    </select>
+  </div>
+
+  <div class="form-group">
+    <label for="instEmail">Official Email</label>
+    <input type="email" id="instEmail" name="email">
+  </div>
+
+  <div class="form-group">
+    <label for="contact">Contact Number</label>
+    <input type="tel" id="contact" name="contact">
+  </div>
+
+  <div class="form-group">
+    <label for="address">Institute Address</label>
+    <input type="text" id="address" name="address">
+  </div>
+
+  <div class="form-group">
+    <label for="instPassword">Password</label>
+    <input type="password" id="instPassword" name="password">
+  </div>
+
+  <div class="form-group">
+    <label for="instPwConfirm">Confirm Password</label>
+    <input type="password" id="instPwConfirm" name="pwConfirm">
+  </div>
+
+  <label class="checkbox">
+    <input type="checkbox" id="instAgree">
+    I agree to the Terms and Conditions
+  </label>
+
+  <button class="btn" type="submit">Register Institute</button>
+</form>
+
+  
+
+     
+      
+      <!-- Login Link -->
+      <div class="login-link">
+        Already have an account? <a href="/login">Login here</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  const personalBtn = document.getElementById("personal");
+  const instituteBtn = document.getElementById("institution");
+  const personalForm = document.getElementById("personalForm");
+  const instituteForm = document.getElementById("instituteForm");
+
+  personalBtn.addEventListener("click", () => {
+    personalBtn.classList.add("active");
+    instituteBtn.classList.remove("active");
+    personalForm.classList.remove("hidden");
+    instituteForm.classList.add("hidden");
+  });
+
+  instituteBtn.addEventListener("click", () => {
+    instituteBtn.classList.add("active");
+    personalBtn.classList.remove("active");
+    instituteForm.classList.remove("hidden");
+    personalForm.classList.add("hidden");
+  });
+
+  // Close button functionality
+  document.querySelector('.close-btn').addEventListener('click', function() {
+    window.history.back();
+  });
+
+  // Custom validation
+  function validateForm(e, type) {
+    e.preventDefault();
+    let valid = true;
+
+    if (type === "personal") {
+      const name = document.getElementById("firstName").value.trim();
+      const email = document.getElementById("email").value.trim();
+      const number = document.getElementById("number").value.trim();
+      const village = document.getElementById("village").value;
+      const disease = document.getElementById("disease").value;
+      const age = document.getElementById("age").value.trim();
+      const pw = document.getElementById("personalPassword").value;
+      const pwc = document.getElementById("personalPwConfirm").value;
+      const agree = document.getElementById("personalAgree").checked;
+
+      if (!name || !email || !number || !village || !disease || !age || !pw || !pwc) {
+        alert("Please fill in all fields.");
+        valid = false;
+      } else if (pw !== pwc) {
+        alert("Passwords do not match.");
+        valid = false;
+      } else if (!agree) {
+        alert("You must agree to the Terms and Conditions.");
+        valid = false;
+      }
+    } else {
+      const instName = document.getElementById("instName").value.trim();
+      const instEmail = document.getElementById("instEmail").value.trim();
+      const contact = document.getElementById("contact").value.trim();
+      const address = document.getElementById("address").value.trim();
+      const pw = document.getElementById("instPassword").value;
+      const pwc = document.getElementById("instPwConfirm").value;
+      const agree = document.getElementById("instAgree").checked;
+
+      if (!instName || !instEmail || !contact || !address || !pw || !pwc) {
+        alert("Please fill in all fields.");
+        valid = false;
+      } else if (pw !== pwc) {
+        alert("Passwords do not match.");
+        valid = false;
+      } else if (!agree) {
+        alert("You must agree to the Terms and Conditions.");
+        valid = false;
+      }
+    }
+    if (valid) e.target.submit();
+  }
+
+  personalForm.addEventListener("submit", (e) => validateForm(e, "personal"));
+  instituteForm.addEventListener("submit", (e) => validateForm(e, "institute"));
+</script>
