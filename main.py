@@ -41,9 +41,9 @@ def login_required(f):
     return decorated_function
 
 # ---------- Home ----------
-@app.route("/")
-def home():
-    return render_template("index.html")
+# @app.route("/login_page")
+# def home():
+#     return render_template("index.html")
 
 # ---------- REGISTER ----------
 @app.route("/register", methods=["GET", "POST"])
@@ -155,7 +155,7 @@ def edit_profile():
 
             users_collection.update_one({"_id": user["_id"]}, {"$set": update_data})
             flash("Profile updated successfully!", "success")
-            return redirect(url_for("aqi_dashboard"))
+            return redirect(url_for("dashboard"))
 
         return render_template("edit_personal.html", user=user)
 
@@ -173,14 +173,53 @@ def edit_profile():
 
             institutions_collection.update_one({"_id": inst["_id"]}, {"$set": update_data})
             flash("Institution profile updated successfully!", "success")
-            return redirect(url_for("aqi_dashboard"))
+            return redirect(url_for("dashboard"))
 
         return render_template("edit_institution.html", inst=inst)
 
     return redirect(url_for("login"))
 
+
+# ---------- Logout ----------
+@app.route("/logout")
+def logout():
+    session.clear()
+    flash("Logged out successfully!", "info")
+    return redirect(url_for("dashboard"))
+
+# ---------- Disable caching ----------
+@app.after_request
+def add_header(response):
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+    return response
+
+
+
+
+
+
+
+# ---------- EDIT PROFILE ----------
+@app.route("/profile", methods=["GET", "POST"])
+@login_required
+def eprofile():
+    return render_template('profile.html')
+
+
+
+
+
+
+
+
+
+
+
+
 # ---------- AQI Dashboard ----------
-@app.route("/dashboard", methods=["GET", "POST"])
+@app.route("/", methods=["GET", "POST"])
 #@login_required
 def dashboard():
     aqi_list, mean_list, pm_list = [], [], []
@@ -244,20 +283,6 @@ def dashboard():
 
 
 
-# ---------- Logout ----------
-@app.route("/logout")
-def logout():
-    session.clear()
-    flash("Logged out successfully!", "info")
-    return redirect(url_for("dashboard"))
-
-# ---------- Disable caching ----------
-@app.after_request
-def add_header(response):
-    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
-    response.headers["Pragma"] = "no-cache"
-    response.headers["Expires"] = "0"
-    return response
 
 if __name__ == "__main__":
     app.run(debug=True)
