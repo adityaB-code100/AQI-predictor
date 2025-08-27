@@ -214,9 +214,9 @@
           <i class="fas fa-chart-line mr-2 text-indigo-600 dark:text-indigo-400"></i>
           72-Hour Forecast
         </h5>
-        <div class="forecast-chart" id="forecast-chart">
+        <!-- <div class="forecast-chart" id="forecast-chart" > -->
           {{ graph_html | safe }}
-        </div>
+        <!-- </div> -->
       </div>
 
       <div class="forecast-card bg-white rounded-2xl shadow-lg p-6 animate-fadeIn hover-lift dark:bg-gray-800">
@@ -224,7 +224,7 @@
           <i class="fas fa-history mr-2 text-indigo-600 dark:text-indigo-400"></i> Historical Trends
         </h5>
         <div class="historical-chart" id="historical-chart">
-          <canvas id="historicalChart"></canvas>
+          {{avg_graph|safe}}
         </div>
       </div>
     </div>

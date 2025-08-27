@@ -14,6 +14,7 @@ from data_function import next_seven_days
 from get_from_db import get_aqi_data, get_aqi_by_village
 from filter_function import filter_off, classify_pollutants
 from data_graph import create_aqi_forecast_chart
+from get_avg_graph import plot_monthly_aqi
 
 app = Flask(__name__)
 app.secret_key = "secretkey"
@@ -255,8 +256,8 @@ def dashboard():
 
     village_aqi_data = get_aqi_by_village(date)
     if village_aqi_data:
-        # mapgenerator(village_aqi_data)
-        pass
+        mapgenerator(village_aqi_data)
+        
 
     if aqi_list:
         avg_aqi_7_days = int(np.mean(aqi_list)) if not math.isnan(np.mean(aqi_list)) else 0
@@ -271,7 +272,7 @@ def dashboard():
     passing_pollutant = dict(zip(date_list, pm_list))
     graph_html = create_aqi_forecast_chart(date_list, aqi_list)
     #print(pollutants)
-
+    avg_graph=plot_monthly_aqi(village)
     return render_template(
         "aqi.html",
         passing_data=passing_data,
@@ -284,6 +285,7 @@ def dashboard():
         graph_html=graph_html,
         date=date,
         village=village,
+        avg_graph=avg_graph
     )
 
 
