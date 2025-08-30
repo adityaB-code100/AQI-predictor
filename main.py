@@ -1,9 +1,9 @@
-from flask import Flask, request, redirect, url_for, session, render_template, flash, jsonify
+from flask import Flask, request, redirect, url_for, session, render_template, flash, jsonify,render_template_string
 from flask_pymongo import PyMongo
 from werkzeug.security import generate_password_hash, check_password_hash
 from bson.objectid import ObjectId
 from functools import wraps
-
+from Fastserver import save_or_update_data
 # AQI imports
 import statistics, math
 from datetime import datetime
@@ -15,7 +15,7 @@ from get_from_db import get_aqi_data, get_aqi_by_village
 from filter_function import filter_off, classify_pollutants
 from data_graph import create_aqi_forecast_chart
 from get_avg_graph import plot_monthly_aqi
-
+from get_user import get_data
 app = Flask(__name__)
 app.secret_key = "secretkey"
 
@@ -223,72 +223,36 @@ def eprofile():
 
 
 
+
 # ---------- AQI Dashboard ----------
 @app.route("/", methods=["GET", "POST"])
 #@login_required
 def dashboard():
-    aqi_list, mean_list, pm_list = [], [], []
-    avg_aqi_7_days = worst_aqi = best_aqi = None
-    avg_3card_dict, passing_data, pollutants = {}, {}, None
-
+  
     if request.method == "POST":
         village = request.form.get("village")
         date = request.form.get("date")
-        print(date)
     else:
         village = "Pune"  # default
         date = get_current_date()
 
-    date_list = next_seven_days(date)
+    print(date)
 
-    for date_i in date_list:
-        data = get_aqi_data(date_i, village=village)
-        if data:
-            mean_list.append(data)
-            if "Predicted_AQI" in data:
-                aqi_list.append(data["Predicted_AQI"])
-            if "PM2.5" in data:
-                pm_list.append(data["PM2.5"])
-
-    data = get_aqi_data(date, village=village)
-    if data:
-        pollutants = classify_pollutants(filter_off(data))
-
-    village_aqi_data = get_aqi_by_village(date)
-    if village_aqi_data:
-        mapgenerator(village_aqi_data)
-        
-
-    if aqi_list:
-        avg_aqi_7_days = int(np.mean(aqi_list)) if not math.isnan(np.mean(aqi_list)) else 0
-        worst_aqi = np.max(aqi_list)
-        best_aqi = np.min([x for x in aqi_list if x is not None and not np.isnan(x)])
-
-    paired_data = dict(zip(aqi_list, date_list))
-    avg_3card_dict["worst_aqi"] = paired_data.get(worst_aqi)
-    avg_3card_dict["best_aqi"] = paired_data.get(best_aqi)
-
-    passing_data = dict(zip(date_list, aqi_list))
-    passing_pollutant = dict(zip(date_list, pm_list))
-    graph_html = create_aqi_forecast_chart(date_list, aqi_list)
-    #print(pollutants)
-    avg_graph=plot_monthly_aqi(village)
+    #dict1=get_data("29-08-2025",village)
+    dict1=get_aqi_data(date, village, mongo_uri="mongodb://localhost:27017/",
+                 db_name="AQI_Project", collection_name="processed_data")
     return render_template(
         "aqi.html",
-        passing_data=passing_data,
-        avg_3card_dict=avg_3card_dict,
-        avg_aqi_7_days=avg_aqi_7_days,
-        worst_aqi=worst_aqi,
-        best_aqi=best_aqi,
-        pollutants=pollutants,
-        passing_pollutant=passing_pollutant,
-        graph_html=graph_html,
-        date=date,
-        village=village,
-        avg_graph=avg_graph
+        # worst_aqi=worst_aqi,
+        # best_aqi=best_aqi,
+          **dict1,
+         # map_name=
+
     )
 
-
+app.route('/Coverage')
+def coverage():
+    pass
 
 
 if __name__ == "__main__":

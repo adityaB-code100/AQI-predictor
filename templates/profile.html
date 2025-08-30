@@ -161,6 +161,22 @@
       box-shadow: var(--shadow-hover);
     }
 
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
+    }
+
+    .card-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
     /* Profile header */
     .profile-header {
       display: flex;
@@ -234,6 +250,8 @@
 
     .profile-actions {
       flex-shrink: 0;
+      display: flex;
+      gap: 0.75rem;
     }
 
     /* Buttons */
@@ -270,6 +288,16 @@
 
     .btn-secondary:hover {
       box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--accent-primary);
+      border: 1px solid var(--accent-primary);
+    }
+
+    .btn-outline:hover {
+      background-color: rgba(79, 70, 229, 0.1);
     }
 
     .btn i {
@@ -541,12 +569,100 @@
     .space-y-3 > * + * {
       margin-top: 0.75rem;
     }
+
+    /* Progress bars */
+    .progress-container {
+      margin-top: 1rem;
+    }
+
+    .progress-bar {
+      height: 0.5rem;
+      background-color: var(--border-color);
+      border-radius: 0.25rem;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(to right, #10b981, #059669);
+      border-radius: 0.25rem;
+    }
+
+    .progress-labels {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 0.25rem;
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+    }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      border-bottom: 1px solid var(--border-color);
+      margin-bottom: 1.5rem;
+    }
+
+    .tab {
+      padding: 0.75rem 1.5rem;
+      cursor: pointer;
+      color: var(--text-secondary);
+      border-bottom: 2px solid transparent;
+      transition: all 0.3s;
+    }
+
+    .tab.active {
+      color: var(--accent-primary);
+      border-bottom: 2px solid var(--accent-primary);
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    /* Responsive improvements */
+    @media (max-width: 768px) {
+      .profile-actions {
+        flex-direction: column;
+        width: 100%;
+      }
+      
+      .profile-actions .btn {
+        width: 100%;
+      }
+      
+      .card-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+      }
+    }
   </style>
 </head>
 <body>
-{% extends "base.html" %}
-{% block content %}
 
+
+  <!-- Navigation -->
+  <nav class="navbar">
+    <a href="#" class="navbar-brand">
+      <i class="fas fa-wind"></i>
+      <span>Hyperlocal AQI</span>
+    </a>
+    
+    <div class="navbar-actions">
+      <button id="themeToggle" class="theme-toggle">
+        <i id="themeIcon" class="fas fa-moon"></i>
+      </button>
+      
+      <button class="user-menu-button">
+        <div class="user-avatar">RH</div>
+      </button>
+    </div>
+  </nav>
 
   <!-- Main Content -->
   <div class="container main-content">
@@ -556,11 +672,6 @@
         <div class="profile-avatar">
           <div class="avatar-placeholder">
             <i class="fas fa-user"></i>
-          </div>
-          <div class="mt-4 text-center">
-            <button class="text-sm text-indigo">
-              <i class="fas fa-camera"></i> Change photo
-            </button>
           </div>
         </div>
         
@@ -585,143 +696,264 @@
           <button id="generateReport" class="btn btn-primary">
             <i class="fas fa-file-pdf"></i> Generate Report
           </button>
+          <button class="btn btn-outline">
+            <i class="fas fa-share-alt"></i> Share
+          </button>
         </div>
       </div>
     </div>
 
-    <!-- User Info and Map Section -->
-    <div class="grid grid-cols-1 lg-grid-cols-2 gap-6 mb-6">
-      <!-- User Information -->
-      <div class="card animate-fadeIn">
-        <h2 class="mb-4">
-          <i class="fas fa-info-circle"></i> Personal Information
-        </h2>
-        
-        <div class="space-y-4">
-          <div class="form-group">
-            <label class="form-label">Full Name</label>
-            <div class="form-value">
-              <p>Rutik Harbale</p>
-            </div>
-          </div>
-          
-          <div class="form-group">
-            <label class="form-label">Email Address</label>
-            <div class="form-value">
-              <p>rutik@example.com</p>
-            </div>
-          </div>
-          
-          <div class="form-group">
-            <label class="form-label">Phone Number</label>
-            <div class="form-value">
-              <p>+1 (555) 123-4567</p>
-            </div>
-          </div>
-          
-          <div class="form-group">
-            <label class="form-label">Registered Village</label>
-            <div class="form-value">
-              <p>Village A</p>
-            </div>
-          </div>
-        </div>
-        
-        <div class="mt-6">
-          <a href="/edit">
-          <button class="btn btn-secondary btn-full">
-            <i class="fas fa-edit"></i> Edit Profile
-          </button></a>
-        </div>
+    <!-- Tabs -->
+    <div class="card">
+      <div class="tabs">
+        <div class="tab active" data-tab="overview">Overview</div>
+        <div class="tab" data-tab="history">History</div>
+        <div class="tab" data-tab="settings">Settings</div>
       </div>
       
-      <!-- User Location Map -->
-      <div class="card animate-fadeIn">
-        <h2 class="mb-4">
-          <i class="fas fa-map-marked-alt"></i> Your Location
-        </h2>
-        
-        <div id="userLocationMap" class="map-container"></div>
-        
-        <div class="info-box">
-          <p class="info-text">
-            <i class="fas fa-info-circle"></i> Your location is used to provide hyperlocal AQI data specific to your village.
-          </p>
+      <!-- Overview Tab -->
+      <div class="tab-content active" id="overview-tab">
+        <!-- User Info and Map Section -->
+        <div class="grid grid-cols-1 lg-grid-cols-2 gap-6 mb-6">
+          <!-- User Information -->
+          <div class="card animate-fadeIn">
+            <div class="card-header">
+              <h2 class="card-title">
+                <i class="fas fa-info-circle"></i> Personal Information
+              </h2>
+            </div>
+            
+            <div class="space-y-4">
+              <div class="form-group">
+                <label class="form-label">Full Name</label>
+                <div class="form-value">
+                  <p>Rutik Harbale</p>
+                </div>
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label">Email Address</label>
+                <div class="form-value">
+                  <p>rutik@example.com</p>
+                </div>
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label">Phone Number</label>
+                <div class="form-value">
+                  <p>+1 (555) 123-4567</p>
+                </div>
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label">Registered Village</label>
+                <div class="form-value">
+                  <p>Village A</p>
+                </div>
+              </div>
+            </div>
+            
+            <div class="mt-6">
+              <button class="btn btn-secondary btn-full">
+                <i class="fas fa-edit"></i> Edit Profile
+              </button>
+            </div>
+          </div>
+          
+          <!-- User Location Map -->
+          <div class="card animate-fadeIn">
+            <div class="card-header">
+              <h2 class="card-title">
+                <i class="fas fa-map-marked-alt"></i> Your Location
+              </h2>
+            </div>
+            
+            <div id="userLocationMap" class="map-container"></div>
+            
+            <div class="info-box">
+              <p class="info-text">
+                <i class="fas fa-info-circle"></i> Your location is used to provide hyperlocal AQI data specific to your village.
+              </p>
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
 
-    <!-- AQI Summary Card -->
-    <div class="card animate-fadeIn">
-      <h2 class="mb-4">
-        <i class="fas fa-wind"></i> Current Air Quality
-      </h2>
-      
-      <div class="grid grid-cols-1 md-grid-cols-3 gap-4">
-        <div class="aqi-mini-card">
-          <div class="aqi-value">35</div>
-          <p class="aqi-label">Good</p>
-          <p class="aqi-desc">Current AQI</p>
+        <!-- AQI Summary Card -->
+        <div class="card animate-fadeIn">
+          <div class="card-header">
+            <h2 class="card-title">
+              <i class="fas fa-wind"></i> Current Air Quality
+            </h2>
+            <button class="btn btn-outline">
+              <i class="fas fa-chart-line"></i> View Trends
+            </button>
+          </div>
+          
+          <div class="grid grid-cols-1 md-grid-cols-3 gap-4">
+            <div class="aqi-mini-card">
+              <div class="aqi-value">35</div>
+              <p class="aqi-label">Good</p>
+              <p class="aqi-desc">Current AQI</p>
+            </div>
+            
+            <div class="aqi-mini-card">
+              <div class="aqi-value">12.5</div>
+              <p class="aqi-label">μg/m³</p>
+              <p class="aqi-desc">PM2.5 Level</p>
+            </div>
+            
+            <div class="aqi-mini-card">
+              <div class="aqi-value">42</div>
+              <p class="aqi-label">7-Day Avg</p>
+              <p class="aqi-desc">Air Quality Index</p>
+            </div>
+          </div>
+          
+          <!-- AQI Progress -->
+          <div class="progress-container">
+            <div class="progress-bar">
+              <div class="progress-fill" style="width: 35%;"></div>
+            </div>
+            <div class="progress-labels">
+              <span>0 (Good)</span>
+              <span>50 (Moderate)</span>
+              <span>100+ (Unhealthy)</span>
+            </div>
+          </div>
         </div>
-        
-        <div class="aqi-mini-card">
-          <div class="aqi-value">12.5</div>
-          <p class="aqi-label">μg/m³</p>
-          <p class="aqi-desc">PM2.5 Level</p>
-        </div>
-        
-        <div class="aqi-mini-card">
-          <div class="aqi-value">42</div>
-          <p class="aqi-label">7-Day Avg</p>
-          <p class="aqi-desc">Air Quality Index</p>
-        </div>
-      </div>
-    </div>
 
-    <!-- Notification Preferences -->
-    <div class="card animate-fadeIn">
-      <h2 class="mb-4">
-        <i class="fas fa-bell"></i> Notification Preferences
-      </h2>
-      
-      <div class="space-y-3">
-        <div class="checkbox-group">
-          <input class="checkbox" type="checkbox" id="poorAirAlert" checked>
-          <label class="checkbox-label" for="poorAirAlert">
-            Poor Air Quality Alerts
-          </label>
-        </div>
-        
-        <div class="checkbox-group">
-          <input class="checkbox" type="checkbox" id="forecastAlert" checked>
-          <label class="checkbox-label" for="forecastAlert">
-            Daily Forecast Updates
-          </label>
-        </div>
-        
-        <div class="checkbox-group">
-          <input class="checkbox" type="checkbox" id="healthAlert">
-          <label class="checkbox-label" for="healthAlert">
-            Health Advisories
-          </label>
-        </div>
-        
-        <div class="checkbox-group">
-          <input class="checkbox" type="checkbox" id="emergencyAlert" checked>
-          <label class="checkbox-label" for="emergencyAlert">
-            Emergency Alerts
-          </label>
+        <!-- Health Recommendations -->
+        <div class="card animate-fadeIn">
+          <div class="card-header">
+            <h2 class="card-title">
+              <i class="fas fa-heartbeat"></i> Health Recommendations
+            </h2>
+          </div>
+          
+          <div class="info-box">
+            <p class="info-text">
+              <i class="fas fa-check-circle"></i> With current AQI levels, air quality is satisfactory and poses little to no risk.
+            </p>
+          </div>
+          
+          <div class="space-y-3 mt-4">
+            <div class="checkbox-group">
+              <input class="checkbox" type="checkbox" id="outdoorActivity" checked>
+              <label class="checkbox-label" for="outdoorActivity">
+                Ideal conditions for outdoor activities
+              </label>
+            </div>
+            
+            <div class="checkbox-group">
+              <input class="checkbox" type="checkbox" id="windowVentilation" checked>
+              <label class="checkbox-label" for="windowVentilation">
+                Recommended to open windows for ventilation
+              </label>
+            </div>
+            
+            <div class="checkbox-group">
+              <input class="checkbox" type="checkbox" id="sensitiveGroups" checked>
+              <label class="checkbox-label" for="sensitiveGroups">
+                Generally safe for sensitive groups
+              </label>
+            </div>
+          </div>
         </div>
       </div>
       
-      <div class="mt-6">
-        <button class="btn btn-secondary">
-          Save Preferences
-        </button>
+      <!-- History Tab -->
+      <div class="tab-content" id="history-tab">
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">
+              <i class="fas fa-history"></i> AQI History
+            </h2>
+            <div>
+              <select class="form-value" id="timeRange">
+                <option>Last 7 days</option>
+                <option>Last 30 days</option>
+                <option>Last 3 months</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="info-box">
+            <p class="info-text">
+              <i class="fas fa-info-circle"></i> Your AQI history shows consistent good air quality with occasional moderate levels during evening hours.
+            </p>
+          </div>
+          
+          <!-- Placeholder for chart -->
+          <div style="height: 250px; background-color: var(--bg-primary); border-radius: 0.75rem; display: flex; align-items: center; justify-content: center; margin: 1.5rem 0;">
+            <p class="text-secondary">AQI Trend Chart Visualization</p>
+          </div>
+          
+          <div class="grid grid-cols-1 md-grid-cols-2 gap-4">
+            <div class="aqi-mini-card">
+              <div class="aqi-value">28</div>
+              <p class="aqi-label">Best This Week</p>
+              <p class="aqi-desc">Tuesday, 8:00 AM</p>
+            </div>
+            
+            <div class="aqi-mini-card">
+              <div class="aqi-value">58</div>
+              <p class="aqi-label">Worst This Week</p>
+              <p class="aqi-desc">Friday, 6:00 PM</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Settings Tab -->
+      <div class="tab-content" id="settings-tab">
+        <!-- Notification Preferences -->
+        <div class="card animate-fadeIn">
+          <div class="card-header">
+            <h2 class="card-title">
+              <i class="fas fa-bell"></i> Notification Preferences
+            </h2>
+          </div>
+          
+          <div class="space-y-3">
+            <div class="checkbox-group">
+              <input class="checkbox" type="checkbox" id="poorAirAlert" checked>
+              <label class="checkbox-label" for="poorAirAlert">
+                Poor Air Quality Alerts
+              </label>
+            </div>
+            
+            <div class="checkbox-group">
+              <input class="checkbox" type="checkbox" id="forecastAlert" checked>
+              <label class="checkbox-label" for="forecastAlert">
+                Daily Forecast Updates
+              </label>
+            </div>
+            
+            <div class="checkbox-group">
+              <input class="checkbox" type="checkbox" id="healthAlert">
+              <label class="checkbox-label" for="healthAlert">
+                Health Advisories
+              </label>
+            </div>
+            
+            <div class="checkbox-group">
+              <input class="checkbox" type="checkbox" id="emergeryAlert" checked>
+              <label class="checkbox-label" for="emergeryAlert">
+                Emergency Alerts
+              </label>
+            </div>
+          </div>
+          
+          <div class="mt-6">
+            <button class="btn btn-secondary">
+              Save Preferences
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
-   {% endblock %}
+
 
 
   <!-- Alert Container -->
@@ -811,6 +1043,30 @@
       }
     }
     
+    // Tab functionality
+    function setupTabs() {
+      const tabs = document.querySelectorAll('.tab');
+      const tabContents = document.querySelectorAll('.tab-content');
+      
+      tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+          const target = tab.dataset.tab;
+          
+          // Update active tab
+          tabs.forEach(t => t.classList.remove('active'));
+          tab.classList.add('active');
+          
+          // Show target tab content
+          tabContents.forEach(content => {
+            content.classList.remove('active');
+            if (content.id === `${target}-tab`) {
+              content.classList.add('active');
+            }
+          });
+        });
+      });
+    }
+    
     // Alert notification system
     function showAlert(message, type) {
       const alertContainer = document.getElementById('alertContainer');
@@ -854,6 +1110,9 @@
       
       // Set up report generation
       setupReportGeneration();
+      
+      // Set up tabs
+      setupTabs();
     });
   </script>
 </body>

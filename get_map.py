@@ -9,7 +9,7 @@ geojson_path = "india_district.geojson"
 geolocator = Nominatim(user_agent="aqi_map")
 
 
-def mapgenerator(aqi):
+def mapgenerator(date,aqi):
     # Multiple AQI locations
     aqi_data = [
     {'village': "NANDED", 'lat': 18.916670, 'lon': 77.500000, 'aqi': aqi['Nanded']},
@@ -112,7 +112,7 @@ def mapgenerator(aqi):
         """
         m.get_root().html.add_child(folium.Element(click_js))
         print("map generated")
-        m.save("static/Full_Final_AQI_Map_change.html")
+        m.save(f"static/map{date}.html")
         #return m
         return m._repr_html_()
 

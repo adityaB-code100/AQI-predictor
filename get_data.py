@@ -61,4 +61,4 @@ def get_data_by_date(village, input_date):
     return predict_aqi_from_csv(train_file, filtered_df)
 
 
-get_data_by_date('Mumbai', '12-02-2025')
+#get_data_by_date('Mumbai', '12-02-2025')
