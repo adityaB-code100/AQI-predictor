@@ -2,11 +2,7 @@
       0% { transform: rotate(30deg) translateX(-100px); }
       100% { transform: rotate(30deg) translateX(100px); }
     }
-    .plotly-graph-div {
-    width: 100% !important;
-    height: 100% !important;
-}
-
+    
     .header::before {
       content: '';
       position: absolute;

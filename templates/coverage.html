@@ -1,0 +1,21 @@
+   {% extends "base.html" %}
+{% block content %}
+
+<style>
+  html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+  }
+
+  iframe {
+    width: 100%;
+    height: 100%;
+    border: none; /* optional, removes border */
+  }
+</style>
+
+<iframe src="{{ url_for('static', filename='map' ~ date ~ '.html') }}"></iframe>
+
+
+{% endblock %}

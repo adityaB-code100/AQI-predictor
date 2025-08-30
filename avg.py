@@ -60,4 +60,3 @@ def calculate_and_store_monthly_mean_aqi():
 
     print("✅ Monthly mean AQI stored/updated successfully!")
 
-calculate_and_store_monthly_mean_aqi()

@@ -1,14 +1,11 @@
-from flask import Flask, request, redirect, url_for, session, render_template, flash, jsonify,render_template_string
+from flask import Flask, request, redirect, url_for, session, render_template, flash, jsonify,render_template_string,send_from_directory
 from flask_pymongo import PyMongo
 from werkzeug.security import generate_password_hash, check_password_hash
 from bson.objectid import ObjectId
 from functools import wraps
 from Fastserver import save_or_update_data
 # AQI imports
-import statistics, math
 from datetime import datetime
-import pandas as pd
-import numpy as np
 from get_map import mapgenerator
 from data_function import next_seven_days
 from get_from_db import get_aqi_data, get_aqi_by_village
@@ -29,7 +26,7 @@ institutions_collection = mongo.db.institutions
 
 # ---------- Helpers ----------
 def get_current_date():
-    return datetime.now().strftime("%Y-%m-%d")
+    return datetime.now().strftime("%d-%m-%Y")   # DD
 
 def login_required(f):
     """Protect routes from unauthorized access"""
@@ -210,7 +207,7 @@ def add_header(response):
 @app.route("/profile", methods=["GET", "POST"])
 @login_required
 def eprofile():
-    return render_template('profile.html')
+    return render_template('profile1.html')
 
 
 
@@ -250,10 +247,9 @@ def dashboard():
 
     )
 
-app.route('/Coverage')
+@app.route('/coverage')
 def coverage():
-    pass
-
+     return render_template('coverage.html',date=get_current_date())
 
 if __name__ == "__main__":
     app.run(debug=True)
