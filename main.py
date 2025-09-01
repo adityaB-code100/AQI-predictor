@@ -249,7 +249,20 @@ def dashboard():
 
 @app.route('/coverage')
 def coverage():
-     return render_template('coverage.html',date=get_current_date())
+      #dict1=get_data("29-08-2025",village)
+    date = get_current_date()
+    village = "Pune"  # default
+
+    dict1=get_aqi_data(date, village, mongo_uri="mongodb://localhost:27017/",
+                 db_name="AQI_Project", collection_name="processed_data")
+    return render_template(
+        'coverage.html',
+        # worst_aqi=worst_aqi,
+        # best_aqi=best_aqi,
+          **dict1,
+         # map_name=
+
+    )
 
 if __name__ == "__main__":
     app.run(debug=True)

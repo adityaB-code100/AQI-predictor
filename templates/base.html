@@ -44,10 +44,10 @@
       </a>
       
       <div class="flex items-center gap-4">
-        <!-- Theme Toggle -->
-        <button id="themeToggle" class="p-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors dark:text-gray-300 dark:hover:bg-gray-700">
+      <button id="themeToggle" class="p-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors dark:text-gray-300 dark:hover:bg-gray-700">
           <i class="fas fa-moon" id="themeIcon"></i>
         </button>
+        
         
         <!-- Mobile menu button -->
         <button class="navbar-toggler md:hidden block text-gray-700 dark:text-gray-300" type="button" id="mobileMenuButton">
@@ -99,28 +99,53 @@
       </div>
     </div>
     
-    <!-- Mobile Menu -->
     <div class="mobile-menu hidden md:hidden bg-white mt-4 rounded-lg shadow-lg p-4 dark:bg-gray-800" id="mobileMenu">
-      <ul class="space-y-2">
-        <li>
-          <a class="block px-4 py-2 rounded-lg font-medium text-gray-900 bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-100" href="/"><i class="fas fa-home mr-2"></i> Home</a>
-        </li>
-        <li>
-          <a class="block px-4 py-2 rounded-lg font-medium text-gray-700 hover:bg-gray-100 transition-colors dark:text-gray-300 dark:hover:bg-gray-700" href="#"><i class="fas fa-info-circle mr-2"></i> About</a>
-        </li>
-        <li>
-          <a class="block px-4 py-2 rounded-lg font-medium text-gray-700 hover:bg-gray-100 transition-colors dark:text-gray-300 dark:hover:bg-gray-700" href="/coverage"><i class="fas fa-map-marked-alt mr-2"></i> Coverage</a>
-        </li>
-        <li>
-          <a class="block px-4 py-2 rounded-lg font-medium text-gray-700 hover:bg-gray-100 transition-colors dark:text-gray-300 dark:hover:bg-gray-700" href="/profile"><i class="fas fa-envelope mr-2"></i> Contact</a>
-        </li>
-        <li class="pt-4 border-t border-gray-200 dark:border-gray-700">
-          <div class="flex items-center space-x-2">
+  <ul class="space-y-2">
+    <li>
+      <a class="block px-4 py-2 rounded-lg font-medium
+                 {% if request.endpoint == 'dashboard' %} bg-indigo-600 text-white dark:bg-indigo-500 dark:text-white {% else %} text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 {% endif %}"
+         href="/">
+        <i class="fas fa-home mr-2"></i> Home
+      </a>
+    </li>
+    <li>
+      <a class="block px-4 py-2 rounded-lg font-medium 
+                 text-gray-700 hover:bg-gray-100 transition-colors 
+                 dark:text-gray-300 dark:hover:bg-gray-700 
+                 border border-transparent
+                 [&.active]:border-indigo-500 [&.active]:text-indigo-600 
+                 dark:[&.active]:border-indigo-400 dark:[&.active]:text-indigo-300" 
+         href="/about">
+        <i class="fas fa-info-circle mr-2"></i> About
+      </a>
+    </li>
+    <li>
+      <a class="block px-4 py-2 rounded-lg font-medium
+   {% if request.endpoint == 'coverage' %}
+      bg-indigo-600 text-white dark:bg-indigo-500 dark:text-white
+   {% else %}
+      text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700
+   {% endif %}" 
+   href="/coverage">
+   <i class="fas fa-map-marked-alt mr-2"></i> Covrage
+</a>
 
-          </div>
-        </li>
-      </ul>
-    </div>
+    </li>
+    <li>
+      <a class="block px-4 py-2 rounded-lg font-medium 
+                 text-gray-700 hover:bg-gray-100 transition-colors 
+                 dark:text-gray-300 dark:hover:bg-gray-700 
+                 border border-transparent
+                 [&.active]:border-indigo-500 [&.active]:text-indigo-600 
+                 dark:[&.active]:border-indigo-400 dark:[&.active]:text-indigo-300
+                 " 
+         href="/profile">
+        <i class="fas fa-envelope mr-2"></i> Contact
+      </a>
+    </li>
+  </ul>
+</div>
+
   </nav>
 
     {% block content %}
@@ -288,6 +313,17 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 </script>
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const currentPath = window.location.pathname;
+    document.querySelectorAll(".mobile-menu a").forEach(link => {
+      if (link.getAttribute("href") === currentPath) {
+        link.classList.add("active");
+      }
+    });
+  });
+</script>
+
 
 
 <!-- Your custom script -->

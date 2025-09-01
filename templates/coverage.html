@@ -1,21 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Coverage Areas - Hyperlocal AQI</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              50: '#f0f9ff',
+              100: '#e0f2fe',
+              200: '#bae6fd',
+              300: '#7dd3fc',
+              400: '#38bdf8',
+              500: '#0ea5e9',
+              600: '#0284c7',
+              700: '#0369a1',
+              800: '#075985',
+              900: '#0c4a6e',
+            },
+            secondary: {
+              50: '#f0fdf4',
+              100: '#dcfce7',
+              200: '#bbf7d0',
+              300: '#86efac',
+              400: '#4ade80',
+              500: '#22c55e',
+              600: '#16a34a',
+              700: '#15803d',
+              800: '#166534',
+              900: '#14532d',
+            }
+          },
+          animation: {
+            'fadeIn': 'fadeIn 0.6s forwards',
+            'pulse': 'pulse 2s infinite',
+            'slideInRight': 'slideInRight 0.5s forwards',
+            'fadeOut': 'fadeOut 0.5s forwards',
+            'float': 'float 6s ease-in-out infinite',
+          },
+          keyframes: {
+            fadeIn: {
+              from: { opacity: 0, transform: 'translateY(20px)' },
+              to: { opacity: 1, transform: 'translateY(0)' }
+            },
+            slideInRight: {
+              from: { transform: 'translateX(100%)', opacity: 0 },
+              to: { transform: 'translateX(0)', opacity: 1 }
+            },
+            fadeOut: {
+              to: { opacity: 0, transform: 'translateX(100%)' }
+            },
+            float: {
+              '0%, 100%': { transform: 'translateY(0)' },
+              '50%': { transform: 'translateY(-10px)' }
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <!-- Leaflet -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"/>
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    .header::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle at center, rgba(255,255,255,0.1) 0%, transparent 70%);
+      transform: rotate(30deg);
+      animation: shimmer 15s infinite linear;
+    }
+    
+    @keyframes shimmer {
+      0% { transform: rotate(30deg) translateX(-100px); }
+      100% { transform: rotate(30deg) translateX(100px); }
+    }
+    
+    .hover-lift {
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .hover-lift:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+    
+    .good-aqi { background-image: linear-gradient(135deg, #10b981 0%, #059669 100%); }
+    .moderate-aqi { background-image: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); }
+    .poor-aqi { background-image: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); }
+    
+    .city-card {
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .city-card.active, .city-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.3);
+      border-color: #4f46e5;
+    }
+    
+    .city-card.active {
+      background-color: rgba(79, 70, 229, 0.05);
+    }
+    
+    #map {
+      height: 500px;
+      border-radius: 16px;
+      z-index: 10;
+    }
+    
+    .theme-transition * {
+      transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+    }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-900 font-sans theme-transition dark:bg-gray-900 dark:text-gray-100">
+  <!-- Navigation Bar -->
    {% extends "base.html" %}
 {% block content %}
 
-<style>
-  html, body {
-    margin: 0;
-    padding: 0;
-    height: 100%;
-  }
+  
+  <!-- HEADER -->
+  <div class="header relative bg-gradient-to-r from-indigo-600 to-indigo-500 text-white py-16 mt-12 mb-8 text-center overflow-hidden dark:from-indigo-700 dark:to-indigo-800">
+    <div class="container mx-auto px-4">
+      <h1 class="text-4xl font-bold mb-2 relative animate-fadeIn"><i class="fas fa-map-marked-alt mr-2"></i> Coverage Areas</h1>
+      <p class="text-lg animate-fadeIn" style="animation-delay: 0.2s">View All Cities AQI </p>
+    </div>
+  </div>
 
-  iframe {
-    width: 100%;
-    height: 100%;
-    border: none; /* optional, removes border */
-  }
-</style>
+  <div class="container mx-auto px-4 mb-12">
+    <!-- CITY SELECTION GRID -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+      {% for city,aqi in village_aqi_data.items() %}
+      <div class="city-card ">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="font-semibold text-lg">{{ city }}</h3>
+          <span class="px-2 py-1  text-xs font-medium rounded-full dark:">  {% if aqi <= 50 %} Good
+              {% elif aqi <= 100 %} Moderate
+              {% elif aqi <= 200 %} Unhealthy
+              {% else %} Very Unhealthy
+              {% endif %}</span>
+        </div>
+        <div class="aqi-value text-3xl font-extrabold bg-clip-text text-transparent  {% if aqi <= 50 %} text-green-500  good-aqi 
+        {% elif aqi <= 100 %} text-yellow-500 moderate-aqi
+        {% elif aqi <= 200 %} text-orange-500 poor-aqi 
+        {% else %} text-red-600 poor-aqi 
+        {% endif %}">{{ aqi }}</div>
+        <p class="text-gray-500 text-sm mt-2 dark:text-gray-400">Maharashtra Region</p>
+                 </div>
+ {% endfor %}
+      </div>
 
-<iframe src="{{ url_for('static', filename='map' ~ date ~ '.html') }}"></iframe>
+      </div>
+    <div class="bg-white rounded-2xl shadow-lg p-6 mb-8 animate-fadeIn dark:bg-gray-800 hover-lift">
+      <h2 class="text-xl font-semibold mb-4 flex items-center">
+        <i class="fas fa-map-marker-alt mr-2 text-indigo-600 dark:text-indigo-400"></i> 
+        <!-- Map View: <span class="ml-2 text-indigo-600 dark:text-indigo-400">Nanded</span> -->
+      </h2>
+      <div id="map">  <iframe src="{{ url_for('static', filename='map' + date + '.html') }}" 
 
+          class="w-full h-full rounded-2xl border-0">        
 
-{% endblock %}
+  </iframe></div>
+    </div>
+
+  </div>
+  {% endblock %}
+
+  <!-- FOOTER -->
+  <footer class="bg-gray-100 text-gray-600 text-center py-6 mt-8 dark:bg-gray-800 dark:text-gray-400">
+    <p>© 2025 Hyperlocal AQI Forecast. Built for research & awareness.</p>
+    <div class="mt-2 flex justify-center space-x-4">
+      <a href="#" class="text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300 transition-colors"><i class="fab fa-twitter"></i></a>
+      <a href="#" class="text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300 transition-colors"><i class="fab fa-facebook"></i></a>
+      <a href="#" class="text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300 transition-colors"><i class="fab fa-linkedin"></i></a>
+      <a href="#" class="text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300 transition-colors"><i class="fab fa-github"></i></a>
+    </div>
+  </footer>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+  
+  <script>
+  
+    
+    if (themeToggle) {
+      themeToggle.addEventListener('click', () => {
+        if (document.documentElement.classList.contains('dark')) {
+          document.documentElement.classList.remove('dark');
+          themeIcon.classList.remove('fa-sun');
+          themeIcon.classList.add('fa-moon');
+          localStorage.setItem('theme', 'light');
+        } else {
+          document.documentElement.classList.add('dark');
+          themeIcon.classList.remove('fa-moon');
+          themeIcon.classList.add('fa-sun');
+          localStorage.setItem('theme', 'dark');
+        }
+      });
+    }
+    
+    // Check for saved theme preference
+    if (localStorage.getItem('theme') === 'dark') {
+      document.documentElement.classList.add('dark');
+      themeIcon.classList.remove('fa-moon');
+      themeIcon.classList.add('fa-sun');
+    }
+  </script>
+</body>
+</html>

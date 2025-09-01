@@ -57,7 +57,7 @@ def processing_data(input_date,village):
         pollutants = classify_pollutants(filter_off(data))
 
     village_aqi_data = get_aqi_by_village(input_date)
-
+    print(village_aqi_data)
 
 #Map Generation
 
@@ -109,7 +109,8 @@ def processing_data(input_date,village):
     "avg_graph": avg_graph,
     "worst_aqi":worst_aqi,
     "best_aqi":best_aqi,
-    "date_list":date_list
+    "date_list":date_list,
+    "village_aqi_data": village_aqi_data
 }
     #save_aqi_to_mongo(records, city, mongo_uri="mongodb://localhost:27017/", db_name="AQI_Project", collection_name="processed_data")
     save_or_update_data(input_date,village,data_dict)
