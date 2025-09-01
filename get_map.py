@@ -27,15 +27,17 @@ def mapgenerator(date,aqi):
         # AQI color function
         def get_aqi_color(aqi):
             if aqi <= 50:
-                return "green"
+                return "#22C55E"
             elif aqi <= 100:
-                return "yellow"
+                return "#FACC15"
+            elif aqi <= 150:
+                return "#F97316"
             elif aqi <= 200:
-                return "orange"
+                return "#EF4444"
             elif aqi <= 300:
-                return "red"
+                return "#9333EA"
             else:
-                return "maroon"
+                return "#111827"
 
         # Read GeoJSON districts
         gdf = gpd.read_file(geojson_path)

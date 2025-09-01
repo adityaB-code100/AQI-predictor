@@ -22,7 +22,7 @@ app = Flask(__name__)
 
 
 def index2():
-    start_date = '2025-08-29'
+    start_date = '2025-09-04'
     date_list = next_days(start_date)
     village_list = ['Mumbai','Nagpur','Nanded','Nashik','Pune']   # Add more if needed
     for village in village_list:

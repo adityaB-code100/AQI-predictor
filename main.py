@@ -13,6 +13,7 @@ from filter_function import filter_off, classify_pollutants
 from data_graph import create_aqi_forecast_chart
 from get_avg_graph import plot_monthly_aqi
 from get_user import get_data
+from get_health_alert import get_health_alert
 app = Flask(__name__)
 app.secret_key = "secretkey"
 
@@ -206,8 +207,31 @@ def add_header(response):
 # ---------- EDIT PROFILE ----------
 @app.route("/profile", methods=["GET", "POST"])
 @login_required
-def eprofile():
-    return render_template('profile1.html')
+def profile():
+   
+    # Check if user is logged in
+    if "user" not in session:
+        return redirect(url_for("login"))  
+
+    # Fetch user data from DB
+    user = users_collection.find_one({"_id": ObjectId(session["user"])})
+    if not user:
+        return "User not found", 404
+    
+    village = user["village"]
+    date = get_current_date()
+    dict1=get_aqi_data(date, village, mongo_uri="mongodb://localhost:27017/",
+                 db_name="AQI_Project", collection_name="processed_data")
+    aqi_all = dict1.get('village_aqi_data', {})   # Get all villages' AQI
+    aqi = aqi_all.get(village) 
+    print(aqi)
+    health_alert = get_health_alert(aqi, 'general')
+    personalise=user['disease']
+    if user['disease']!=None:
+        personalise = get_health_alert(aqi, user['disease'])
+
+    return render_template("profile.html", user=user, health_alert=health_alert, personalise=personalise,          **dict1
+)
 
 
 
@@ -238,12 +262,18 @@ def dashboard():
     #dict1=get_data("29-08-2025",village)
     dict1=get_aqi_data(date, village, mongo_uri="mongodb://localhost:27017/",
                  db_name="AQI_Project", collection_name="processed_data")
+    aqi_all = dict1.get('village_aqi_data', {})   # Get all villages' AQI
+    aqi = aqi_all.get(village) 
+    print(aqi)
+    health_alert = get_health_alert(aqi, 'general')
+
     return render_template(
         "aqi.html",
         # worst_aqi=worst_aqi,
         # best_aqi=best_aqi,
           **dict1,
          # map_name=
+         health_alert=health_alert
 
     )
 
