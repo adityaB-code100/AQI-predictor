@@ -15,7 +15,7 @@ from get_from_db import get_aqi_data, get_aqi_by_village
 from google import genai
 from google.genai import types
 
-from get_health_alert import get_health_alert
+from get_health_alert import get_health_alert_personal
 app = Flask(__name__)
 app.secret_key = "secretkey"
 
@@ -222,10 +222,10 @@ def profile():
                              db_name="AQI_Project", collection_name="processed_data")
         aqi_all = dict1.get('village_aqi_data', {})  
         aqi = aqi_all.get(village) 
-        health_alert = get_health_alert(aqi, 'general')
+        health_alert = get_health_alert_personal(aqi, 'general')
         personalise = user['disease']
         if user['disease'] is not None:
-            personalise = get_health_alert(aqi, user['disease'])
+            personalise = get_health_alert_personal(aqi, user['disease'])
 
         return render_template("profile.html", user=user, health_alert=health_alert,
                                personalise=personalise, **dict1)
@@ -266,7 +266,7 @@ def dashboard():
     aqi_all = dict1.get('village_aqi_data', {})   # Get all villages' AQI
     aqi = aqi_all.get(village) 
     print(aqi)
-    health_alert = get_health_alert(aqi, 'general')
+    health_alert = get_health_alert_personal(aqi, 'general')
 
     return render_template(
         "aqi.html",
@@ -300,10 +300,11 @@ def coverage():
 def generate():
     # Collect all form data
     village=None
+    date1=None
     if request.method == "POST":
         village = request.form.get("village")
-        date = request.form.get("date")
-    report=get_report(village, date)
+        date1 = request.form.get("date")
+    report=get_report(village, date1)
     
     
 
