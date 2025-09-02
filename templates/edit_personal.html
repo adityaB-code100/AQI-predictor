@@ -15,7 +15,7 @@
     <div>
       <label class="block text-sm mb-1">Village</label>
       <select name="village" class="w-full rounded-lg border px-3 py-2" required>
-        {% set villages = ['Village 1','Village 2','Nanded','Pune'] %}
+        {% set villages = ['Nashik','Mumbai','Nanded','Pune','Nagpur'] %}
         {% for v in villages %}
           <option value="{{ v }}" {% if user.village == v %}selected{% endif %}>{{ v }}</option>
         {% endfor %}
@@ -34,7 +34,7 @@
       <input name="age" type="number" value="{{ user.age }}" min="1" max="120" class="w-full rounded-lg border px-3 py-2" required />
     </div>
     <div class="flex items-center justify-end gap-2">
-      <a href="{{ url_for('dashboard') }}" class="px-4 py-2 rounded-lg border">Cancel</a>
+      <a href="/profile" class="px-4 py-2 rounded-lg border">Cancel</a>
       <button class="px-4 py-2 rounded-lg bg-gray-900 text-white">Save</button>
     </div>
   </form>

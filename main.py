@@ -4,22 +4,25 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from bson.objectid import ObjectId
 from functools import wraps
 from Fastserver import save_or_update_data
+import os,json
+#from config_loader import config
+
 # AQI imports
 from datetime import datetime
 # #from get_map import mapgenerator
-# #from data_function import next_seven_days
+from get_report import get_report
 from get_from_db import get_aqi_data, get_aqi_by_village
-# from filter_function import filter_off, classify_pollutants
-# from data_graph import create_aqi_forecast_chart
-# from get_avg_graph import plot_monthly_aqi
-# from get_user import get_data
+from google import genai
+from google.genai import types
+
 from get_health_alert import get_health_alert
 app = Flask(__name__)
 app.secret_key = "secretkey"
 
-# MongoDB Config
+# # MongoDB Config
 app.config["MONGO_URI"] = "mongodb://localhost:27017/AQI_Project"
 mongo = PyMongo(app)
+
 
 # Collections
 users_collection = mongo.db.users
@@ -158,7 +161,7 @@ def edit_profile():
 
             users_collection.update_one({"_id": user["_id"]}, {"$set": update_data})
             flash("Profile updated successfully!", "success")
-            return redirect(url_for("dashboard"))
+            return redirect(url_for("profile"))
 
         return render_template("edit_personal.html", user=user)
 
@@ -176,7 +179,7 @@ def edit_profile():
 
             institutions_collection.update_one({"_id": inst["_id"]}, {"$set": update_data})
             flash("Institution profile updated successfully!", "success")
-            return redirect(url_for("dashboard"))
+            return redirect(url_for("profile"))
 
         return render_template("edit_institution.html", inst=inst)
 
@@ -285,12 +288,38 @@ def coverage():
                  db_name="AQI_Project", collection_name="processed_data")
     return render_template(
         'coverage.html',
-        # worst_aqi=worst_aqi,
-        # best_aqi=best_aqi,
+      
           **dict1,
-         # map_name=
 
     )
+
+
+
+
+@app.route('/generate', methods=['POST'])
+def generate():
+    # Collect all form data
+    village=None
+    if request.method == "POST":
+        village = request.form.get("village")
+        date = request.form.get("date")
+    report=get_report(village, date)
+    
+    
+
+    # Get current date and time (separate date and time)
+    now = datetime.now()
+    current_date = now.strftime("%d-%m-%Y")
+    current_time = now.strftime("%H:%M:%S")
+
+    return render_template(
+        'report.html',
+        report=report,
+        current_date=current_date,
+        current_time=current_time
+    )
+
+
 
 if __name__ == "__main__":
     app.run(debug=True)

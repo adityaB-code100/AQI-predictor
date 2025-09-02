@@ -99,38 +99,55 @@
         </div>
       </div>
 
-      <!-- Alerts -->
-      <h2 class="text-xl font-semibold mt-6 flex items-center justify-center">
-        <i class="fas fa-bell text-red-500 dark:text-red-400 mr-2"></i> Alerts
-      </h2>
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-xl shadow text-center">
-          <h3 class="font-medium text-indigo-600 dark:text-indigo-400 mb-2">General Alerts</h3>
-          <ul>
-            {% if health_alert == personalise %}
-              <li>{{ health_alert }}</li>
-            {% else %}
-              <li>{{ health_alert }}</li>
-              {% if personalise %}
-                <li>{{ personalise }}</li>
-              {% endif %}
-            {% endif %}
-          </ul>
-        </div>
-        <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-xl shadow text-center">
-          <h3 class="font-medium text-green-600 dark:text-green-400 mb-2">Disease Alerts</h3>
-          <ul><li>No current disease alerts</li></ul>
-        </div>
-        <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-xl shadow text-center">
-          <h3 class="font-medium text-yellow-600 dark:text-yellow-400 mb-2">Institute Alerts</h3>
-          <ul><li>No current institute alerts</li></ul>
-        </div>
-      </div>
+     <!-- Alerts -->
+<h2 class="text-xl font-semibold mt-6 flex items-center justify-center">
+  <i class="fas fa-bell text-red-500 dark:text-red-400 mr-2"></i> Alerts
+</h2>
+
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+
+  <!-- General Alerts -->
+  <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-xl shadow text-center">
+    <h3 class="font-medium text-indigo-600 dark:text-indigo-400 mb-2">General Alerts</h3>
+    <ul>
+      {% if health_alert %}
+        <li>{{ health_alert }}</li>
+      {% endif %}
+     
+    </ul>
+  </div>
+
+  <!-- Disease Alerts -->
+  <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-xl shadow text-center">
+    <h3 class="font-medium text-green-600 dark:text-green-400 mb-2">Disease Alerts</h3>
+    <ul>
+      {% if personalise %}
+        <li>{{ personalise }}</li>
+      {% else %}
+        <li>No disease alerts</li>
+      {% endif %}
+    </ul>
+  </div>
+
+  <!-- Institute Alerts -->
+  <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-xl shadow text-center">
+    <h3 class="font-medium text-yellow-600 dark:text-yellow-400 mb-2">Institute Alerts</h3>
+    <ul>
+      <li>No current institute alerts</li>
+    </ul>
+  </div>
+
+</div>
+
 
       <!-- Report Button -->
-      <button class="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg font-bold mt-6">
+       <form action="/generate" method="post">
+         <input type="hidden" name="village" value="{{ user.village }}">
+        <input type="hidden" name="date" value="{{ date }}">
+      <button class="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg font-bold mt-6" type="submit">
         📄 Get AQI Report
       </button>
+      </form>
     </div>
 
     <!-- Profile Section -->
@@ -165,11 +182,13 @@
 
   <!-- Action Buttons -->
   <div class="flex gap-4 mt-6">
-    <button class="flex-1 flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-lg shadow-md transition">
-      ✏️ Edit Info
+    <a href="/edit">
+      <button class="flex-1 flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-lg shadow-md transition">
+       Edit Profile
     </button>
+    </a>
     <button class="flex-1 flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-lg shadow-md transition">
-      📧 Edit Email
+      Edit Email
     </button>
   </div>
 </div>

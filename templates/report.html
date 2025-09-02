@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f4f8;
+            margin: 0;
+            padding: 40px 40px;
+            padding-left: 310px;
+            /* left padding */
+            padding-right: 310px;
+            /* right padding */
+            color: #333;
+        }
+
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+
+        .section {
+            background-color: #ffffff;
+            padding: 20px 25px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            color: #2980b9;
+            border-bottom: 2px solid #2980b9;
+            padding-bottom: 5px;
+        }
+
+        p {
+            line-height: 1.6;
+            margin: 10px 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 8px 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #2980b9;
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f6fa;
+        }
+
+        a,
+        button {
+            display: inline-block;
+            margin-top: 20px;
+            text-decoration: none;
+            background-color: #2980b9;
+            color: white;
+            padding: 10px 25px;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+
+        a:hover,
+        button:hover {
+            background-color: #1f618d;
+        }
+
+        .button-container {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .section pre {
+            display: none;
+        }
+
+        .section pre:first-of-type {
+            display: none;
+        }
+
+        .report-footer {
+            text-align: right;
+            margin-top: 40px;
+            font-size: 13px;
+            color: #555;
+            border-top: 1px solid #ddd;
+            padding-top: 8px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="section" id="report-section">
+        <div
+            style="display: flex; justify-content: flex-end; flex-direction: column; font-size: 14px; color: #555; margin-bottom: 10px; text-align: right;">
+            <div>Date : {{ current_date }}</div>
+            <div>Time : {{ current_time }}</div>
+        </div>
+
+        {{ report | safe }}
+
+        <div class="report-footer">
+            <div>Hyperlocal AQI</div>
+            <div>© 2025 | All Rights Reserved</div>
+        </div>
+
+    </div>
+
+
+    <div class="button-container">
+        <a href="/">Go Back</a>
+        <button onclick="downloadPDF()">Download PDF</button>
+    </div>
+
+    <script>
+        async function downloadPDF() {
+            const { jsPDF } = window.jspdf;
+            const reportElement = document.getElementById("report-section");
+
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const pdfHeight = pdf.internal.pageSize.getHeight();
+
+            const canvas = await html2canvas(reportElement, { scale: 2, useCORS: true, allowTaint: true });
+            const imgData = canvas.toDataURL('image/png');
+
+            const imgProps = pdf.getImageProperties(imgData);
+            const imgWidth = pdfWidth;
+            const imgHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+            let heightLeft = imgHeight;
+            let position = 0;
+
+            while (heightLeft > 0) {
+                pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                heightLeft -= pdfHeight;
+                position -= pdfHeight;
+
+                if (heightLeft > 0) {
+                    pdf.addPage();
+                }
+            }
+
+            pdf.save('Air_Quality_Report_{{ current_date }}_{{ current_time }}.pdf');
+        }
+
+    </script>
+</body>
+
+</html>
