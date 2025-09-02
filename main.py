@@ -6,13 +6,13 @@ from functools import wraps
 from Fastserver import save_or_update_data
 # AQI imports
 from datetime import datetime
-from get_map import mapgenerator
-from data_function import next_seven_days
+# #from get_map import mapgenerator
+# #from data_function import next_seven_days
 from get_from_db import get_aqi_data, get_aqi_by_village
-from filter_function import filter_off, classify_pollutants
-from data_graph import create_aqi_forecast_chart
-from get_avg_graph import plot_monthly_aqi
-from get_user import get_data
+# from filter_function import filter_off, classify_pollutants
+# from data_graph import create_aqi_forecast_chart
+# from get_avg_graph import plot_monthly_aqi
+# from get_user import get_data
 from get_health_alert import get_health_alert
 app = Flask(__name__)
 app.secret_key = "secretkey"
@@ -204,39 +204,37 @@ def add_header(response):
 
 
 
-# ---------- EDIT PROFILE ----------
+# ----------  PROFILE ----------
 @app.route("/profile", methods=["GET", "POST"])
 @login_required
 def profile():
-   
-    # Check if user is logged in
-    if "user" not in session:
-        return redirect(url_for("login"))  
+    if session.get("type") == "personal":
+        user = users_collection.find_one({"_id": ObjectId(session["user"])})
+        if not user:
+            return "User not found", 404
+        
+        village = user["village"]
+        date = get_current_date()
+        dict1 = get_aqi_data(date, village, mongo_uri="mongodb://localhost:27017/",
+                             db_name="AQI_Project", collection_name="processed_data")
+        aqi_all = dict1.get('village_aqi_data', {})  
+        aqi = aqi_all.get(village) 
+        health_alert = get_health_alert(aqi, 'general')
+        personalise = user['disease']
+        if user['disease'] is not None:
+            personalise = get_health_alert(aqi, user['disease'])
 
-    # Fetch user data from DB
-    user = users_collection.find_one({"_id": ObjectId(session["user"])})
-    if not user:
-        return "User not found", 404
-    
-    village = user["village"]
-    date = get_current_date()
-    dict1=get_aqi_data(date, village, mongo_uri="mongodb://localhost:27017/",
-                 db_name="AQI_Project", collection_name="processed_data")
-    aqi_all = dict1.get('village_aqi_data', {})   # Get all villages' AQI
-    aqi = aqi_all.get(village) 
-    print(aqi)
-    health_alert = get_health_alert(aqi, 'general')
-    personalise=user['disease']
-    if user['disease']!=None:
-        personalise = get_health_alert(aqi, user['disease'])
+        return render_template("profile.html", user=user, health_alert=health_alert,
+                               personalise=personalise, **dict1)
 
-    return render_template("profile.html", user=user, health_alert=health_alert, personalise=personalise,          **dict1
-)
+    elif session.get("type") == "institution":
+        inst = institutions_collection.find_one({"_id": ObjectId(session["institution"])})
+        if not inst:
+            return "Institution not found", 404
+        
+        return render_template("profile1.html", inst=inst)
 
-
-
-
-
+    return redirect(url_for("login"))
 
 
 

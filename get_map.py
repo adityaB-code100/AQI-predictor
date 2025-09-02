@@ -3,6 +3,12 @@ import pandas as pd
 import folium
 import geopandas as gpd
 from geopy.geocoders import Nominatim
+import os
+import geopandas as gpd
+
+# current_dir = os.path.dirname(__file__)  # folder of processing.py
+# geojson_path = os.path.join(current_dir, "india_district.geojson")
+# gdf = gpd.read_file(geojson_path)
 
 # ----------------- CONFIG -----------------
 geojson_path = "india_district.geojson"
