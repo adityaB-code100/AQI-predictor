@@ -15,67 +15,76 @@
     </div>
   </div>
 
-  <form action="/" method="post">
-  <div class="container mx-auto px-4">
+
+<div class="m-10">
+<div class="container mx-auto px-4 mb-6 w-full">
+  <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-4 text-center hover-lift animate-fadeIn">
+    <h2 class="text-2xl font-bold text-indigo-600 dark:text-indigo-400">
+      📍 Selected Village: <span class="text-gray-900 dark:text-white">{{village}}</span>
+    </h2>
+  </div>
+</div>
+
+  <form action="/" method="post" onsubmit="return validateForm()">
+  <div class="container mx-auto px-4 w-full">
     <!-- VILLAGE + DATE FILTER -->
     <div class="card bg-white rounded-2xl shadow-lg mb-6 p-6 animate-fadeIn dark:bg-gray-800 hover-lift">
       <h5 class="card-title text-lg font-semibold mb-4 flex items-center">
         <i class="fas fa-filter mr-2 text-indigo-600 dark:text-indigo-400"></i> Select Village & Date
       </h5>
+
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Village Dropdown -->
         <div>
           <label class="form-label block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Village</label>
-          <select name="village" class="form-select w-full rounded-xl py-3 px-4 border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-indigo-400 dark:focus:border-indigo-400">
-            <option selected >Select Village</option>
-          <option value="Nanded">Nanded</option>
+          <select name="village" id="village" 
+            class="form-select w-full rounded-xl py-3 px-4 border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-indigo-400 dark:focus:border-indigo-400"
+            required>
+            <option value="" disabled selected>{{village}}</option>
+            <option value="Nanded">Nanded</option>
             <option value="Pune">Pune</option>
             <option value="Mumbai">Mumbai</option>
             <option value="Nagpur">Nagpur</option>
             <option value="Nashik">Nashik</option>  
-
           </select>
         </div>
-        <div class="mb-4">
-  <label for="date" class="form-label block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">
-    Date
-  </label>
-  <div class="relative">
-    <!-- Calendar Input -->
-    <input 
-      type="date" 
-      id="date" 
-      name="date" 
-      class="form-control w-full rounded-xl py-3 pl-10 pr-4 
-             border border-gray-300 shadow-sm 
-             hover:border-indigo-400 
-             focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 
-             dark:bg-gray-700 dark:border-gray-600 dark:text-white 
-             dark:focus:ring-indigo-400 dark:focus:border-indigo-400
-             transition duration-200 ease-in-out"
-    >
-    <!-- Calendar Icon -->
-    
-  </div>
-</div>
 
+        <!-- Date Picker -->
+        <div class="mb-4">
+          <label for="date" class="form-label block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">
+            Date
+          </label>
+          <div class="relative">
+            <input 
+              type="date" 
+              id="date" 
+              name="date" 
+              class="form-control w-full rounded-xl py-3 pl-10 pr-4 
+                     border border-gray-300 shadow-sm 
+                     hover:border-indigo-400 
+                     focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 
+                     dark:bg-gray-700 dark:border-gray-600 dark:text-white 
+                     dark:focus:ring-indigo-400 dark:focus:border-indigo-400
+                     transition duration-200 ease-in-out"
+              required
+            >
+          </div>
+        </div>
       </div>
-      <button type="submit"   class="btn-primary mt-4 bg-gradient-to-r from-indigo-600 to-indigo-500 text-white font-semibold py-2 px-6 rounded-xl shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-300 animate-pulse dark:from-indigo-500 dark:to-indigo-400 flex items-center justify-center">
+
+      <!-- Submit Button -->
+      <button type="submit" 
+        class="btn-primary mt-4 bg-gradient-to-r from-indigo-600 to-indigo-500 text-white font-semibold py-2 px-6 rounded-xl shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-300 animate-pulse dark:from-indigo-500 dark:to-indigo-400 flex items-center justify-center">
         <i class="fas fa-sync-alt mr-2"></i> Apply Filters
       </button>
     </div>
-    </form>
+  </div>
+</form>
 
-    <!-- MAP -->
-<!-- <div class="h-96 rounded-2xl shadow-lg mb-5 animate-fadeIn hover-lift">
-  <iframe src="{{ url_for('static', filename='map' + date + '.html') }}" 
 
-          class="w-full h-full rounded-2xl border-0">        
-
-  </iframe>
-</div> -->
 
 <!-- MAP -->
-<div class="h-96 rounded-2xl shadow-lg mb-5 animate-fadeIn hover-lift relative">
+<div class="h-96 rounded-2xl shadow-lg mb-5 animate-fadeIn hover-lift relative ">
   <iframe src="{{ url_for('static', filename='map' + date + '.html') }}" 
           class="w-full h-full rounded-2xl border-0">
   </iframe>
@@ -114,11 +123,38 @@
 
 
     <!-- AQI SUMMARY CARDS -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-5 text-center mb-6">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-5 text-center mb-6">
       <div class="aqi-card bg-white p-6 rounded-2xl shadow-lg animate-fadeIn hover-lift dark:bg-gray-800">
         <h5 class="text-lg font-medium flex items-center justify-center">
-          <i class="fas fa-chart-line mr-2 text-indigo-600 dark:text-indigo-400"></i> 7-Day Avg AQI
+          <i class="fas fa-broadcast-tower mr-2 text-indigo-600 dark:text-indigo-400"></i> Live Air Quality Index {{village}}
         </h5>
+        <div class="aqi-value text-4xl font-extrabold bg-clip-text text-transparentmt-2
+        {% if live_AQI <= 50 %} text-green-500  good-aqi 
+        {% elif live_AQI <= 100 %} text-yellow-500 moderate-aqi
+        {% elif live_AQI <= 200 %} text-orange-500 poor-aqi 
+        {% else %} text-red-600 poor-aqi 
+        {% endif %}">{{live_AQI}}</div> 
+        <div class="aqi-percentage h-1.5 bg-gray-200 rounded-full my-3 overflow-hidden dark:bg-gray-700">
+        <div class="aqi-percentage-fill h-full rounded-full 
+          {% if live_AQI <= 50 %} bg-green-500 
+          {% elif live_AQI <= 100 %} bg-yellow-500 
+          {% elif live_AQI <= 200 %} bg-orange-500 
+          {% else %} bg-red-600 
+          {% endif %}" 
+          style="width: 45%;">
+        </div>
+        </div>
+        <p class="text-gray-500 mt-2 dark:text-gray-400"> 
+          {% if avg_aqi_7_days <= 50 %} Good
+              {% elif live_AQI <= 100 %} Moderate
+              {% elif live_AQI <= 200 %} Unhealthy
+              {% else %} Very Unhealthy
+              {% endif %} air quality</p>
+       
+      </div>
+      <div class="aqi-card bg-white p-6 rounded-2xl shadow-lg animate-fadeIn hover-lift dark:bg-gray-800">
+        <h5 class="text-lg font-medium flex items-center justify-center">
+          <i class="fas fa-chart-line mr-2 text-indigo-600 dark:text-indigo-400"></i> 7-Day Average AQI </h5>
         <div class="aqi-value text-4xl font-extrabold bg-clip-text text-transparentmt-2
         {% if avg_aqi_7_days <= 50 %} text-green-500  good-aqi 
         {% elif avg_aqi_7_days <= 100 %} text-yellow-500 moderate-aqi
@@ -143,6 +179,7 @@
               {% endif %} air quality</p>
        
       </div>
+
       <div class="aqi-card bg-white p-6 rounded-2xl shadow-lg animate-fadeIn hover-lift dark:bg-gray-800" style="animation-delay: 0.1s">
         <h5 class="text-lg font-medium flex items-center justify-center">
           <i class="fas fa-exclamation-triangle mr-2 text-amber-600 dark:text-amber-400 "></i> Worst AQI
@@ -155,12 +192,12 @@
         {% endif %}">{{worst_aqi}}</div> 
         <div class="aqi-percentage h-1.5 bg-gray-200 rounded-full my-3 overflow-hidden dark:bg-gray-700">
           <div class="aqi-percentage-fill h-full rounded-full   {% if worst_aqi <= 50 %} bg-green-500 
-          {% elif worst_aqi <= 100 %} bg-orange-500 
-          {% elif worst_aqi <= 200 %} bg-red-500 
+          {% elif worst_aqi <= 100 %} bg-yellow-500 
+          {% elif worst_aqi <= 200 %} bg-orange-500 
           {% else %} bg-red-600 
           {% endif %}" style="width: 78%; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);"></div>
         </div>
-        <p class="text-gray-500 mt-2 dark:text-gray-400">Worst On{{  avg_3card_dict['worst_aqi']}}</p>
+        <p class="text-gray-500 mt-2 dark:text-gray-400">Worst On {{  avg_3card_dict['worst_aqi']}}</p>
         
       </div>
 
@@ -169,9 +206,30 @@
         <h5 class="text-lg font-medium flex items-center justify-center">
           <i class="fas fa-trophy mr-2 text-emerald-600 dark:text-emerald-400"></i> Lowest AQI
         </h5>
-        <div class="aqi-value text-4xl font-extrabold bg-clip-text text-transparent good-aqi mt-2">{{ best_aqi}}</div>
+         <div class="aqi-value text-4xl font-extrabold bg-clip-text text-transparent  mt-2
+        {% if best_aqi <= 50 %} text-green-500  good-aqi 
+        {% elif best_aqi <= 100 %} text-yellow-500 moderate-aqi
+        {% elif best_aqi <= 200 %} text-orange-500 poor-aqi 
+        {% else %} text-red-600 poor-aqi 
+        {% endif %}">{{best_aqi}}</div> 
         <div class="aqi-percentage h-1.5 bg-gray-200 rounded-full my-3 overflow-hidden dark:bg-gray-700">
-          <div class="aqi-percentage-fill h-full rounded-full" style="width: 28%; background: linear-gradient(135deg, #10b981 0%, #059669 100%);"></div>
+          <div class="aqi-percentage-fill h-full rounded-full   {% if best_aqi <= 50 %} bg-green-500 
+          {% elif best_aqi <= 100 %} bg-orange-500 
+          {% elif best_aqi <= 200 %} bg-red-500 
+          {% else %} bg-red-600 
+          {% endif %}" 
+
+                    {% if best_aqi <= 50 %} style="width:30%; background: linear-gradient(135deg, #22C55E 0%, #16A34A 100%);"
+            {% elif best_aqi <= 100 %}
+             style="width:55%; background: linear-gradient(135deg, #FACC15 0%, #EAB308 100%);"
+            {% elif best_aqi <= 200 %}  style="width:75%; background: linear-gradient(135deg, #F97316 0%, #EA580C 100%);"
+            {% elif best_aqi <= 300 %}
+               style="width:90%; background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);"
+            {% elif best_aqi <= 400 %}
+             style="width:95%; background: linear-gradient(135deg, #9333EA 0%, #7E22CE 100%);"
+            {% else %}
+           style="width:99%; background: linear-gradient(135deg, #111827 0%, #1F2937 100%);"
+            {% endif %}></div>
         </div>
         <p class="text-gray-500 mt-2 dark:text-gray-400"> Lowest on {{ avg_3card_dict['best_aqi'] }}</p>
         <div class="flex justify-between text-xs text-gray-500 mt-1 dark:text-gray-400">
@@ -263,7 +321,7 @@
             <div class="forecast-card bg-white rounded-2xl shadow-lg p-6 animate-fadeIn hover-lift dark:bg-gray-800">
         <h5 class="text-lg font-semibold mb-4 flex items-center">
           <i class="fas fa-chart-line mr-2 text-indigo-600 dark:text-indigo-400"></i>
-          72-Hour Forecast
+          7-Day Graphical Forecast
         </h5>
         <!-- <div class="forecast-chart" id="forecast-chart" > -->
           {{ graph_html | safe }}
@@ -287,5 +345,7 @@
       </h5>
       <p class="text-gray-700 dark:text-gray-300">{{health_alert}}</div>
   </div>
+</div>
+
 </div>
   {% endblock %}

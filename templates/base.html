@@ -335,6 +335,20 @@ dateInput.addEventListener("change", function () {
 
   </script>
 
+  <script>
+  function validateForm() {
+    const village = document.getElementById("village").value;
+    const date = document.getElementById("date").value;
+
+    if (!village || !date) {
+      alert("Please select both village and date.");
+      return false;
+    }
+    return true;
+  }
+</script>
+
+
   <!-- Your custom script -->
   <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>

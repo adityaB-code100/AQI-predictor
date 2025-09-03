@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Institute AQI Profile</title>
+  <script src="https://kit.fontawesome.com/your-fontawesome-kit.js" crossorigin="anonymous"></script>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+  <style>
+    .institute-card {
+      background: linear-gradient(135deg, #4F46E5 0%, #7E22CE 100%);
+      color: white;
+      border-radius: 1rem;
+    }
+    .institute-icon {
+      background-color: rgba(255, 255, 255, 0.2);
+      border-radius: 50%;
+      padding: 0.75rem;
+    }
+  </style>
+</head>
+<body class="bg-gradient-to-r from-gray-100 to-gray-200 text-gray-800 dark:from-gray-900 dark:to-gray-800 dark:text-gray-100">
+
+  {% extends "base.html" %}
+  {% block content %}
+
+  <div class="container mx-auto p-6 grid lg:grid-cols-3 gap-6">
+    <!-- AQI Section -->
+    <div class="lg:col-span-2 space-y-6">
+      <!-- Institute Area -->
+      <h2 class="text-2xl font-bold text-indigo-600 dark:text-indigo-400 border-l-4 border-indigo-500 pl-3">
+        Institute Area: {{ inst.village }}
+      </h2>
+
+      <!-- AQI Summary Cards -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <!-- Live AQI -->
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 text-center transition transform hover:-translate-y-1 hover:shadow-xl">
+          <h5 class="text-lg font-medium flex items-center justify-center">
+            <i class="fas fa-broadcast-tower text-emerald-600 dark:text-emerald-400 mr-2"></i> Live AQI
+          </h5>
+          <p class="text-4xl font-bold mt-2 {{ 'text-green-500' if village_aqi_data[inst.village] <= 50 else 'text-yellow-500' if village_aqi_data[inst.village] <= 100 else 'text-orange-500' if village_aqi_data[inst.village] <= 200 else 'text-red-600' }}">
+            {{ village_aqi_data[inst.village] }}
+          </p>
+          <p class="text-gray-500 dark:text-gray-400">Today</p>
+        </div>
+
+        <!-- 7-Day Avg AQI -->
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 text-center hover:-translate-y-1 hover:shadow-xl transition">
+          <h5 class="text-lg font-medium flex items-center justify-center">
+            <i class="fas fa-chart-line text-indigo-600 dark:text-indigo-400 mr-2"></i> 7-Day Avg AQI
+          </h5>
+          <p class="text-4xl font-bold mt-2 {% if avg_aqi_7_days <= 50 %}text-green-500{% elif avg_aqi_7_days <= 100 %}text-yellow-500{% elif avg_aqi_7_days <= 200 %}text-orange-500{% else %}text-red-600{% endif %}">
+            {{ avg_aqi_7_days }}
+          </p>
+          <p class="text-gray-500 dark:text-gray-400">
+            {% if avg_aqi_7_days <= 50 %} Good
+            {% elif avg_aqi_7_days <= 100 %} Moderate
+            {% elif avg_aqi_7_days <= 200 %} Unhealthy
+            {% else %} Very Unhealthy
+            {% endif %}
+          </p>
+        </div>
+
+        <!-- Worst AQI -->
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 text-center hover:-translate-y-1 hover:shadow-xl transition">
+          <h5 class="text-lg font-medium flex items-center justify-center">
+            <i class="fas fa-exclamation-triangle text-amber-600 dark:text-amber-400 mr-2"></i> Worst AQI
+          </h5>
+          <p class="text-4xl font-bold mt-2 {% if worst_aqi <= 50 %}text-green-500{% elif worst_aqi <= 100 %}text-yellow-500{% elif worst_aqi <= 200 %}text-orange-500{% else %}text-red-600{% endif %}">
+            {{ worst_aqi }}
+          </p>
+          <p class="text-gray-500 dark:text-gray-400">Worst on {{ avg_3card_dict['worst_aqi'] }}</p>
+        </div>
+
+        <!-- Best AQI -->
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 text-center hover:-translate-y-1 hover:shadow-xl transition">
+          <h5 class="text-lg font-medium flex items-center justify-center">
+            <i class="fas fa-trophy text-emerald-600 dark:text-emerald-400 mr-2"></i> Best AQI
+          </h5>
+          <p class="text-4xl font-bold mt-2 text-green-500">{{ best_aqi }}</p>
+          <p class="text-gray-500 dark:text-gray-400">Best on {{ avg_3card_dict['best_aqi'] }}</p>
+        </div>
+      </div>
+
+      <!-- Forecast -->
+      <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6">
+        <h4 class="text-xl font-semibold mb-4 flex items-center justify-center">
+          <i class="fas fa-calendar-alt text-indigo-600 dark:text-indigo-400 mr-2"></i> 7-Day Forecast
+        </h4>
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-4">
+          {% for i in range(7) %}
+          {% set aqi = passing_data[i]["value"] %}
+          <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-xl shadow text-center hover:-translate-y-1 hover:shadow-lg transition">
+            <h6 class="font-medium">{{ passing_data[i]["date"] }}</h6>
+            <p class="text-2xl font-bold mt-2 {% if aqi <= 50 %}text-green-500{% elif aqi <= 100 %}text-yellow-500{% elif aqi <= 200 %}text-orange-500{% else %}text-red-600{% endif %}">
+              {{ aqi }}
+            </p>
+            <small class="text-gray-500 dark:text-gray-400">
+              {% if aqi <= 50 %} Good
+              {% elif aqi <= 100 %} Moderate
+              {% elif aqi <= 200 %} Unhealthy
+              {% else %} Very Unhealthy
+              {% endif %}
+            </small>
+            <div class="text-xs text-gray-400 dark:text-gray-500 mt-1">
+              PM2.5: {{ passing_pollutant[i]['value'] }}
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+     <!-- Alerts -->
+<h2 class="text-xl font-semibold mt-6 flex items-center justify-center">
+  <i class="fas fa-bell text-red-500 dark:text-red-400 mr-2"></i> Alerts
+</h2>
+
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4">
+
+  <!-- General Alerts -->
+  <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-xl shadow text-center">
+    <h3 class="font-medium text-indigo-600 dark:text-indigo-400 mb-2">General Alerts</h3>
+    <ul>
+      {% if personalise %}
+        <li>{{ personalise }}</li>
+      {% endif %}
+     
+    </ul>
+  </div>
+
+  <!-- Disease Alerts -->
+  <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-xl shadow text-center">
+    <h3 class="font-medium text-green-600 dark:text-green-400 mb-2">Alerts for Your Institute</h3>
+    <ul>
+      {% if institute_alert %}
+        <li>{{ institute_alert }}</li>
+      {% else %}
+        <li>No disease alerts</li>
+      {% endif %}
+    </ul>
+  </div>
+
+  
+</div>
+
+
+      <!-- Report Button -->
+       <form action="/generate" method="post">
+         <input type="hidden" name="village" value="{{ inst.village }}">
+        <input type="hidden" name="date" value="{{ date }}">
+      <button class="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg font-bold mt-6" type="submit">
+        📄 Get AQI Report
+      </button>
+      </form>
+    </div>
+
+    <!-- Institute Profile Section -->
+    <div class="flex flex-col pt-6 items-center profile-section institute-card rounded-2xl shadow-lg p-6 text-center mt-16">
+      <!-- Institute Icon -->
+      <div class="institute-icon mb-4">
+        <i class="fas fa-school text-white text-3xl"></i>
+      </div>
+      
+      <!-- Institute Info -->
+      <h1 class="text-2xl font-bold text-white">{{ inst.institution_name }}</h1>
+      <h6 class="text-indigo-100">{{ inst.email }}</h6>
+
+      <!-- Details Box -->
+      <div class="bg-white bg-opacity-20 rounded-xl p-5 mt-5 text-left space-y-3 shadow-inner w-full">
+        <div class="flex items-center gap-2 text-white">
+          <span class="institute-icon"><i class="fas fa-signature text-sm"></i></span> 
+          <span class="font-medium">Institute Name:</span> 
+          <span>{{ inst.institution_name }}</span>
+        </div>
+        <div class="flex items-center gap-2 text-white">
+          <span class="institute-icon"><i class="fas fa-envelope text-sm"></i></span> 
+          <span class="font-medium">Email:</span> 
+          <span>{{ inst.email }}</span>
+        </div>
+        <div class="flex items-center gap-2 text-white">
+          <span class="institute-icon"><i class="fas fa-phone text-sm"></i></span> 
+          <span class="font-medium">Contact:</span> 
+          <span>{{ inst.contact }}</span>
+        </div>
+        <div class="flex items-center gap-2 text-white">
+          <span class="institute-icon"><i class="fas fa-university text-sm"></i></span> 
+          <span class="font-medium">Institute Type:</span> 
+          <span>{{ inst.institution_type }}</span>
+        </div>
+        <div class="flex items-start gap-2 text-white">
+          <span class="institute-icon mt-1"><i class="fas fa-map-marker-alt text-sm"></i></span> 
+          <div>
+            <span class="font-medium">Village:</span> 
+            <span class="block">{{ inst.village }}</span>
+          </div>
+        </div>
+        <div class="flex items-start gap-2 text-white">
+          <span class="institute-icon mt-1"><i class="fas fa-map-marker-alt text-sm"></i></span> 
+          <div>
+            <span class="font-medium">Address:</span> 
+            <span class="block">{{ inst.address }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex gap-4 mt-6 w-full">
+        <a href="/edit" class="flex-1">
+          <button class="w-full flex items-center justify-center gap-2 bg-white text-indigo-600 hover:bg-indigo-50 py-2 rounded-lg shadow-md transition font-medium">
+            <i class="fas fa-edit"></i> Edit Profile
+          </button>
+        </a>
+      </div>
+    </div>
+  </div>
+  {% endblock %}
+</body>
+</html>

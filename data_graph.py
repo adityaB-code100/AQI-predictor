@@ -1,7 +1,7 @@
 import plotly.graph_objs as go
 import plotly.offline as pyo
 
-def create_aqi_forecast_chart(dates, aqi_values, title="72-Hour AQI Forecast"):
+def create_aqi_forecast_chart(dates, aqi_values, title="7 days Graphical AQI Forecast"):
     """
     Create an AQI forecast chart (time vs AQI) using Plotly.
     Returns an embeddable HTML <div> string for Flask/Jinja templates.

@@ -22,7 +22,7 @@ app = Flask(__name__)
 
 
 def index2():
-    start_date = '2025-09-04'
+    start_date = '2025-09-01'
     date_list = next_days(start_date)
     village_list = ['Mumbai','Nagpur','Nanded','Nashik','Pune']   # Add more if needed
     for village in village_list:
@@ -42,7 +42,15 @@ def processing_data(input_date,village):
     date_list = next_seven_days(input_date)
     print(date_list)
 
-    
+
+
+    live_AQI=None
+    live_data=get_aqi_data(input_date, village=village)
+
+    if "Predicted_AQI" in live_data:
+        live_AQI=live_data["Predicted_AQI"]
+
+
     for date_k in date_list:
         data = get_aqi_data(date_k, village=village)
         if data:
@@ -110,7 +118,8 @@ def processing_data(input_date,village):
     "worst_aqi":worst_aqi,
     "best_aqi":best_aqi,
     "date_list":date_list,
-    "village_aqi_data": village_aqi_data
+    "village_aqi_data": village_aqi_data,
+    'live_AQI':live_AQI
 }
     #save_aqi_to_mongo(records, city, mongo_uri="mongodb://localhost:27017/", db_name="AQI_Project", collection_name="processed_data")
     save_or_update_data(input_date,village,data_dict)

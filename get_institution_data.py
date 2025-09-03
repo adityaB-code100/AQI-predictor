@@ -22,4 +22,5 @@ def get_institutions():
 
 
 if __name__ == "__main__":
-    get_institutions()
+    app.run(debug=True)
+    # get_institutions()

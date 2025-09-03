@@ -3,12 +3,14 @@ from pymongo import MongoClient
 # Connect to MongoDB
 client = MongoClient("mongodb://localhost:27017/")
 db = client["AQI_Project"]
-collection = db["health_alerts"]
 
-def get_health_alert(aqi_value, category="general"):
+def get_health_alert_personal(aqi_value, category="general"):
+
     """
     Fetch health alert message based on AQI value and category (general or disease).
     """
+    collection = db["health_alerts"]
+
     if category == 'None':
          category="general"
     # Determine AQI category

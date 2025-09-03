@@ -14,7 +14,7 @@ from get_report import get_report
 from get_from_db import get_aqi_data, get_aqi_by_village
 from google import genai
 from google.genai import types
-
+from get_health_alerts_institution import get_health_alert_institution
 from get_health_alert import get_health_alert_personal
 app = Flask(__name__)
 app.secret_key = "secretkey"
@@ -180,7 +180,7 @@ def edit_profile():
             institutions_collection.update_one({"_id": inst["_id"]}, {"$set": update_data})
             flash("Institution profile updated successfully!", "success")
             return redirect(url_for("profile"))
-
+            
         return render_template("edit_institution.html", inst=inst)
 
     return redirect(url_for("login"))
@@ -234,8 +234,21 @@ def profile():
         inst = institutions_collection.find_one({"_id": ObjectId(session["institution"])})
         if not inst:
             return "Institution not found", 404
-        
-        return render_template("profile1.html", inst=inst)
+        village = inst["village"]
+        date = get_current_date()
+        dict1 = get_aqi_data(date, village, mongo_uri="mongodb://localhost:27017/",
+                             db_name="AQI_Project", collection_name="processed_data")
+        aqi_all = dict1.get('village_aqi_data', {})  
+        aqi = aqi_all.get(village) 
+        print(aqi)
+        print(inst)
+        personalise = inst['institution_type']
+        if inst['institution_type'] is not None:
+            personalise = get_health_alert_institution(aqi, 'general')
+        institute_alert = get_health_alert_institution(aqi, inst['institution_type'])
+
+        print(institute_alert,personalise)
+        return render_template("institution_profile.html", inst=inst, **dict1,institute_alert=institute_alert, personalise=personalise)
 
     return redirect(url_for("login"))
 
