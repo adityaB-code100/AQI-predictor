@@ -1,356 +1,188 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Create Account · AQI Project</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <style>
-    /* Reset + base */
-    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
-    body {
-      background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-      display: flex; align-items: center; justify-content: center;
-      min-height: 100vh; padding: 20px;
-    }
-
-    /* Card */
-    .card {
-      background: #fff;
-      border-radius: 20px;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.1);
-      width: 100%; max-width: 500px;
-      overflow: hidden;
-      animation: fadeIn 0.8s ease;
-    }
-
-    .card-header {
-      background: linear-gradient(135deg, #6366f1, #3b82f6);
-      color: #fff; padding: 24px 28px;
-      display: flex; align-items: center; justify-content: space-between;
-    }
-    .card-header h2 { font-size: 20px; font-weight: 700; }
-    .card-header .close-btn {
-      cursor: pointer; font-size: 20px;
-      opacity: 0.9; transition: opacity 0.2s;
-    }
-    .card-header .close-btn:hover { opacity: 1; }
-
-    .card-body { padding: 30px; }
-
-    .form-group { margin-bottom: 18px; }
-    label { display: block; font-size: 14px; font-weight: 600; margin-bottom: 6px; color: #334155; }
-    input, select {
-      width: 100%; padding: 14px 16px;
-      border: 2px solid #e2e8f0; border-radius: 12px;
-      font-size: 15px; transition: all 0.25s;
-    }
-    input:focus, select:focus {
-      border-color: #3b82f6;
-      box-shadow: 0 0 0 4px rgba(59,130,246,0.1);
-      outline: none;
-    }
-
-    /* Toggle Switch */
-    .toggle-container {
-      display: flex; justify-content: center; align-items: center;
-      margin-bottom: 20px;
-    }
-    .toggle-btn {
-      display: flex;
-      background: #f1f5f9;
-      border-radius: 50px;
-      overflow: hidden;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-    }
-    .toggle-btn button {
-      flex: 1; padding: 12px;
-      border: none; background: transparent;
-      font-size: 15px; font-weight: 600;
-      cursor: pointer; color: #475569;
-      transition: all 0.3s ease;
-    }
-    .toggle-btn button.active {
-      background: linear-gradient(135deg, #6366f1, #3b82f6);
-      color: #fff;
-    }
-
-    /* Checkbox */
-    .checkbox { display: flex; align-items: center; gap: 8px; font-size: 14px; margin-top: 8px; color: #475569; }
-    .checkbox input { width: auto; accent-color: #3b82f6; }
-
-    /* Submit */
-    .btn {
-      width: 100%; padding: 14px;
-      border: none; border-radius: 12px;
-      background: linear-gradient(135deg, #6366f1, #3b82f6);
-      color: #fff; font-size: 16px; font-weight: 600;
-      cursor: pointer; transition: all 0.3s;
-      margin-top: 16px;
-    }
-    .btn:hover {
-      background: linear-gradient(135deg, #4f46e5, #2563eb);
-      box-shadow: 0 6px 16px rgba(59,130,246,0.25);
-      transform: translateY(-2px);
-    }
-
-    /* Animation */
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    /* Hide forms */
-    .hidden { display: none; }
-    
-    /* Login link */
-    .login-link {
-      text-align: center;
-      margin-top: 20px;
-      font-size: 14px;
-      color: #64748b;
-    }
-    .login-link a {
-      color: #3b82f6;
-      text-decoration: none;
-      font-weight: 600;
-      transition: color 0.2s;
-    }
-    .login-link a:hover {
-      color: #2563eb;
-      text-decoration: underline;
-    }
-  </style>
-</head>
-<body>
-  <div class="card">
-    <div class="card-header">
-      <h2>Create an Account</h2>
-      <span class="close-btn">&times;</span>
+{% extends "base.html" %}
+{% block title %}Create Account · AQI Project{% endblock %}
+{% block content %}
+<div class="flex items-center justify-center min-h-screen bg-gradient-to-br from-sky-50 to-sky-100 dark:from-gray-900 dark:to-gray-800 transition-colors duration-500 mt-8">
+  <div class="card w-full max-w-lg bg-white dark:bg-gray-900 rounded-2xl shadow-xl overflow-hidden animate-fadeIn  mb-8">
+    <!-- Header -->
+    <div class="card-header flex items-center justify-between px-6 py-5 bg-gradient-to-r from-indigo-500 to-blue-500 text-white">
+      <h2 class="text-lg font-bold">Create an Account</h2>
+      <span class="close-btn cursor-pointer text-xl opacity-90 hover:opacity-100">&times;</span>
     </div>
-    <div class="card-body">
+
+    <!-- Body -->
+    <div class="card-body p-8">
       <!-- Toggle Buttons -->
-      <div class="toggle-container">
-        <div class="toggle-btn">
-          <button id="personal" class="active" type="button">Personal</button>
-          <button id="institution" type="button">Institute</button>
+      <div class="flex justify-center mb-6">
+        <div class="toggle-btn flex rounded-full bg-slate-100 dark:bg-gray-800 shadow">
+          <button id="personal" type="button" class="active flex-1 px-6 py-2 rounded-full font-semibold text-sm text-white bg-gradient-to-r from-indigo-500 to-blue-500">Personal</button>
+          <button id="institution" type="button" class="flex-1 px-6 py-2 rounded-full font-semibold text-sm text-slate-600 dark:text-gray-300 hover:bg-slate-200 dark:hover:bg-gray-700 transition">Institute</button>
         </div>
       </div>
+
       <!-- Personal Form -->
-<form id="personalForm" action="/register" method="POST" novalidate>
-  <input type="hidden" name="reg_type" value="personal">
+      <form id="personalForm" action="/register" method="POST" novalidate>
+        <input type="hidden" name="reg_type" value="personal">
 
-  <div class="form-group">
-    <label for="firstName">First Name</label>
-    <input type="text" id="firstName" name="name">
-  </div>
+        <div class="space-y-4">
+          <div>
+            <label for="firstName" class="block text-sm font-semibold text-slate-700 dark:text-gray-300">First Name</label>
+            <input type="text" id="firstName" name="name" class="w-full p-3 rounded-xl border-2 border-slate-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition" />
+          </div>
 
-  <div class="form-group">
-    <label for="email">Email address</label>
-    <input type="email" id="email" name="email">
-  </div>
+          <div>
+            <label for="email" class="block text-sm font-semibold text-slate-700 dark:text-gray-300">Email Address</label>
+            <input type="email" id="email" name="email" class="w-full p-3 rounded-xl border-2 border-slate-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition" />
+          </div>
 
-  <div class="form-group">
-    <label for="number">Mobile No</label>
-    <input type="number" id="number" name="mobile">
-  </div>
+          <div>
+            <label for="number" class="block text-sm font-semibold text-slate-700 dark:text-gray-300">Mobile No</label>
+            <input type="number" id="number" name="mobile" class="w-full p-3 rounded-xl border-2 border-slate-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition" />
+          </div>
 
-  <div class="form-group">
-    <label for="village">Select Village:</label>
-    <select name="village" id="village" class="form-select">
-      <option value="">--Select Village--</option>
-      <option value="Nanded">Nanded</option>
-      <option value="Pune">Pune</option>
-      <option value="Mumbai">Mumbai</option>
-      <option value="Nagpur">Nagpur</option>
-      <option value="Nashik">Nashik</option>
-    </select>
-  </div>
+          <div>
+            <label for="village" class="block text-sm font-semibold text-slate-700 dark:text-gray-300">Select Village</label>
+            <select name="village" id="village" class="w-full p-3 rounded-xl border-2 border-slate-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition">
+              <option value="">--Select Village--</option>
+              <option value="Nanded">Nanded</option>
+              <option value="Pune">Pune</option>
+              <option value="Mumbai">Mumbai</option>
+              <option value="Nagpur">Nagpur</option>
+              <option value="Nashik">Nashik</option>
+            </select>
+          </div>
 
-  <div class="form-group">
-    <label for="disease">Select Disease:</label>
-    <select name="disease" id="disease" class="form-select">
-      <option value="">--Select Disease--</option>
-      <option value="None">None</option>
-      <option value="Asthma">Asthma</option>
-      <option value="Bronchitis">Bronchitis</option>
-      <option value="COPD">COPD</option>
-      <option value="Allergic Rhinitis">Allergic Rhinitis</option>
-    </select>
-  </div>
+          <div>
+            <label for="disease" class="block text-sm font-semibold text-slate-700 dark:text-gray-300">Select Disease</label>
+            <select name="disease" id="disease" class="w-full p-3 rounded-xl border-2 border-slate-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition">
+              <option value="">--Select Disease--</option>
+              <option value="None">None</option>
+              <option value="Asthma">Asthma</option>
+              <option value="Bronchitis">Bronchitis</option>
+              <option value="COPD">COPD</option>
+              <option value="Allergic Rhinitis">Allergic Rhinitis</option>
+            </select>
+          </div>
 
-  <div class="form-group">
-    <label for="age">Age</label>
-    <input type="number" id="age" name="age">
-  </div>
+          <div>
+            <label for="age" class="block text-sm font-semibold text-slate-700 dark:text-gray-300">Age</label>
+            <input type="number" id="age" name="age" class="w-full p-3 rounded-xl border-2 border-slate-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition" />
+          </div>
 
-  <div class="form-group">
-    <label for="personalPassword">Password</label>
-    <input type="password" id="personalPassword" name="password">
-  </div>
+          <div>
+            <label for="personalPassword" class="block text-sm font-semibold text-slate-700 dark:text-gray-300">Password</label>
+            <input type="password" id="personalPassword" name="password" class="w-full p-3 rounded-xl border-2 border-slate-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition" />
+          </div>
 
-  <div class="form-group">
-    <label for="personalPwConfirm">Confirm Password</label>
-    <input type="password" id="personalPwConfirm" name="pwConfirm">
-  </div>
+          <div>
+            <label for="personalPwConfirm" class="block text-sm font-semibold text-slate-700 dark:text-gray-300">Confirm Password</label>
+            <input type="password" id="personalPwConfirm" name="pwConfirm" class="w-full p-3 rounded-xl border-2 border-slate-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition" />
+          </div>
 
-  <label class="checkbox">
-    <input type="checkbox" id="personalAgree">
-    I agree to the Terms and Conditions
-  </label>
+          <label class="flex items-center gap-2 text-sm text-slate-600 dark:text-gray-400">
+            <input type="checkbox" id="personalAgree" class="accent-blue-500" />
+            I agree to the Terms and Conditions
+          </label>
 
-  <button class="btn" type="submit">Register</button>
-</form>
-<!-- Institute Form -->
-<form id="instituteForm" class="hidden" action="/register" method="POST" novalidate>
-  <input type="hidden" name="reg_type" value="institution">
+          <button type="submit" class="btn w-full py-3 rounded-xl bg-gradient-to-r from-indigo-500 to-blue-500 text-white font-semibold shadow hover:from-indigo-600 hover:to-blue-600 transition">Register</button>
+        </div>
+      </form>
 
-  <div class="form-group">
-    <label for="instName">Institute Name</label>
-    <input type="text" id="instName" name="institution_name">
-  </div>
+      <!-- Institute Form -->
+      <form id="instituteForm" class="hidden" action="/register" method="POST" novalidate>
+        <input type="hidden" name="reg_type" value="institution">
 
-  <div class="form-group">
-  <label for="instType">Institute Type</label>
-  <select id="instType" name="institution_type" class="form-select">
-    <option value="" disabled selected>Select Institute Type</option>
-    <option value="hospital">Hospital</option>
-    <option value="school">School</option>
-    <option value="other">Other</option>
-  </select>
-</div>
+        <div class="space-y-4">
+          <div>
+            <label for="instName" class="block text-sm font-semibold text-slate-700 dark:text-gray-300">Institute Name</label>
+            <input type="text" id="instName" name="institution_name" class="w-full p-3 rounded-xl border-2 border-slate-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition" />
+          </div>
 
-<div class="form-group">
-    <label for="village">Select Village:</label>
-    <select name="village" id="village" class="form-select">
-      <option value="">--Select Village--</option>
-      <option value="Nanded">Nanded</option>
-      <option value="Pune">Pune</option>
-      <option value="Mumbai">Mumbai</option>
-      <option value="Nagpur">Nagpur</option>
-      <option value="Nashik">Nashik</option>
-    </select>
-  </div>
+          <div>
+            <label for="instType" class="block text-sm font-semibold text-slate-700 dark:text-gray-300">Institute Type</label>
+            <select id="instType" name="institution_type" class="w-full p-3 rounded-xl border-2 border-slate-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition">
+              <option value="" disabled selected>Select Institute Type</option>
+              <option value="hospital">Hospital</option>
+              <option value="school">School</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
 
-  <div class="form-group">
-    <label for="instEmail">Official Email</label>
-    <input type="email" id="instEmail" name="email">
-  </div>
+          <div>
+            <label for="village" class="block text-sm font-semibold text-slate-700 dark:text-gray-300">Select Village</label>
+            <select name="village" id="village" class="w-full p-3 rounded-xl border-2 border-slate-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition">
+              <option value="">--Select Village--</option>
+              <option value="Nanded">Nanded</option>
+              <option value="Pune">Pune</option>
+              <option value="Mumbai">Mumbai</option>
+              <option value="Nagpur">Nagpur</option>
+              <option value="Nashik">Nashik</option>
+            </select>
+          </div>
 
-  <div class="form-group">
-    <label for="contact">Contact Number</label>
-    <input type="tel" id="contact" name="contact">
-  </div>
+          <div>
+            <label for="instEmail" class="block text-sm font-semibold text-slate-700 dark:text-gray-300">Official Email</label>
+            <input type="email" id="instEmail" name="email" class="w-full p-3 rounded-xl border-2 border-slate-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition" />
+          </div>
 
-  <div class="form-group">
-    <label for="address">Institute Address</label>
-    <input type="text" id="address" name="address">
-  </div>
+          <div>
+            <label for="contact" class="block text-sm font-semibold text-slate-700 dark:text-gray-300">Contact Number</label>
+            <input type="tel" id="contact" name="contact" class="w-full p-3 rounded-xl border-2 border-slate-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition" />
+          </div>
 
-  <div class="form-group">
-    <label for="instPassword">Password</label>
-    <input type="password" id="instPassword" name="password">
-  </div>
+          <div>
+            <label for="address" class="block text-sm font-semibold text-slate-700 dark:text-gray-300">Institute Address</label>
+            <input type="text" id="address" name="address" class="w-full p-3 rounded-xl border-2 border-slate-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition" />
+          </div>
 
-  <div class="form-group">
-    <label for="instPwConfirm">Confirm Password</label>
-    <input type="password" id="instPwConfirm" name="pwConfirm">
-  </div>
+          <div>
+            <label for="instPassword" class="block text-sm font-semibold text-slate-700 dark:text-gray-300">Password</label>
+            <input type="password" id="instPassword" name="password" class="w-full p-3 rounded-xl border-2 border-slate-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition" />
+          </div>
 
-  <label class="checkbox">
-    <input type="checkbox" id="instAgree">
-    I agree to the Terms and Conditions
-  </label>
+          <div>
+            <label for="instPwConfirm" class="block text-sm font-semibold text-slate-700 dark:text-gray-300">Confirm Password</label>
+            <input type="password" id="instPwConfirm" name="pwConfirm" class="w-full p-3 rounded-xl border-2 border-slate-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition" />
+          </div>
 
-  <button class="btn" type="submit">Register Institute</button>
-</form>
+          <label class="flex items-center gap-2 text-sm text-slate-600 dark:text-gray-400">
+            <input type="checkbox" id="instAgree" class="accent-blue-500" />
+            I agree to the Terms and Conditions
+          </label>
 
-  
+          <button type="submit" class="btn w-full py-3 rounded-xl bg-gradient-to-r from-indigo-500 to-blue-500 text-white font-semibold shadow hover:from-indigo-600 hover:to-blue-600 transition">Register Institute</button>
+        </div>
+      </form>
 
-     
-      
       <!-- Login Link -->
-      <div class="login-link">
-        Already have an account? <a href="/login">Login here</a>
+      <div class="login-link text-center mt-6 text-sm text-slate-600 dark:text-gray-400">
+        Already have an account? <a href="/login" class="font-semibold text-blue-500 hover:text-blue-600 hover:underline">Login here</a>
       </div>
     </div>
   </div>
+</div>
 
-  <script>
-  const personalBtn = document.getElementById("personal");
-  const instituteBtn = document.getElementById("institution");
-  const personalForm = document.getElementById("personalForm");
-  const instituteForm = document.getElementById("instituteForm");
-
-  personalBtn.addEventListener("click", () => {
-    personalBtn.classList.add("active");
-    instituteBtn.classList.remove("active");
-    personalForm.classList.remove("hidden");
-    instituteForm.classList.add("hidden");
-  });
-
-  instituteBtn.addEventListener("click", () => {
-    instituteBtn.classList.add("active");
-    personalBtn.classList.remove("active");
-    instituteForm.classList.remove("hidden");
-    personalForm.classList.add("hidden");
-  });
-
-  // Close button functionality
-  document.querySelector('.close-btn').addEventListener('click', function() {
-    window.history.back();
-  });
-
-  // Custom validation
-  function validateForm(e, type) {
-    e.preventDefault();
-    let valid = true;
-
-    if (type === "personal") {
-      const name = document.getElementById("firstName").value.trim();
-      const email = document.getElementById("email").value.trim();
-      const number = document.getElementById("number").value.trim();
-      const village = document.getElementById("village").value;
-      const disease = document.getElementById("disease").value;
-      const age = document.getElementById("age").value.trim();
-      const pw = document.getElementById("personalPassword").value;
-      const pwc = document.getElementById("personalPwConfirm").value;
-      const agree = document.getElementById("personalAgree").checked;
-
-      if (!name || !email || !number || !village || !disease || !age || !pw || !pwc) {
-        alert("Please fill in all fields.");
-        valid = false;
-      } else if (pw !== pwc) {
-        alert("Passwords do not match.");
-        valid = false;
-      } else if (!agree) {
-        alert("You must agree to the Terms and Conditions.");
-        valid = false;
-      }
-    } else {
-      const instName = document.getElementById("instName").value.trim();
-      const instEmail = document.getElementById("instEmail").value.trim();
-      const contact = document.getElementById("contact").value.trim();
-      const address = document.getElementById("address").value.trim();
-      const pw = document.getElementById("instPassword").value;
-      const pwc = document.getElementById("instPwConfirm").value;
-      const agree = document.getElementById("instAgree").checked;
-
-      if (!instName || !instEmail || !contact || !address || !pw || !pwc) {
-        alert("Please fill in all fields.");
-        valid = false;
-      } else if (pw !== pwc) {
-        alert("Passwords do not match.");
-        valid = false;
-      } else if (!agree) {
-        alert("You must agree to the Terms and Conditions.");
-        valid = false;
-      }
-    }
-    if (valid) e.target.submit();
+<style>
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
   }
+  .animate-fadeIn { animation: fadeIn 0.8s ease; }
+</style>
 
-  personalForm.addEventListener("submit", (e) => validateForm(e, "personal"));
-  instituteForm.addEventListener("submit", (e) => validateForm(e, "institute"));
+<script>
+  // Form toggle
+  document.getElementById("personal").addEventListener("click", function() {
+    document.getElementById("personalForm").classList.remove("hidden");
+    document.getElementById("instituteForm").classList.add("hidden");
+    this.classList.add("active", "bg-gradient-to-r", "from-indigo-500", "to-blue-500", "text-white");
+    document.getElementById("institution").classList.remove("active", "bg-gradient-to-r", "from-indigo-500", "to-blue-500", "text-white");
+  });
+
+  document.getElementById("institution").addEventListener("click", function() {
+    document.getElementById("instituteForm").classList.remove("hidden");
+    document.getElementById("personalForm").classList.add("hidden");
+    this.classList.add("active", "bg-gradient-to-r", "from-indigo-500", "to-blue-500", "text-white");
+    document.getElementById("personal").classList.remove("active", "bg-gradient-to-r", "from-indigo-500", "to-blue-500", "text-white");
+  });
 </script>
+{% endblock %}

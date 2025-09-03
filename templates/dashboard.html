@@ -1,28 +1,65 @@
 {% extends "base.html" %}
 {% block title %}Dashboard · AQI Project{% endblock %}
 {% block content %}
-<div class="bg-white rounded-2xl shadow p-6">
+<div class="bg-white dark:bg-gray-900 rounded-2xl shadow p-6 transition-colors duration-500">
   <div class="flex items-center justify-between">
-    <h1 class="text-xl font-semibold">Dashboard</h1>
-    <a href="{{ url_for('edit_profile') }}" class="px-3 py-2 rounded-lg border">Edit Profile</a>
+    <h1 class="text-xl font-semibold dark:text-white">Dashboard</h1>
+
+    <div class="flex items-center gap-3">
+      <button id="themeToggle" class="px-3 py-2 rounded-lg border dark:border-gray-600 dark:text-white">
+        🌙 Toggle Mode
+      </button>
+      <a href="{{ url_for('edit_profile') }}" class="px-3 py-2 rounded-lg border dark:border-gray-600 dark:text-white">Edit Profile</a>
+    </div>
   </div>
 
   {% if type == "personal" %}
     <dl class="grid md:grid-cols-2 gap-4 mt-6">
-      <div class="p-4 border rounded-xl"><dt class="text-gray-500 text-sm">Name</dt><dd class="font-medium">{{ data.name }}</dd></div>
-      <div class="p-4 border rounded-xl"><dt class="text-gray-500 text-sm">Email</dt><dd class="font-medium">{{ data.email }}</dd></div>
-      <div class="p-4 border rounded-xl"><dt class="text-gray-500 text-sm">Mobile</dt><dd class="font-medium">{{ data.mobile }}</dd></div>
-      <div class="p-4 border rounded-xl"><dt class="text-gray-500 text-sm">Village</dt><dd class="font-medium">{{ data.village }}</dd></div>
-      <div class="p-4 border rounded-xl"><dt class="text-gray-500 text-sm">Disease</dt><dd class="font-medium">{{ data.disease }}</dd></div>
-      <div class="p-4 border rounded-xl"><dt class="text-gray-500 text-sm">Age</dt><dd class="font-medium">{{ data.age }}</dd></div>
+      <div class="p-4 border rounded-xl dark:border-gray-700">
+        <dt class="text-gray-500 text-sm dark:text-gray-400">Name</dt>
+        <dd class="font-medium dark:text-white">{{ data.name }}</dd>
+      </div>
+      <div class="p-4 border rounded-xl dark:border-gray-700">
+        <dt class="text-gray-500 text-sm dark:text-gray-400">Email</dt>
+        <dd class="font-medium dark:text-white">{{ data.email }}</dd>
+      </div>
+      <div class="p-4 border rounded-xl dark:border-gray-700">
+        <dt class="text-gray-500 text-sm dark:text-gray-400">Mobile</dt>
+        <dd class="font-medium dark:text-white">{{ data.mobile }}</dd>
+      </div>
+      <div class="p-4 border rounded-xl dark:border-gray-700">
+        <dt class="text-gray-500 text-sm dark:text-gray-400">Village</dt>
+        <dd class="font-medium dark:text-white">{{ data.village }}</dd>
+      </div>
+      <div class="p-4 border rounded-xl dark:border-gray-700">
+        <dt class="text-gray-500 text-sm dark:text-gray-400">Disease</dt>
+        <dd class="font-medium dark:text-white">{{ data.disease }}</dd>
+      </div>
+      <div class="p-4 border rounded-xl dark:border-gray-700">
+        <dt class="text-gray-500 text-sm dark:text-gray-400">Age</dt>
+        <dd class="font-medium dark:text-white">{{ data.age }}</dd>
+      </div>
     </dl>
   {% else %}
     <dl class="grid md:grid-cols-2 gap-4 mt-6">
-      <div class="p-4 border rounded-xl"><dt class="text-gray-500 text-sm">Institution</dt><dd class="font-medium">{{ data.institution_name }}</dd></div>
-      <div class="p-4 border rounded-xl"><dt class="text-gray-500 text-sm">Type</dt><dd class="font-medium capitalize">{{ data.institution_type }}</dd></div>
-      <div class="p-4 border rounded-xl"><dt class="text-gray-500 text-sm">Email</dt><dd class="font-medium">{{ data.email }}</dd></div>
-      <div class="p-4 border rounded-xl"><dt class="text-gray-500 text-sm">Contact</dt><dd class="font-medium">{{ data.contact }}</dd></div>
+      <div class="p-4 border rounded-xl dark:border-gray-700">
+        <dt class="text-gray-500 text-sm dark:text-gray-400">Institution</dt>
+        <dd class="font-medium dark:text-white">{{ data.institution_name }}</dd>
+      </div>
+      <div class="p-4 border rounded-xl dark:border-gray-700">
+        <dt class="text-gray-500 text-sm dark:text-gray-400">Type</dt>
+        <dd class="font-medium capitalize dark:text-white">{{ data.institution_type }}</dd>
+      </div>
+      <div class="p-4 border rounded-xl dark:border-gray-700">
+        <dt class="text-gray-500 text-sm dark:text-gray-400">Email</dt>
+        <dd class="font-medium dark:text-white">{{ data.email }}</dd>
+      </div>
+      <div class="p-4 border rounded-xl dark:border-gray-700">
+        <dt class="text-gray-500 text-sm dark:text-gray-400">Contact</dt>
+        <dd class="font-medium dark:text-white">{{ data.contact }}</dd>
+      </div>
     </dl>
   {% endif %}
 </div>
+
 {% endblock %}

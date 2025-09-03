@@ -151,7 +151,7 @@
   {% endblock %}
 
   <!-- FOOTER -->
-  <footer class="bg-gray-100 text-gray-600 text-center py-6 mt-8 dark:bg-gray-800 dark:text-gray-400">
+  <footer class="bg-gray-100 text-gray-600 text-center py-6  dark:bg-gray-800 dark:text-gray-400">
     <p>© 2025 Hyperlocal AQI Forecast. Built for research & awareness.</p>
     <div class="mt-2 flex justify-center space-x-4">
       <a href="#" class="text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300 transition-colors"><i class="fab fa-twitter"></i></a>
@@ -348,6 +348,83 @@ dateInput.addEventListener("change", function () {
   }
 </script>
 
+<script>
+  const personalBtn = document.getElementById("personal");
+  const instituteBtn = document.getElementById("institution");
+  const personalForm = document.getElementById("personalForm");
+  const instituteForm = document.getElementById("instituteForm");
+
+  personalBtn.addEventListener("click", () => {
+    personalBtn.classList.add("active");
+    instituteBtn.classList.remove("active");
+    personalForm.classList.remove("hidden");
+    instituteForm.classList.add("hidden");
+  });
+
+  instituteBtn.addEventListener("click", () => {
+    instituteBtn.classList.add("active");
+    personalBtn.classList.remove("active");
+    instituteForm.classList.remove("hidden");
+    personalForm.classList.add("hidden");
+  });
+
+  // Close button functionality
+  document.querySelector('.close-btn').addEventListener('click', function() {
+    window.history.back();
+  });
+
+  // Custom validation
+  function validateForm(e, type) {
+    e.preventDefault();
+    let valid = true;
+
+    if (type === "personal") {
+      const name = document.getElementById("firstName").value.trim();
+      const email = document.getElementById("email").value.trim();
+      const number = document.getElementById("number").value.trim();
+      const village = document.getElementById("village").value;
+      const disease = document.getElementById("disease").value;
+      const age = document.getElementById("age").value.trim();
+      const pw = document.getElementById("personalPassword").value;
+      const pwc = document.getElementById("personalPwConfirm").value;
+      const agree = document.getElementById("personalAgree").checked;
+
+      if (!name || !email || !number || !village || !disease || !age || !pw || !pwc) {
+        alert("Please fill in all fields.");
+        valid = false;
+      } else if (pw !== pwc) {
+        alert("Passwords do not match.");
+        valid = false;
+      } else if (!agree) {
+        alert("You must agree to the Terms and Conditions.");
+        valid = false;
+      }
+    } else {
+      const instName = document.getElementById("instName").value.trim();
+      const instEmail = document.getElementById("instEmail").value.trim();
+      const contact = document.getElementById("contact").value.trim();
+      const address = document.getElementById("address").value.trim();
+      const pw = document.getElementById("instPassword").value;
+      const pwc = document.getElementById("instPwConfirm").value;
+      const agree = document.getElementById("instAgree").checked;
+
+      if (!instName || !instEmail || !contact || !address || !pw || !pwc) {
+        alert("Please fill in all fields.");
+        valid = false;
+      } else if (pw !== pwc) {
+        alert("Passwords do not match.");
+        valid = false;
+      } else if (!agree) {
+        alert("You must agree to the Terms and Conditions.");
+        valid = false;
+      }
+    }
+    if (valid) e.target.submit();
+  }
+
+  personalForm.addEventListener("submit", (e) => validateForm(e, "personal"));
+  instituteForm.addEventListener("submit", (e) => validateForm(e, "institute"));
+</script>
 
   <!-- Your custom script -->
   <script src="{{ url_for('static', filename='script.js') }}"></script>
