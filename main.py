@@ -5,7 +5,6 @@ from bson.objectid import ObjectId
 from functools import wraps
 from Fastserver import save_or_update_data
 import os,json
-#from config_loader import config
 
 # AQI imports
 from datetime import datetime
@@ -227,7 +226,7 @@ def profile():
         if user['disease'] is not None:
             personalise = get_health_alert_personal(aqi, user['disease'])
 
-        return render_template("profile.html", user=user, health_alert=health_alert,
+        return render_template("user_profile.html", user=user, health_alert=health_alert,
                                personalise=personalise, **dict1)
 
     elif session.get("type") == "institution":
@@ -306,7 +305,11 @@ def coverage():
 
     )
 
-
+@app.route('/about')
+def about():
+  
+    return render_template(
+        'about.html' )
 
 
 @app.route('/generate', methods=['POST'])

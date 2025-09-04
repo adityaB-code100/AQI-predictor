@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About · Qur AQI Visualiser</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              50: '#f0f9ff',
+              100: '#e0f2fe',
+              200: '#bae6fd',
+              300: '#7dd3fc',
+              400: '#38bdf8',
+              500: '#0ea5e9',
+              600: '#0284c7',
+              700: '#0369a1',
+              800: '#075985',
+              900: '#0c4a6e',
+            },
+            secondary: {
+              50: '#f0fdf4',
+              100: '#dcfce7',
+              200: '#bbf7d0',
+              300: '#86efac',
+              400: '#4ade80',
+              500: '#22c55e',
+              600: '#16a34a',
+              700: '#15803d',
+              800: '#166534',
+              900: '#14532d',
+            }
+          },
+          animation: {
+            'fadeIn': 'fadeIn 0.6s forwards',
+            'pulse': 'pulse 2s infinite',
+            'slideInRight': 'slideInRight 0.5s forwards',
+            'float': 'float 6s ease-in-out infinite',
+          },
+          keyframes: {
+            fadeIn: {
+              from: { opacity: 0, transform: 'translateY(20px)' },
+              to: { opacity: 1, transform: 'translateY(0)' }
+            },
+            slideInRight: {
+              from: { transform: 'translateX(100%)', opacity: 0 },
+              to: { transform: 'translateX(0)', opacity: 1 }
+            },
+            float: {
+              '0%, 100%': { transform: 'translateY(0)' },
+              '50%': { transform: 'translateY(-10px)' }
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    .header::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle at center, rgba(255,255,255,0.1) 0%, transparent 70%);
+      transform: rotate(30deg);
+      animation: shimmer 15s infinite linear;
+    }
+    @keyframes shimmer {
+      0% { transform: rotate(30deg) translateX(-100px); }
+      100% { transform: rotate(30deg) translateX(100px); }
+    }
+    .hover-lift {
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .hover-lift:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 
+                  0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-900 font-sans theme-transition dark:bg-gray-900 dark:text-gray-100">
+  {% extends "base.html" %}
+  {% block content %}
+
+  <!-- HEADER -->
+  <div class="header relative bg-gradient-to-r from-indigo-600 to-indigo-500 text-white py-16 mt-12 mb-8 text-center overflow-hidden dark:from-indigo-700 dark:to-indigo-800">
+    <div class="container mx-auto px-4">
+      <h1 class="text-4xl font-bold mb-2 relative animate-fadeIn">
+        <i class="fas fa-leaf mr-2"></i> About Qur AQI Visualiser
+      </h1>
+      <p class="text-lg animate-fadeIn" style="animation-delay: 0.2s">
+        Our mission: Making air quality visible, understandable & actionable.
+      </p>
+    </div>
+  </div>
+
+  <!-- ABOUT CONTENT -->
+  <div class="container mx-auto px-4 mb-12 space-y-8">
+    <!-- Purpose -->
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8 hover-lift animate-fadeIn">
+      <h2 class="text-2xl font-semibold mb-4 text-indigo-600 dark:text-indigo-400">🌍 Purpose</h2>
+      <p class="text-gray-700 dark:text-gray-300 leading-relaxed">
+        The Qur AQI Visualiser is designed to monitor, analyze, and forecast <b>Air Quality Index (AQI)</b> 
+        for villages, towns, and cities. It empowers communities with real-time air quality data, 
+        historical trends, and health advisories so they can make informed decisions about their well-being.
+      </p>
+    </div>
+
+    <!-- Features -->
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8 hover-lift animate-fadeIn">
+      <h2 class="text-2xl font-semibold mb-4 text-indigo-600 dark:text-indigo-400">⚡ Key Features</h2>
+      <ul class="list-disc list-inside text-gray-700 dark:text-gray-300 space-y-2">
+        <li>📊 Real-time AQI Data Monitoring</li>
+        <li>⏳ Historical Trend Analysis</li>
+        <li>🤖 AI-powered Predictions</li>
+        <li>🔔 Health Alerts & Recommendations</li>
+        <li>🌐 Interactive & User-friendly Interface</li>
+      </ul>
+    </div>
+
+    <!-- Tech Stack -->
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8 hover-lift animate-fadeIn">
+      <h2 class="text-2xl font-semibold mb-4 text-indigo-600 dark:text-indigo-400">🛠️ Technology Stack</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 text-gray-600 dark:text-gray-300">
+        <div><i class="fas fa-server text-indigo-500 mr-2"></i> Flask, MongoDB Atlas</div>
+        <div><i class="fas fa-desktop text-indigo-500 mr-2"></i> HTML, CSS, Tailwind, Bootstrap</div>
+        <div><i class="fas fa-chart-line text-indigo-500 mr-2"></i> Plotly, Matplotlib</div>
+        <div><i class="fas fa-robot text-indigo-500 mr-2"></i> Scikit-learn, XgBoost, Pandas, NumPy</div>
+      </div>
+    </div>
+
+  <!-- Team Section -->
+<div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8 hover-lift animate-fadeIn">
+  <h2 class="text-2xl font-semibold mb-6 text-indigo-600 dark:text-indigo-400">👨‍💻 Developed By</h2>
+  <p class="text-gray-700 dark:text-gray-300 mb-4">
+    <b>Team Name:</b> ML Titans
+  </p>
+  <ul class="space-y-3 text-gray-700 dark:text-gray-300">
+    <li class="flex items-center">
+      <i class="fas fa-user-tie text-indigo-500 mr-2"></i>
+      <b>Team Leader:</b> Aditya Bandewar
+      <a href="https://www.linkedin.com/in/aditya-bandewar-393231326" target="_blank" class="ml-2 text-blue-600 hover:text-blue-800">
+        <i class="fab fa-linkedin text-xl"></i>
+      </a>
+    </li>
+    <li class="flex items-center">
+      <i class="fas fa-user text-indigo-500 mr-2"></i>
+      Khushbu Pande
+      <a href="https://www.linkedin.com/in/khushbu-pande-4470ab28a/" target="_blank" class="ml-2 text-blue-600 hover:text-blue-800">
+        <i class="fab fa-linkedin text-xl"></i>
+      </a>
+    </li>
+    <li class="flex items-center">
+      <i class="fas fa-user text-indigo-500 mr-2"></i>
+      Sakshi Tak
+      <a href="https://www.linkedin.com/in/sakshi-j-tak-199a52258/" target="_blank" class="ml-2 text-blue-600 hover:text-blue-800">
+        <i class="fab fa-linkedin text-xl"></i>
+      </a>
+    </li>
+    <li class="flex items-center">
+      <i class="fas fa-user text-indigo-500 mr-2"></i>
+      Nikhil Lanje
+      <a href="https://www.linkedin.com/in/nikhil-lanje-401ba4292/" target="_blank" class="ml-2 text-blue-600 hover:text-blue-800">
+        <i class="fab fa-linkedin text-xl"></i>
+      </a>
+    </li>
+    <li class="flex items-center">
+      <i class="fas fa-user text-indigo-500 mr-2"></i>
+      Rutik Harbale
+      <a href="https://www.linkedin.com/in/rutik-harbale-a057782a0/" target="_blank" class="ml-2 text-blue-600 hover:text-blue-800">
+        <i class="fab fa-linkedin text-xl"></i>
+      </a>
+    </li>
+  </ul>
+</div>
+
+  </div>
+
+  {% endblock %}
+
+  
