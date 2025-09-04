@@ -8,7 +8,6 @@ import os,json
 
 # AQI imports
 from datetime import datetime
-# #from get_map import mapgenerator
 from get_report import get_report
 from get_from_db import get_aqi_data, get_aqi_by_village
 from google import genai
