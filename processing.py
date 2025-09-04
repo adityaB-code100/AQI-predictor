@@ -20,16 +20,20 @@ from data_for_server import next_days
 
 app = Flask(__name__)
 
-
-def index2():
-    start_date = '2025-09-01'
+def index2(start_date):
+    #start_date = '2025-09-01'
     date_list = next_days(start_date)
     village_list = ['Mumbai','Nagpur','Nanded','Nashik','Pune']   # Add more if needed
-    for village in village_list:
+    flag=None
 
-        for date_i in date_list:
+    for date_i in date_list:
+        
+
+        for village in village_list:
+            
             print(date_i,village)
             processing_data(date_i,village)
+
 
 
 
@@ -68,9 +72,8 @@ def processing_data(input_date,village):
     print(village_aqi_data)
 
 #Map Generation
-
     if village_aqi_data:
-        mapgenerator(input_date,village_aqi_data)
+            mapgenerator(input_date,village_aqi_data)
         
     if aqi_list:
         # Remove None and NaN values
@@ -129,4 +132,7 @@ def processing_data(input_date,village):
 #processing_data("12-08-2025",'Pune')
 
 
-index2()
+# start_date = '2025-09-01'
+
+# index2(start_date)
+#     #start_date = '2025-09-01'

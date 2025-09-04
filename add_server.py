@@ -7,9 +7,7 @@ from data_function import next_seven_days
 import pandas as pd
 from testc import save_aqi_to_mongo   # <-- updated function from before
 from avg import calculate_and_store_monthly_mean_aqi
-from processing import index2
-def index():
-    start_date = '2025-08-29'
+def index(start_date):
     date_list = next_days(start_date)
     village_list = ['Mumbai', 'Nagpur','Nanded','Nashik','Pune']   # Add more if needed
 
@@ -54,6 +52,3 @@ def index():
     # if avg_list:
     #         mapgenerator({village: avg_list[0]})
         
-    index2()
-if __name__ == "__main__":
-    index()

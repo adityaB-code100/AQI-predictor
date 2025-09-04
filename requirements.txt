@@ -1,0 +1,14 @@
+Flask
+Flask-PyMongo
+Werkzeug
+pymongo
+twilio
+pandas
+numpy
+xgboost
+folium
+geopandas
+geopy
+google-generativeai
+plotly
+Flask-Mail

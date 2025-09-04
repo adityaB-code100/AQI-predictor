@@ -1,7 +1,6 @@
 
 import pandas as pd
 import xgboost as xgb
-from mango import mango_data
 
 def predict_aqi_from_csv(train_csv, input_df):
 # save_model_path='xgb_aqi_model.joblib'):
