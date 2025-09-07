@@ -7,10 +7,13 @@
   <script src="https://kit.fontawesome.com/your-fontawesome-kit.js" crossorigin="anonymous"></script>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
 </head>
-<body class="bg-gradient-to-r from-gray-100 to-gray-200 text-gray-800 dark:from-gray-900 dark:to-gray-800 dark:text-gray-100">
+
+
 
   {% extends "base.html" %}
   {% block content %}
+<body class="bg-gradient-to-r from-gray-100 to-gray-200 text-gray-800 dark:from-gray-900 dark:to-gray-800 dark:text-gray-100 mt-15">
+
 
   <div class="container mx-auto p-6 grid lg:grid-cols-3 gap-6">
     <!-- AQI Section -->
@@ -104,7 +107,7 @@
   <i class="fas fa-bell text-red-500 dark:text-red-400 mr-2"></i> Alerts
 </h2>
 
-<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+<div class="grid grid-cols-1 sm:grid-cols-1 lg:grid-cols-2 gap-4">
 
   <!-- General Alerts -->
   <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-xl shadow text-center">
@@ -129,13 +132,7 @@
     </ul>
   </div>
 
-  <!-- Institute Alerts -->
-  <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-xl shadow text-center">
-    <h3 class="font-medium text-yellow-600 dark:text-yellow-400 mb-2">Institute Alerts</h3>
-    <ul>
-      <li>No current institute alerts</li>
-    </ul>
-  </div>
+  
 
 </div>
 
@@ -151,7 +148,7 @@
     </div>
 
 <!-- Profile Section -->
-<div class="flex flex-col pt-6 items-center mt-20 profile-section bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 text-center">
+<div class="flex flex-col pt-6 items-center mt-15 profile-section bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 text-center">
   <!-- Profile Image -->
   {% set aqi = village_aqi_data[user.village] %}
   {% if aqi <= 50 %}
