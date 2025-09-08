@@ -19,5 +19,5 @@ def get_data(date, village):
 
 
 
-date1=get_data("30-08-2025", "Mumbai")
-print("printing",date1)
+# date1=get_data("30-08-2025", "Mumbai")
+# print("printing",date1)

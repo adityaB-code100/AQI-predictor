@@ -1,3 +1,4 @@
+
 from twilio.rest import Client
 import json
 from datetime import datetime
@@ -9,7 +10,7 @@ from get_health_alert import get_health_alert_personal
 with open("config.json") as f:
     config = json.load(f)
 
-twilio_config = config["twilio"]
+twilio_config = config["twilio1"]
 
 # ✅ Twilio setup
 account_sid = twilio_config["account_sid"]
@@ -35,31 +36,26 @@ def format_phone_number(number: str) -> str | None:
     """
     if not number:
         return None
-
     number = str(number).strip().replace(" ", "").replace("-", "")
 
-    # Already in correct format
     if number.startswith("+91") and len(number) == 13 and number[1:].isdigit():
         return number
-
-    # Starts with 91 but missing +
     if number.startswith("91") and len(number) == 12 and number.isdigit():
         return "+" + number
-
-    # Starts with 0 and has 11 digits (like 0987654321)
     if number.startswith("0") and len(number) == 11 and number.isdigit():
         return "+91" + number[1:]
-
-    # Plain 10-digit number
     if len(number) == 10 and number.isdigit():
         return "+91" + number
-
-    # Otherwise invalid
     return None
 
 
 def send_message_to_users():
-    users = users_collection.find()
+    try:
+        users = users_collection.find()
+    except Exception as db_error:
+        print(f"❌ Error fetching users from DB: {db_error}")
+        return
+
     sent_sms, failed_sms, invalid_numbers = [], [], []
 
     for user in users:
@@ -68,43 +64,54 @@ def send_message_to_users():
             raw_number = user.get("mobile")
             name = user.get("name", "User")
 
-            if not village or not raw_number:
-                print(f"⚠️ Skipping {name}: missing village/mobile")
-                continue
-
-            # ✅ Format phone number
+            # ✅ Validate phone number
             phone_number = format_phone_number(raw_number)
             if not phone_number:
-                print(f"⚠️ Skipping {name}: invalid phone number {raw_number}")
+                print(f"⚠️ Skipping {name}: invalid number {raw_number}")
                 invalid_numbers.append(raw_number)
                 continue
 
             date = get_current_date()
 
             # ✅ Get AQI data
-            data = get_aqi_data(date, village)
-            aqi_all = data.get("village_aqi_data", {})
-            aqi = aqi_all.get(village, "N/A")
+            try:
+                data = get_aqi_data(date, village)
+                print(data)
+                aqi_all = data.get("village_aqi_data", {})
+                aqi = data['Predicted_AQI']
+            except Exception as aqi_error:
+                print(f"⚠️ Failed to fetch AQI for {village}: {aqi_error}")
+                aqi = -1
 
-            # ✅ Get health alerts
-            health_alert = get_health_alert_personal(aqi, "general")
-            personalise_alert = (
-                get_health_alert_personal(aqi, user.get("disease"))
-                if user.get("disease")
-                else "N/A"
-            )
+            # ✅ Get alerts safely
+            try:
+                health_alert = (
+                    get_health_alert_personal(aqi, "general")
+                    if aqi != -1 else "AQI data not available"
+                )
+                personalise_alert = (
+                    get_health_alert_personal(aqi, user.get("disease"))
+                    if user.get("disease") and aqi != -1
+                    else "AQI data not available"
+                )
+            except Exception as alert_error:
+                print(f"⚠️ Alert generation failed for {name}: {alert_error}")
+                health_alert = "Error generating advice"
+                personalise_alert = "Error generating advice"
 
             # ✅ Create SMS text
             text_message = (
-                f"🌍 AQI Alert - {village} ({date})\n\n"
-                f"👤 {name}, Age: {user.get('age', 'N/A')}\n"
-                f"📊 Current AQI: {aqi}\n\n"
-                f"⚠️ General Advice: {health_alert}\n"
-                f"🩺 Personal Advice ({user.get('disease', 'N/A')}): {personalise_alert}\n\n"
+                f"AQI Alert - {village} ({date})\n\n"
+                f"Dear,\n{name},\n"
+                f"Current AQI for Your Village : {aqi if aqi != -1 else 'N/A'}\n\n"
+                f"General Advice: {health_alert}\n"
+                f"Personal Advice : {personalise_alert}\n\n"
                 f"Please take precautions.\n"
-                f"- AQI Monitoring System"
+                f"- Hyperlocal AQI System"
             )
 
+            # ✅ Send SMS
+            print(text_message)
             try:
                 message = client.messages.create(
                     body=text_message,
@@ -113,13 +120,12 @@ def send_message_to_users():
                 )
                 print(f"✅ SMS sent to {phone_number} (SID: {message.sid})")
                 sent_sms.append(phone_number)
-
             except Exception as sms_error:
                 print(f"❌ Could not send SMS to {phone_number}: {sms_error}")
                 failed_sms.append(phone_number)
 
         except Exception as user_error:
-            print(f"⚠️ Error processing user {user.get('name', 'Unknown')}: {user_error}")
+            print(f"❌ Unexpected error with user {user.get('name', 'Unknown')}: {user_error}")
             failed_sms.append(user.get("mobile"))
 
     # ✅ Final summary
@@ -129,5 +135,5 @@ def send_message_to_users():
     print(f"⚠️ Invalid Numbers ({len(invalid_numbers)}): {invalid_numbers}")
 
 
-if __name__ == "__main__":
-    send_message_to_users()
+# if __name__ == "__main__":
+#     send_message_to_users()
