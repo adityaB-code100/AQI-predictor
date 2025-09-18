@@ -66,7 +66,6 @@
     .good-aqi { background-image: linear-gradient(135deg, #10b981 0%, #059669 100%); }
     .moderate-aqi { background-image: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); }
     .poor-aqi { background-image: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); }
-    
     /* Loading screen */
     .loading-screen {
       position: fixed;
@@ -91,7 +90,7 @@
       border-top-color: white;
       animation: spin 1s ease-in-out infinite;
     }
-    
+     */
     /* Theme transition */
     .theme-transition * {
       transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;

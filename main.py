@@ -3,13 +3,13 @@ from flask_pymongo import PyMongo
 from werkzeug.security import generate_password_hash, check_password_hash
 from bson.objectid import ObjectId
 from functools import wraps
-from Fastserver import save_or_update_data
+from add_secondary_data import save_or_update_data
 import os, json
 from jinja2 import UndefinedError
-
+from utils import get_html_page
 # AQI imports
 from datetime import datetime
-from get_report import get_report
+from get_report_generator import get_report
 from get_from_db import get_aqi_data, get_aqi_by_village
 from google import genai
 from google.genai import types
@@ -291,6 +291,8 @@ def dashboard():
             raise ValueError("No AQI value found")
 
         health_alert = get_health_alert_personal(aqi, 'general')
+        #map= get_html_page(date)
+
 
         return render_template("aqi.html", **dict1, health_alert=health_alert)
     except Exception as e:

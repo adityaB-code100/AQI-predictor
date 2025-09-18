@@ -1,7 +1,7 @@
 from pymongo import MongoClient
-
+from atlas import get_mongo_uri
 # Connect to MongoDB
-client = MongoClient("mongodb://localhost:27017/")
+client = MongoClient(get_mongo_uri())
 db = client["AQI_Project"]
 
 def get_health_alert_personal(aqi_value, category="general"):

@@ -1,10 +1,18 @@
 from pymongo import MongoClient
 
-# connect to MongoDB
-client = MongoClient("mongodb://localhost:27017/")
-db = client["AQI_Project"]
-collection = db["health_alerts"]
+# # connect to MongoDB
+# client = MongoClient("mongodb://localhost:27017/")
+# db = client["AQI_Project"]
+# collection = db["health_alerts"]
+# ✅ Replace with your MongoDB Atlas connection string
+uri = "mongodb+srv://hyperlocalaqi_db_user:Test1234@aqiproject.7r8nvxf.mongodb.net/?retryWrites=true&w=majority&appName=AQIProject"
 
+# Connect to MongoDB Atlas
+client = MongoClient(uri)
+db = client["AQIProject"]
+
+# Use your collection
+collection = db["health_alerts"]
 # JSON data (from above)
 data = {
     "data": {

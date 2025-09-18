@@ -1,7 +1,7 @@
 from apscheduler.schedulers.background import BackgroundScheduler
 import time
-from Otp import send_message_to_users
-from Email_institution import send_message_to_all
+from send_alert_user import send_message_to_users
+from send_Email_institution import send_message_to_all
 
 def job1():
     send_message_to_users()
@@ -10,8 +10,8 @@ def job2():
     send_message_to_all()
 
 scheduler = BackgroundScheduler()
-scheduler.add_job(job1, 'interval', seconds=60)
-scheduler.add_job(job2, 'interval', seconds=60)
+scheduler.add_job(job1, 'interval', seconds=10)
+scheduler.add_job(job2, 'interval', seconds=10)
 
 scheduler.start()
 

@@ -1,7 +1,8 @@
 import plotly.graph_objects as go
 from pymongo import MongoClient
+from atlas import get_mongo_uri
 
-def get_city_monthly_aqi(city, uri="mongodb://localhost:27017/", db_name="AQI_Project", collection_name="monthly_aqi"):
+def get_city_monthly_aqi(city, uri=get_mongo_uri(), db_name="AQI_Project", collection_name="monthly_aqi"):
     # Connect to MongoDB
     client = MongoClient(uri)
     db = client[db_name]

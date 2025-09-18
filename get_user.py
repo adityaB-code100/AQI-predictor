@@ -1,7 +1,7 @@
 from pymongo import MongoClient
-
+from atlas import get_mongo_uri
 # Connect to MongoDB
-client = MongoClient("mongodb://localhost:27017/")  # Change if using Atlas
+client = MongoClient(get_mongo_uri())
 db = client["AQI_Project"]
 collection = db["processed_data"]
 

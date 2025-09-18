@@ -1,7 +1,7 @@
 from pymongo import MongoClient
 from datetime import datetime
-
-def get_aqi_data(date: str, village: str = None, mongo_uri="mongodb://localhost:27017/",
+from atlas import get_mongo_uri
+def get_aqi_data(date: str, village: str = None, mongo_uri=get_mongo_uri(),
                  db_name="AQI_Project", collection_name="aqi_records"):
     """
     Fetch AQI data for a given date and optionally for a specific village.
@@ -89,7 +89,7 @@ def get_aqi_by_village(date: str, db_name="AQI_Project", collection_name="aqi_re
     date_dmy = dt_obj.strftime("%d-%m-%Y")
     date_ymd = dt_obj.strftime("%Y-%m-%d")
 
-    client = MongoClient("mongodb://localhost:27017/")
+    client = MongoClient(get_mongo_uri())
     db = client[db_name]
     collection = db[collection_name]
 

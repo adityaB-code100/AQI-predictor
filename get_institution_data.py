@@ -1,10 +1,11 @@
 from flask import Flask, jsonify
 from pymongo import MongoClient
-
+from atlas import get_mongo_uri
+# Connect to MongoDB
+client = MongoClient(get_mongo_uri())
 app = Flask(__name__)
 
 # connect to MongoDB (change URI for your DB)
-client = MongoClient("mongodb://localhost:27017/")
 db = client["AQI_Project"]        # replace with your DB name
 collection = db["institutions"]          # replace with your collection name
 
