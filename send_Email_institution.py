@@ -100,5 +100,6 @@ def send_message_to_all():
         print(f"Failed emails ({len(failed_emails)}): {failed_emails}")
 
 
-# if __name__ == "__main__":
-#     send_message_to_all()
+
+
+send_message_to_all()

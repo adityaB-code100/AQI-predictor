@@ -1,4 +1,4 @@
-from flask import Flask, request, redirect, url_for, session, render_template, flash
+from flask import Flask, abort, request, redirect, url_for, session, render_template, flash
 from werkzeug.security import generate_password_hash, check_password_hash
 from bson.objectid import ObjectId
 from functools import wraps
@@ -13,7 +13,8 @@ from get_report_generator import get_report
 from get_from_db import get_aqi_data, get_aqi_by_village
 from get_health_alerts_institution import get_health_alert_institution
 from get_health_alert import get_health_alert_personal
-
+from notes_db import add_note, get_notes_by_user, update_note, delete_note
+from get_note import get_notes_for_matching_aqi
 # ----------------- Flask App -----------------
 app = Flask(__name__)
 app.secret_key = "secretkey"
@@ -28,7 +29,8 @@ db = client["AQI_Project"]
 # Collections
 users_collection = db.users
 institutions_collection = db.institutions
-
+notes_collection = db.notes
+# 
 # ----------------- Helpers -----------------
 def get_current_date():
     return datetime.now().strftime("%d-%m-%Y")
@@ -193,7 +195,7 @@ def profile():
         
         village = user["village"]
         date = get_current_date()
-        dict1 = get_aqi_data(date, village, mongo_uri="mongodb://localhost:27017/",
+        dict1 = get_aqi_data(date, village, mongo_uri=get_mongo_uri(),
                              db_name="AQI_Project", collection_name="processed_data")
         aqi_all = dict1.get('village_aqi_data', {})  
         aqi = aqi_all.get(village) 
@@ -201,9 +203,10 @@ def profile():
         personalise = user['disease']
         if user['disease'] is not None:
             personalise = get_health_alert_personal(aqi, user['disease'])
-
+        note=get_notes_for_matching_aqi(session.get("user"), village)
+        print(note)
         return render_template("user_profile.html", user=user, health_alert=health_alert,
-                               personalise=personalise, **dict1)
+                               personalise=personalise, **dict1,note=note)
 
     elif session.get("type") == "institution":
         inst = institutions_collection.find_one({"_id": ObjectId(session["institution"])})
@@ -211,7 +214,7 @@ def profile():
             return "Institution not found", 404
         village = inst["village"]
         date = get_current_date()
-        dict1 = get_aqi_data(date, village, mongo_uri="mongodb://localhost:27017/",
+        dict1 = get_aqi_data(date, village, mongo_uri=get_mongo_uri(),
                              db_name="AQI_Project", collection_name="processed_data")
         aqi_all = dict1.get('village_aqi_data', {})  
         aqi = aqi_all.get(village) 
@@ -249,7 +252,8 @@ def dashboard():
 def coverage():
     date = get_current_date()
     village = "Pune"
-    dict1 = get_aqi_data(date, village, mongo_uri=get_mongo_uri(),
+    uri_1=get_mongo_uri()
+    dict1 = get_aqi_data(date, village, mongo_uri=uri_1,
                          db_name="AQI_Project", collection_name="processed_data")
     return render_template('coverage.html', **dict1)
 
@@ -267,7 +271,94 @@ def generate():
     current_time = now.strftime("%H:%M:%S")
     return render_template('report.html', report=report,
                            current_date=current_date, current_time=current_time)
+# ---------- NOTES ----
+@app.route("/note/add", methods=["POST"])
+@login_required
+def add_note_route():
+    
+        user_id = session.get("user")
 
+        # Get note details from form
+        title = request.form.get("title")
+        content = request.form.get("content")
+
+        if not title or not content:
+            flash("Title and Content are required!", "danger")
+            return redirect(url_for("note"))
+
+        # Fetch user info
+        user = users_collection.find_one({"_id": ObjectId(user_id)})
+        if not user:
+            return "User not found", 404
+
+        # Get village and live AQI
+        village = user["village"]
+        date = get_current_date()
+        dict1 = get_aqi_data(
+            date, village,
+            mongo_uri=get_mongo_uri(),
+            db_name="AQI_Project",
+            collection_name="processed_data"
+        )
+
+        # Extract live AQI value (assuming key "live_AQI" exists in dict1)
+        live_aqi = dict1.get("live_AQI", None)
+
+        # Save note with extra fields
+        note_data = {
+            "user_id": user_id,
+            "title": title,
+            "content": content,
+            "village": village,
+            "live_aqi": live_aqi,
+            "created_at":  get_current_date()
+        }
+
+        notes_collection.insert_one(note_data)
+
+        flash("Note added successfully with AQI data!", "success")
+        return redirect(url_for("note"))
+
+    
+
+@app.route("/note/edit/<id>", methods=["POST"])
+@login_required
+def edit_note_route(id):
+    try:
+        title = request.form.get("title")
+        content = request.form.get("content")
+        update_note(notes_collection, id, title, content)
+        flash("Note updated successfully!", "info")
+        return redirect(url_for("note"))
+    except Exception as e:
+        print(f"[ERROR] Edit note failed: {e}")
+
+
+@app.route("/note/delete/<id>")
+@login_required
+def delete_note_route(id):
+    try:
+        delete_note(notes_collection, id)
+        flash("Note deleted successfully!", "warning")
+        return redirect(url_for("note"))
+    except Exception as e:
+        print(f"[ERROR] Delete note failed: {e}")
+
+
+@app.route('/note')
+@login_required
+def note():
+    try:
+        if session.get("type") == "personal":
+            user = users_collection.find_one({"_id": ObjectId(session["user"])})
+        if not user:
+            return "User not found", 404
+        
+        name = user["name"]
+
+        return render_template('note.html', name=name,date=get_current_date())
+    except Exception as e:
+        print(f"[ERROR] Note page failed: {e}")
 # ----------- ERROR HANDLERS -----------
 @app.errorhandler(404)
 def page_not_found(e):

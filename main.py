@@ -6,6 +6,7 @@ from functools import wraps
 from add_secondary_data import save_or_update_data
 import os, json
 from jinja2 import UndefinedError
+from atlas import get_mongo_uri
 from utils import get_html_page
 # AQI imports
 from datetime import datetime
@@ -15,12 +16,13 @@ from google import genai
 from google.genai import types
 from get_health_alerts_institution import get_health_alert_institution
 from get_health_alert import get_health_alert_personal
+from notes_db import add_note, get_notes_by_user, update_note, delete_note
 
 app = Flask(__name__)
 app.secret_key = "secretkey"
 
 # # MongoDB Config
-app.config["MONGO_URI"] = "mongodb://localhost:27017/AQI_Project"
+
 mongo = PyMongo(app)
 
 # Collections
@@ -30,6 +32,7 @@ institutions_collection = mongo.db.institutions
 # ---------- Helpers ----------
 def get_current_date():
     return datetime.now().strftime("%d-%m-%Y")   # DD-MM-YYYY
+notes_collection = mongo.db.notes
 
 def login_required(f):
     """Protect routes from unauthorized access"""
@@ -220,7 +223,7 @@ def profile():
 
             village = user["village"]
             date = get_current_date()
-            dict1 = get_aqi_data(date, village, mongo_uri="mongodb://localhost:27017/",
+            dict1 = get_aqi_data(date, village, mongo_uri=get_mongo_uri(),
                                  db_name="AQI_Project", collection_name="processed_data")
             if not dict1:
                 raise ValueError("No AQI data found")
@@ -245,7 +248,7 @@ def profile():
 
             village = inst["village"]
             date = get_current_date()
-            dict1 = get_aqi_data(date, village, mongo_uri="mongodb://localhost:27017/",
+            dict1 = get_aqi_data(date, village, mongo_uri=get_mongo_uri(),
                                  db_name="AQI_Project", collection_name="processed_data")
             if not dict1:
                 raise ValueError("No AQI data found")
@@ -280,7 +283,7 @@ def dashboard():
             village = request.args.get("village", "Pune")
             date = request.args.get("date", get_current_date())
 
-        dict1 = get_aqi_data(date, village, mongo_uri="mongodb://localhost:27017/",
+        dict1 = get_aqi_data(date, village, mongo_uri=get_mongo_uri(),
                              db_name="AQI_Project", collection_name="processed_data")
         if not dict1:
             raise ValueError("No AQI data found")
@@ -305,7 +308,7 @@ def coverage():
     try:
         date = get_current_date()
         village = "Pune"
-        dict1 = get_aqi_data(date, village, mongo_uri="mongodb://localhost:27017/",
+        dict1 = get_aqi_data(date, village, mongo_uri=get_mongo_uri(),
                              db_name="AQI_Project", collection_name="processed_data")
         if not dict1:
             raise ValueError("No AQI data found")
@@ -344,6 +347,83 @@ def generate():
         print(f"[ERROR] Report generation failed: {e}")
         abort(500)
 
+
+
+# ---------- NOTES ----
+@app.route("/note/add", methods=["POST"])
+@login_required
+def add_note_route():
+    try:
+        user_id = session.get("user")
+        title = request.form.get("title")
+        content = request.form.get("content")
+
+        if not title or not content:
+            flash("Title and Content are required!", "danger")
+            return redirect(url_for("note"))
+
+        # Fetch user & village
+        user = users_collection.find_one({"_id": ObjectId(user_id)})
+        if not user:
+            abort(404, description="User not found")
+
+        village = user["village"]
+        date = get_current_date()
+        dict1 = get_aqi_data(
+            date,
+            village,
+            mongo_uri=get_mongo_uri(),   # fixed with ()
+            db_name="AQI_Project",
+            collection_name="processed_data"
+        )
+        live_aqi = dict1.get("live_AQI", None)
+
+        # Use notes_db function
+        add_note(notes_collection, user_id, title, content, village, live_aqi)
+
+        flash("Note added successfully with AQI data!", "success")
+        return redirect(url_for("note"))
+
+    except Exception as e:
+        print(f"[ERROR] Add note failed: {e}")
+        abort(500)
+
+
+@app.route("/note/edit/<id>", methods=["POST"])
+@login_required
+def edit_note_route(id):
+    try:
+        title = request.form.get("title")
+        content = request.form.get("content")
+        update_note(notes_collection, id, title, content)
+        flash("Note updated successfully!", "info")
+        return redirect(url_for("note"))
+    except Exception as e:
+        print(f"[ERROR] Edit note failed: {e}")
+        abort(500)
+
+
+@app.route("/note/delete/<id>")
+@login_required
+def delete_note_route(id):
+    try:
+        delete_note(notes_collection, id)
+        flash("Note deleted successfully!", "warning")
+        return redirect(url_for("note"))
+    except Exception as e:
+        print(f"[ERROR] Delete note failed: {e}")
+        abort(500)
+
+
+@app.route('/note')
+@login_required
+def note():
+    try:
+
+        return render_template('note.html')
+    except Exception as e:
+        print(f"[ERROR] Note page failed: {e}")
+        abort(500)
 # ---------- Error Handlers ----------
 @app.errorhandler(404)
 def page_not_found(e):

@@ -136,5 +136,5 @@ def send_message_to_users():
     print(f"⚠️ Invalid Numbers ({len(invalid_numbers)}): {invalid_numbers}")
 
 
-# if __name__ == "__main__":
-#     send_message_to_users()
+if __name__ == "__main__":
+    send_message_to_users()

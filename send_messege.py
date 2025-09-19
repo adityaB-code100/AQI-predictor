@@ -10,8 +10,8 @@ def job2():
     send_message_to_all()
 
 scheduler = BackgroundScheduler()
-scheduler.add_job(job1, 'interval', seconds=10)
-scheduler.add_job(job2, 'interval', seconds=10)
+scheduler.add_job(job1, 'interval', seconds=60)
+scheduler.add_job(job2, 'interval', seconds=60)
 
 scheduler.start()
 
