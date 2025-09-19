@@ -54,6 +54,31 @@
             {% endfor %}
           </select>
         </div>
+        <div>
+  <label class="block text-sm font-semibold text-gray-600 dark:text-gray-300">Language</label>
+  <select name="target" required
+    class="w-full mt-2 px-4 py-3 border-2 rounded-xl focus:ring-2 focus:ring-blue-400 
+           dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200">
+    {% for code, lang in {
+      'en': 'English',
+      'es': 'Spanish',
+      'fr': 'French',
+      'de': 'German',
+      'ja': 'Japanese',
+      'zh-CN': 'Chinese (Simplified)',
+      'ar': 'Arabic',
+      'ru': 'Russian',
+      'pt': 'Portuguese',
+      'it': 'Italian',
+      'hi': 'Hindi'
+    }.items() %}
+      <option value="{{ code }}" {% if user.language == code %}selected{% endif %}>
+        {{ lang }}
+      </option>
+    {% endfor %}
+  </select>
+</div>
+
 
         <!-- Age -->
         <div>

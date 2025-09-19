@@ -1,9 +1,10 @@
-from flask import Flask, abort, request, redirect, url_for, session, render_template, flash
+from flask import Flask, abort, jsonify, request, redirect, url_for, session, render_template, flash
 from werkzeug.security import generate_password_hash, check_password_hash
 from bson.objectid import ObjectId
 from functools import wraps
 from pymongo import MongoClient
 import os, json
+import traceback
 from datetime import datetime
 from utils import get_html_page
 
@@ -15,6 +16,10 @@ from get_health_alerts_institution import get_health_alert_institution
 from get_health_alert import get_health_alert_personal
 from notes_db import add_note, get_notes_by_user, update_note, delete_note
 from get_note import get_notes_for_matching_aqi
+from keyword_chatbot import ALLOWED_KEYWORDS
+import google.generativeai as genai
+import json
+import re
 # ----------------- Flask App -----------------
 app = Flask(__name__)
 app.secret_key = "secretkey"
@@ -30,7 +35,21 @@ db = client["AQI_Project"]
 users_collection = db.users
 institutions_collection = db.institutions
 notes_collection = db.notes
-# 
+# # 
+
+# with open("data.json", "r") as f:
+#     dataset = json.load(f)
+
+with open("data.json") as f:
+    latest_data = json.load(f)[0]  # first record
+
+# Configure Gemini
+genai.configure(api_key="AIzaSyA3j3SgJXqw9moz4I3T1vrBjbJ4JA0cAnw")
+model = genai.GenerativeModel("gemini-1.5-flash")
+# response = model.generate_content([context, f"Question: {user_input}"])
+
+    
+
 # ----------------- Helpers -----------------
 def get_current_date():
     return datetime.now().strftime("%d-%m-%Y")
@@ -64,6 +83,7 @@ def register():
                 "mobile": request.form["mobile"],
                 "village": request.form["village"],
                 "disease": request.form["disease"],
+                "language": request.form["target"],
                 "age": request.form["age"],
                 "password": generate_password_hash(request.form["password"])
             }
@@ -151,6 +171,7 @@ def edit_profile():
                 "mobile": request.form["mobile"],
                 "village": request.form["village"],
                 "disease": request.form["disease"],
+                "language": request.form["target"],
                 "age": request.form["age"]
             }
             if request.form.get("password"):
@@ -375,6 +396,65 @@ def add_header(response):
     response.headers["Pragma"] = "no-cache"
     response.headers["Expires"] = "0"
     return response
+
+
+
+
+def is_allowed_question(user_input):
+    text = user_input.lower()
+    for keyword in ALLOWED_KEYWORDS:
+        if re.search(rf"\b{keyword}\b", text):
+            return True
+    return False
+
+@app.route("/chat_bot")
+def chatbot():
+    return render_template("index.html")
+
+
+
+@app.route("/ask", methods=["POST"])
+def ask():
+    user_input = request.json.get("question", "")
+
+    # Step 1: Filter out irrelevant questions
+    if not is_allowed_question(user_input):
+        return jsonify({"answer": "Sorry, I can only answer Weather and Pollution/AQI related questions."})
+
+    # Step 2: Pass only dataset as context
+    context = f"""
+    Dataset:
+    {json.dumps(latest_data, indent=2)}
+    """
+
+    try:
+        # Step 3: Call Gemini with dataset + user question separately
+        model = genai.GenerativeModel("models/gemini-1.5-flash")
+        response = model.generate_content([context, f"Question: {user_input}"])
+
+        # Debug print Gemini raw response
+        print("Gemini raw response:", response)
+
+        # Step 4: Extract answer safely
+        answer = None
+        if hasattr(response, "text") and response.text:
+            answer = response.text.strip()
+        elif hasattr(response, "candidates") and response.candidates:
+            parts = response.candidates[0].content.parts
+            if parts and hasattr(parts[0], "text"):
+                answer = parts[0].text.strip()
+
+        if not answer:
+            answer = "⚠️ Sorry, I couldn’t fetch an answer right now."
+
+        return jsonify({"answer": answer})
+
+    except Exception as e:
+        print("Gemini error:", str(e))
+        traceback.print_exc()  # 🔥 full error log
+        return jsonify({"answer": "Error while fetching answer from Gemini."})
+
+
 
 # ----------------- RUN APP -----------------
 if __name__ == "__main__":

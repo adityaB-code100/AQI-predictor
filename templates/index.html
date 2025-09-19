@@ -1,15 +1,156 @@
-{% extends "base.html" %}
-{% block title %}Home · AQI Project{% endblock %}
-{% block content %}
-<section class="grid gap-6 md:grid-cols-2">
-  <div class="rounded-2xl bg-white p-6 shadow">
-    <h2 class="text-lg font-semibold mb-2">Welcome</h2>
-    <p class="text-gray-600">Log in or create an account as a Personal user or an Institution to access your AQI dashboard.</p>
-  </div>
-  <div class="rounded-2xl bg-white p-6 shadow flex items-center justify-between">
-    <a href="{{ url_for('login') }}" class="px-4 py-2 rounded-xl bg-gray-900 text-white">Login</a>
-    <a href="{{ url_for('register') }}" class="px-4 py-2 rounded-xl border">Register</a>
-    <a href="{{ url_for('forgot_password') }}" class="px-4 py-2 rounded-xl border">Forgot Password</a>
-  </div>
-</section>
-{% endblock %}
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>AQI Chatbot</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style_chatbot.css') }}">
+</head>
+
+<body>
+    <div class="chat-wrapper">
+        <h1 class="chat-heading">AQI Assistance Chatbot</h1>
+        <div class="chat-container">
+            <div id="chat-box"></div>
+
+            <!-- Quick Questions -->
+            <div class="questions" id="questions-box">
+                <button onclick="sendQuestion('Is it safe to go outside now?', 'outside')">Is it safe to go
+                    outside?</button>
+                <button
+                    onclick="sendQuestion('Should elderly people avoid outdoor activities today?', 'elderly')">Advice
+                    for elderly</button>
+                <button onclick="sendQuestion('Can children play outside in this air quality?', 'children')">Advice for
+                    children</button>
+                <button onclick="sendQuestion('Do I need to wear a mask outside today?', 'mask')">Do I need a
+                    mask?</button>
+                <button
+                    onclick="sendQuestion('Show me the overall Air Quality Index (AQI) summary.', 'summary')">Overall
+                    Summary</button>
+            </div>
+
+            <!-- User input box -->
+            <div class="input-box">
+                <input type="text" id="user-input" placeholder="Type your question..." onkeypress="handleKey(event)">
+                <button onclick="askCustom()">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const followUps = {
+            "outside": [
+                { text: "How long can I stay outside safely?", key: "duration" },
+                { text: "What precautions should I take if going outside?", key: "precautions" }
+            ],
+            "elderly": [
+                { text: "Should elderly use air purifiers indoors?", key: "purifiers" },
+                { text: "Is walking in the morning safer?", key: "morning" }
+            ],
+            "children": [
+                { text: "Should kids avoid outdoor sports today?", key: "sports" },
+                { text: "Is wearing a mask safe for small kids?", key: "kidsmask" }
+            ],
+            "mask": [
+                { text: "Which type of mask is best?", key: "masktype" },
+                { text: "Do I need a mask indoors too?", key: "indoor" }
+            ],
+            "summary": [
+                { text: "Give me AQI-based health advice.", key: "health" },
+                { text: "What’s the AQI forecast for tomorrow?", key: "forecast" }
+            ],
+            "duration": [], "precautions": [], "purifiers": [], "morning": [],
+            "sports": [], "kidsmask": [], "masktype": [], "indoor": [],
+            "health": [], "forecast": []
+        };
+
+          function addMessage(sender, text) {
+        let chatBox = document.getElementById("chat-box");
+
+        // Ensure we never append empty text
+        let safeText = text && text.trim() !== "" ? text : "⚠️ No response received";
+
+        let msg = document.createElement("div");
+        msg.className = sender + " fadeIn";
+        msg.innerText = safeText;
+
+        chatBox.appendChild(msg);
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+        function addTyping() {
+            let chatBox = document.getElementById("chat-box");
+            let typingDiv = document.createElement("div");
+            typingDiv.className = "typing fadeIn";
+            typingDiv.innerHTML = "<span>.</span><span>.</span><span>.</span>";
+            typingDiv.id = "typing";
+            chatBox.appendChild(typingDiv);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function removeTyping() {
+            let typingDiv = document.getElementById("typing");
+            if (typingDiv) typingDiv.remove();
+        }
+
+        function showQuestions(options) {
+            let qBox = document.getElementById("questions-box");
+            qBox.innerHTML = ""; // clear old
+
+            if (options.length === 0) return;
+
+            options.forEach(opt => {
+                let btn = document.createElement("button");
+                btn.innerText = opt.text;
+                btn.onclick = () => sendQuestion(opt.text, opt.key);
+                qBox.appendChild(btn);
+            });
+        }
+
+        function sendQuestion(question, key = null) {
+        addMessage("user", question);
+        addTyping();
+
+        fetch("/ask", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ question: question })
+        })
+        .then(res => res.json())
+        .then(data => {
+            removeTyping();
+
+            // Debug log to check what backend sends
+            console.log("Response from backend:", data);
+
+            // Append bot message safely
+            addMessage("bot", data.answer || "⚠️ Sorry, I couldn’t fetch an answer right now.");
+
+            // Show follow-ups if predefined
+            if (key && followUps[key]) {
+                showQuestions(followUps[key]);
+            }
+        })
+        .catch(err => {
+            removeTyping();
+            console.error("Fetch error:", err);
+            addMessage("bot", "⚠️ Error: Could not connect to server.");
+        });
+    }
+
+        function handleKey(event) {
+            if (event.key === "Enter") {
+                askCustom();
+            }
+        }
+
+        function askCustom() {
+            let input = document.getElementById("user-input");
+            let question = input.value.trim();
+            if (question === "") return;
+            sendQuestion(question);  // no follow-ups for free-text
+            input.value = "";
+        }
+    </script>
+</body>
+
+</html>

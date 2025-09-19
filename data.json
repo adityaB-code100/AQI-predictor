@@ -1,0 +1,28 @@
+[
+    {
+        "Timestamp": "01-01-2025 00:00",
+        "PM2.5 (ug/m³)": 13.32,
+        "PM10 (ug/m³)": 21.36,
+        "NO (ug/m³)": 7.79,
+        "NO2 (ug/m³)": 6.28,
+        "NOx (ppb)": 14.07,
+        "SO2 (ug/m³)": 3.77,
+        "CO (mg/m³)": 0.86,
+        "Ozone (ug/m³)": 9.55,
+        "Benzene (ug/m³)": 1.24,
+        "MP-Xylene (ug/m³)": 6.755,
+        "RH (%)": 20.06,
+        "WS (m/s)": 1.05,
+        "TOT-RF (mm)": 0,
+        "SR (W/mt2)": 96.46,
+        "BP (mmHg)": 946.86,
+        "temperature_2m (°C)": 20.2,
+        "relative_humidity_2m (%)": 61,
+        "rain (mm)": 0,
+        "surface_pressure (hPa)": 951.2,
+        "wind_speed_10m (km/h)": 12.6,
+        "wind_speed_100m (km/h)": 23.4,
+        "wind_direction_10m (°)": 257,
+        "wind_direction_100m (°)": 266
+    }
+]
