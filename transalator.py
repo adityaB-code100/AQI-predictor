@@ -1,12 +1,15 @@
 from flask import Flask, render_template, request
 import requests
-import os
+import os,json
 
 
 # It's best practice to use environment variables for sensitive information like API keys.
 # You MUST replace "YOUR_GOOGLE_TRANSLATE_API_KEY" with your actual, working API key.
 # This 403 Forbidden error is almost certainly caused by an invalid or restricted key.
-API_KEY = os.environ.get("GOOGLE_TRANSLATE_API_KEY", "AIzaSyA3j3SgJXqw9moz4I3T1vrBjbJ4JA0cAnw")
+# Load API key
+with open("config.json") as f:
+    config = json.load(f)
+API_KEY = config["GOOGLE_TRANSLATE_API_KEY"]["key"]#
 URL = "https://translation.googleapis.com/language/translate/v2"
 
 
@@ -45,4 +48,3 @@ def transaltor(text,target):
             translated_text = "Please enter text and select a target language."
 
     return translated_text
-

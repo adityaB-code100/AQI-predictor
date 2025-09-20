@@ -66,3 +66,4 @@ Do not skip any section. give me all 8 section Detail.
         report = report.replace("```html", "").replace("```", "").strip()
 
     return report
+

@@ -313,7 +313,8 @@ def send_message_to_users():
                         subject=f"🌍 AQI Health Report - {village} ({date})",
                         sender=app.config['MAIL_USERNAME'],
                         recipients=[user.get("email")],
-                        body=transaltor(text_message, language)
+                        #body=text_message
+                        #body=transaltor(text_message, language)
                     )
                     mail.send(msg)
                     print(f"📧 Email sent to {user.get('email')}")

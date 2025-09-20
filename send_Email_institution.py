@@ -101,5 +101,4 @@ def send_message_to_all():
 
 
 
-
 send_message_to_all()
