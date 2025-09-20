@@ -183,7 +183,7 @@ from get_from_db import get_aqi_data
 from get_health_alert import get_health_alert_personal
 from atlas import get_mongo_uri
 from flask_mail import Mail, Message
-from transalator import translator_gemini
+from transalator import transaltor
 
 # ✅ Load configuration from config.json
 with open("config.json") as f:
@@ -299,13 +299,13 @@ def send_message_to_users():
             # ✅ Send SMS
             try:
                 # message = client.messages.create(
-                #     body=translator_gemini(text_message, language),
+                #     body=transaltor(text_message, language),
                 #     from_=twilio_number,
                 #     to=phone_number
                 # )
                 # print(f"✅ SMS sent to {phone_number} (SID: {message.sid})")
-                print(f"✅ SMS (mock) prepared for {phone_number}")
-                sent_sms.append(phone_number)
+                # print(f"✅ SMS (mock) prepared for {phone_number}")
+                # sent_sms.append(phone_number)
 
                 # ✅ Send Email inside Flask app context
                 with app.app_context():
@@ -313,7 +313,7 @@ def send_message_to_users():
                         subject=f"🌍 AQI Health Report - {village} ({date})",
                         sender=app.config['MAIL_USERNAME'],
                         recipients=[user.get("email")],
-                        body=translator_gemini(text_message, language)
+                        body=transaltor(text_message, language)
                     )
                     mail.send(msg)
                     print(f"📧 Email sent to {user.get('email')}")

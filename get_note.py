@@ -27,21 +27,11 @@ def get_notes_for_matching_aqi(user_id, village):
     # Fetch all user notes once
     user_notes = list(notes_collection.find({"user_id": user_id}))
     print(f"User notes fetched: {user_notes}")
+    aqi_test = get_aqi_data( str(today), village, mongo_uri=get_mongo_uri(),db_name="AQI_Project", collection_name="processed_data")
 
     # Check past 28 days
-    for i in range(1,9):
-        past_date = today - timedelta(days=i)
-        print(f"Checking date: {past_date.strftime('%d-%m-%Y')}")
-        past_date_str = str(past_date.strftime("%d-%m-%Y"))
-        aqi_test = get_aqi_data(past_date_str, village, mongo_uri=get_mongo_uri(),db_name="AQI_Project", collection_name="processed_data")
-        #print(aqi_test)
-        print(aqi_test.get('live_AQI'))
-
-        if aqi_test is None:
-            continue
-
+    for note in user_notes:
         # Compare AQI with user's notes
-        for note in user_notes:
             # Optional: convert note created_at string to date
             note_date_str = note.get("created_at", "").strip('"')
             try:
@@ -51,9 +41,7 @@ def get_notes_for_matching_aqi(user_id, village):
 
             if note.get("live_aqi") == aqi_test.get('live_AQI'):
                 matched_notes.append({
-                    "date": past_date.strftime("%d-%m-%Y"),  # for display
-                    #"village": village,
-                    #"live_aqi": aqi_test,
+                     "Title": note.get("Title", "No title found"),
                     "note": note.get("content", "No note text found")
                 })
 

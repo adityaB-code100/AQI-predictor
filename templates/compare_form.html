@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8 mt-8 h-screen">
+  <h1 class="text-3xl font-bold text-center mb-8 text-indigo-700 dark:text-indigo-400">
+    <i class="fas fa-balance-scale mr-3"></i>Village AQI Comparison
+  </h1>
+  
+  <div class="bg-white rounded-xl shadow-lg p-6 mb-8 dark:bg-gray-800">
+    <h2 class="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">Select Villages to Compare</h2>
+    
+    <form action="/compare" method="POST" id="compareForm" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 ">
+      <div>
+        <label class="form-label block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Village 1</label>
+        <select name="village1" id="village1"
+          class="form-select w-full rounded-xl py-3 px-4 border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-indigo-400 dark:focus:border-indigo-400"
+          required>
+          <option value="" disabled selected>Select Village</option>
+          <option value="Nanded">Nanded</option>
+          <option value="Pune">Pune</option>
+          <option value="Mumbai">Mumbai</option>
+          <option value="Nagpur">Nagpur</option>
+          <option value="Nashik">Nashik</option>  
+        </select>
+      </div>
+      
+      <div>
+        <label class="form-label block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Village 2</label>
+        <select name="village2" id="village2"
+          class="form-select w-full rounded-xl py-3 px-4 border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-indigo-400 dark:focus:border-indigo-400"
+          required>
+          <option value="" disabled selected>Select Village</option>
+          <option value="Nanded">Nanded</option>
+          <option value="Pune">Pune</option>
+          <option value="Mumbai">Mumbai</option>
+          <option value="Nagpur">Nagpur</option>
+          <option value="Nashik">Nashik</option>  
+        </select>
+      </div>
+      
+      <div class="flex items-end">
+        <button type="submit" class="w-full py-3 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors dark:bg-indigo-500 dark:hover:bg-indigo-600">
+          Compare Villages
+        </button>
+      </div>
+    </form>
+
+    <!-- ⚠️ Error message -->
+    <p id="errorMsg" class="text-red-600 dark:text-red-400 font-medium mt-3 hidden">
+      ⚠️ Please select two different villages.
+    </p>
+  </div>
+</div>
+
+<script>
+document.getElementById("compareForm").addEventListener("submit", function(e) {
+  const v1 = document.getElementById("village1").value;
+  const v2 = document.getElementById("village2").value;
+  const errorMsg = document.getElementById("errorMsg");
+
+  if (v1 && v2 && v1 === v2) {
+    e.preventDefault();
+    errorMsg.classList.remove("hidden");
+  } else {
+    errorMsg.classList.add("hidden");
+  }
+});
+</script>
+{% endblock %}

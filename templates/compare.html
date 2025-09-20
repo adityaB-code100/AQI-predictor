@@ -3,350 +3,73 @@
 {% block content %}
 <div class="container mx-auto px-4 py-8 mt-8">
   <h1 class="text-3xl font-bold text-center mb-8 text-indigo-700 dark:text-indigo-400">
-    <i class="fas fa-balance-scale mr-3"></i>Village AQI Comparison
+    <i class="fas fa-balance-scale mr-3"></i> Village AQI Comparison
   </h1>
-  
-  <div class="bg-white rounded-xl shadow-lg p-6 mb-8 dark:bg-gray-800">
-    <h2 class="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">Select Villages to Compare</h2>
-    
-    <form id="compareForm" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-      <div>
-        <label for="village1" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">First Village</label>
-        <select id="village1" name="village1" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-          <option value="">Select a village</option>
-          {% for village in villages %}
-          <option value="{{ village }}">{{ village }}</option>
-          {% endfor %}
-        </select>
-      </div>
-      
-      <div>
-        <label for="village2" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Second Village</label>
-        <select id="village2" name="village2" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-          <option value="">Select a village</option>
-          {% for village in villages %}
-          <option value="{{ village }}">{{ village }}</option>
-          {% endfor %}
-        </select>
-      </div>
-      
-      <div class="flex items-end">
-        <button type="button" id="compareBtn" class="w-full py-3 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors dark:bg-indigo-500 dark:hover:bg-indigo-600">
-          Compare Villages
-        </button>
-      </div>
-    </form>
-  </div>
-  
-  <div id="comparisonResults" class="hidden">
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-      <!-- Village 1 Card -->
-      <div class="bg-white rounded-xl shadow-lg p-6 dark:bg-gray-800">
-        <h3 id="village1Name" class="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200"></h3>
-        <div class="flex justify-between items-center mb-4">
-          <span class="text-lg font-medium">Current AQI</span>
-          <span id="village1AQI" class="text-3xl font-bold"></span>
-        </div>
-        <div id="village1Chart" class="h-64"></div>
-      </div>
-      
-      <!-- Village 2 Card -->
-      <div class="bg-white rounded-xl shadow-lg p-6 dark:bg-gray-800">
-        <h3 id="village2Name" class="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200"></h3>
-        <div class="flex justify-between items-center mb-4">
-          <span class="text-lg font-medium">Current AQI</span>
-          <span id="village2AQI" class="text-3xl font-bold"></span>
-        </div>
-        <div id="village2Chart" class="h-64"></div>
-      </div>
-    </div>
-    
-    <!-- Comparison Table -->
-    <div class="bg-white rounded-xl shadow-lg p-6 mb-8 dark:bg-gray-800">
-      <h3 class="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">7-Day Forecast Comparison</h3>
-      <div class="overflow-x-auto">
-        <table class="w-full">
-          <thead>
-            <tr class="border-b border-gray-200 dark:border-gray-700">
-              <th class="py-3 px-4 text-left">Date</th>
-              <th id="village1Header" class="py-3 px-4 text-left"></th>
-              <th id="village2Header" class="py-3 px-4 text-left"></th>
-              <th class="py-3 px-4 text-left">Difference</th>
-            </tr>
-          </thead>
-          <tbody id="comparisonTableBody">
-            <!-- Data will be populated by JavaScript -->
-          </tbody>
-        </table>
-      </div>
-    </div>
-    
-    <!-- Health Impact Comparison -->
-    <div class="bg-white rounded-xl shadow-lg p-6 dark:bg-gray-800">
-      <h3 class="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">Health Impact Comparison</h3>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div>
-          <h4 id="healthVillage1" class="text-lg font-medium mb-3 text-gray-700 dark:text-gray-300"></h4>
-          <ul id="village1HealthImpacts" class="space-y-2">
-            <!-- Health impacts will be populated by JavaScript -->
-          </ul>
-        </div>
-        <div>
-          <h4 id="healthVillage2" class="text-lg font-medium mb-3 text-gray-700 dark:text-gray-300"></h4>
-          <ul id="village2HealthImpacts" class="space-y-2">
-            <!-- Health impacts will be populated by JavaScript -->
-          </ul>
-        </div>
-      </div>
-    </div>
-  </div>
-  
-  <div id="noSelectionMessage" class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6 dark:bg-yellow-900 dark:border-yellow-600 hidden">
-    <div class="flex">
-      <div class="flex-shrink-0">
-        <i class="fas fa-exclamation-triangle text-yellow-400 dark:text-yellow-300"></i>
-      </div>
-      <div class="ml-3">
-        <p class="text-sm text-yellow-700 dark:text-yellow-300">
-          Please select two different villages to compare their AQI data.
-        </p>
-      </div>
-    </div>
-  </div>
-</div>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  const compareBtn = document.getElementById('compareBtn');
-  const comparisonResults = document.getElementById('comparisonResults');
-  const noSelectionMessage = document.getElementById('noSelectionMessage');
-  
-  compareBtn.addEventListener('click', function() {
-    const village1 = document.getElementById('village1').value;
-    const village2 = document.getElementById('village2').value;
-    
-    if (!village1 || !village2) {
-      showAlert('Please select both villages', 'error');
-      noSelectionMessage.classList.remove('hidden');
-      comparisonResults.classList.add('hidden');
-      return;
-    }
-    
-    if (village1 === village2) {
-      showAlert('Please select two different villages', 'error');
-      noSelectionMessage.classList.remove('hidden');
-      comparisonResults.classList.add('hidden');
-      return;
-    }
-    
-    noSelectionMessage.classList.add('hidden');
-    
-    // In a real application, you would fetch data from your backend
-    // For this example, we'll use mock data
-    fetchComparisonData(village1, village2);
-  });
-  
-  function fetchComparisonData(village1, village2) {
-    // Show loading state
-    compareBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Comparing...';
-    compareBtn.disabled = true;
-    
-    // Simulate API call
-    setTimeout(() => {
-      // Mock data - in a real app, this would come from your backend
-      const mockData = {
-        village1: {
-          name: village1,
-          currentAQI: Math.floor(Math.random() * 300) + 50,
-          forecast: Array(7).fill(0).map(() => Math.floor(Math.random() * 300) + 50),
-          healthImpacts: [
-            'Increased respiratory symptoms',
-            'Aggravation of asthma',
-            'Decreased lung function'
-          ]
-        },
-        village2: {
-          name: village2,
-          currentAQI: Math.floor(Math.random() * 300) + 50,
-          forecast: Array(7).fill(0).map(() => Math.floor(Math.random() * 300) + 50),
-          healthImpacts: [
-            'Minor breathing discomfort',
-            'No health impacts for most people',
-            'Possible discomfort for sensitive groups'
-          ]
-        }
-      };
-      
-      displayComparisonResults(mockData);
-      
-      // Reset button
-      compareBtn.innerHTML = 'Compare Villages';
-      compareBtn.disabled = false;
-    }, 1000);
-  }
-  
-  function displayComparisonResults(data) {
-    // Show results section
-    comparisonResults.classList.remove('hidden');
-    
-    // Update village names
-    document.getElementById('village1Name').textContent = data.village1.name;
-    document.getElementById('village2Name').textContent = data.village2.name;
-    document.getElementById('village1Header').textContent = data.village1.name;
-    document.getElementById('village2Header').textContent = data.village2.name;
-    document.getElementById('healthVillage1').textContent = data.village1.name + ' Health Impacts';
-    document.getElementById('healthVillage2').textContent = data.village2.name + ' Health Impacts';
-    
-    // Update current AQI
-    document.getElementById('village1AQI').textContent = data.village1.currentAQI;
-    document.getElementById('village2AQI').textContent = data.village2.currentAQI;
-    
-    // Style AQI values based on their level
-    styleAQIValue(document.getElementById('village1AQI'), data.village1.currentAQI);
-    styleAQIValue(document.getElementById('village2AQI'), data.village2.currentAQI);
-    
-    // Update health impacts
-    const village1HealthList = document.getElementById('village1HealthImpacts');
-    const village2HealthList = document.getElementById('village2HealthImpacts');
-    
-    village1HealthList.innerHTML = '';
-    village2HealthList.innerHTML = '';
-    
-    data.village1.healthImpacts.forEach(impact => {
-      const li = document.createElement('li');
-      li.className = 'flex items-start';
-      li.innerHTML = '<i class="fas fa-exclamation-circle text-red-500 mt-1 mr-2"></i> ' + impact;
-      village1HealthList.appendChild(li);
-    });
-    
-    data.village2.healthImpacts.forEach(impact => {
-      const li = document.createElement('li');
-      li.className = 'flex items-start';
-      li.innerHTML = '<i class="fas fa-exclamation-circle text-red-500 mt-1 mr-2"></i> ' + impact;
-      village2HealthList.appendChild(li);
-    });
-    
-    // Update comparison table
-    const tableBody = document.getElementById('comparisonTableBody');
-    tableBody.innerHTML = '';
-    
-    const dates = [];
-    const today = new Date();
-    for (let i = 0; i < 7; i++) {
-      const date = new Date();
-      date.setDate(today.getDate() + i);
-      dates.push(date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }));
-    }
-    
-    for (let i = 0; i < 7; i++) {
-      const row = document.createElement('tr');
-      row.className = 'border-b border-gray-200 dark:border-gray-700';
-      
-      const dateCell = document.createElement('td');
-      dateCell.className = 'py-3 px-4';
-      dateCell.textContent = dates[i];
-      
-      const village1Cell = document.createElement('td');
-      village1Cell.className = 'py-3 px-4';
-      village1Cell.textContent = data.village1.forecast[i];
-      styleAQICell(village1Cell, data.village1.forecast[i]);
-      
-      const village2Cell = document.createElement('td');
-      village2Cell.className = 'py-3 px-4';
-      village2Cell.textContent = data.village2.forecast[i];
-      styleAQICell(village2Cell, data.village2.forecast[i]);
-      
-      const diffCell = document.createElement('td');
-      diffCell.className = 'py-3 px-4 font-medium';
-      const diff = data.village1.forecast[i] - data.village2.forecast[i];
-      diffCell.textContent = (diff > 0 ? '+' : '') + diff;
-      
-      if (diff > 0) {
-        diffCell.classList.add('text-red-600', 'dark:text-red-400');
-      } else if (diff < 0) {
-        diffCell.classList.add('text-green-600', 'dark:text-green-400');
-      } else {
-        diffCell.classList.add('text-gray-500', 'dark:text-gray-400');
-      }
-      
-      row.appendChild(dateCell);
-      row.appendChild(village1Cell);
-      row.appendChild(village2Cell);
-      row.appendChild(diffCell);
-      
-      tableBody.appendChild(row);
-    }
-    
-    // Create charts (simplified version)
-    createSimpleChart('village1Chart', data.village1.forecast, data.village1.name);
-    createSimpleChart('village2Chart', data.village2.forecast, data.village2.name);
-  }
-  
-  function styleAQIValue(element, value) {
-    // Reset classes
-    element.className = 'text-3xl font-bold';
-    
-    // Add color based on AQI value
-    if (value <= 50) {
-      element.classList.add('text-green-600', 'dark:text-green-400');
-    } else if (value <= 100) {
-      element.classList.add('text-yellow-600', 'dark:text-yellow-400');
-    } else if (value <= 150) {
-      element.classList.add('text-orange-600', 'dark:text-orange-400');
-    } else if (value <= 200) {
-      element.classList.add('text-red-600', 'dark:text-red-400');
-    } else if (value <= 300) {
-      element.classList.add('text-purple-600', 'dark:text-purple-400');
-    } else {
-      element.classList.add('text-red-800', 'dark:text-red-600');
-    }
-  }
-  
-  function styleAQICell(element, value) {
-    // Reset classes
-    element.className = 'py-3 px-4';
-    
-    // Add color based on AQI value
-    if (value <= 50) {
-      element.classList.add('text-green-600', 'dark:text-green-400');
-    } else if (value <= 100) {
-      element.classList.add('text-yellow-600', 'dark:text-yellow-400');
-    } else if (value <= 150) {
-      element.classList.add('text-orange-600', 'dark:text-orange-400');
-    } else if (value <= 200) {
-      element.classList.add('text-red-600', 'dark:text-red-400');
-    } else if (value <= 300) {
-      element.classList.add('text-purple-600', 'dark:text-purple-400');
-    } else {
-      element.classList.add('text-red-800', 'dark:text-red-600');
-    }
-  }
-  
-  function createSimpleChart(containerId, data, label) {
-    const container = document.getElementById(containerId);
-    container.innerHTML = ''; // Clear previous content
-    
-    // In a real application, you would use Chart.js or another library
-    // This is a simplified visualization for demonstration
-    const maxValue = Math.max(...data, 300);
-    const barsContainer = document.createElement('div');
-    barsContainer.className = 'flex items-end h-full w-full gap-1';
-    
-    data.forEach(value => {
-      const bar = document.createElement('div');
-      bar.className = 'flex-1 bg-indigo-500 rounded-t';
-      bar.style.height = `${(value / maxValue) * 100}%`;
-      barsContainer.appendChild(bar);
-    });
-    
-    container.appendChild(barsContainer);
-    
-    // Add label
-    const labelElement = document.createElement('div');
-    labelElement.className = 'text-center mt-2 text-sm text-gray-600 dark:text-gray-400';
-    labelElement.textContent = '7-Day Forecast';
-    container.appendChild(labelElement);
-  }
-});
-</script>
+  {% if village1 and village2 %}
+  <div class="bg-white rounded-xl shadow-lg p-6 mb-8 dark:bg-gray-800">
+    <h3 class="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">
+      7-Day AQI Forecast Comparison
+    </h3>
+    <div class="overflow-x-auto">
+      <table class="w-full">
+        <thead>
+          <tr class="border-b border-gray-200 dark:border-gray-700">
+            <th class="py-3 px-4 text-left">Date</th>
+            <th class="py-3 px-4 text-left">{{ village1.village }}</th>
+            <th class="py-3 px-4 text-left">{{ village2.village }}</th>
+            <th class="py-3 px-4 text-left">Difference</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for i in range(7) %}
+          {% set date = village1.passing_data[i].date %}
+          {% set value1 = village1.passing_data[i].value %}
+          {% set value2 = village2.passing_data[i].value %}
+          {% set diff = value1 - value2 %}
+          <tr class="border-b border-gray-200 dark:border-gray-700">
+            <td class="py-3 px-4">{{ date }}</td>
+            <td class="py-3 px-4">{{ value1 }}</td>
+            <td class="py-3 px-4">{{ value2 }}</td>
+            <td class="py-3 px-4 font-medium
+              {% if diff > 0 %}text-red-600 dark:text-red-400
+              {% elif diff < 0 %}text-green-600 dark:text-green-400
+              {% else %}text-gray-500 dark:text-gray-400{% endif %}">
+              {{ "%+d"|format(diff) }}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ✅ Pollutant Breakdown -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div class="bg-white rounded-xl shadow-lg p-6 dark:bg-gray-800">
+      <h3 class="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">{{ village1.village }} Pollutants</h3>
+      <ul>
+        {% for p in village1.pollutants %}
+        <li class="flex justify-between py-2 border-b border-gray-200 dark:border-gray-700">
+          <span>{{ p.name }}</span>
+          <span class="{{ p.class }} text-white px-2 py-1 rounded-lg">{{ p.value }} ({{ p.status }})</span>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-lg p-6 dark:bg-gray-800">
+      <h3 class="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">{{ village2.village }} Pollutants</h3>
+      <ul>
+        {% for p in village2.pollutants %}
+        <li class="flex justify-between py-2 border-b border-gray-200 dark:border-gray-700">
+          <span>{{ p.name }}</span>
+          <span class="{{ p.class }} text-white px-2 py-1 rounded-lg">{{ p.value }} ({{ p.status }})</span>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+  {% endif %}
+</div>
 {% endblock %}

@@ -83,6 +83,12 @@
               </a>
             </li>
             <li class="nav-item">
+              <a class="nav-link px-4 py-2 rounded-lg font-medium text-gray-700  hover:bg-gray-100 transition-colors dark:text-gray-300 dark:hover:bg-gray-700  {% if request.endpoint == 'dashboard' %}active{% endif %}" href="/compare">
+                <i class="fas fa-balance-scale mr-1"></i> Compare
+              </a>
+            </li>
+
+            <li class="nav-item">
               <a class="nav-link px-4 py-2 rounded-lg font-medium text-gray-700 hover:bg-gray-100 transition-colors dark:text-gray-300 dark:hover:bg-gray-700 {% if request.endpoint == 'about' %}active{% endif %}" href="/about">
                 <i class="fas fa-info-circle mr-1"></i> About
               </a>
@@ -131,6 +137,12 @@
         <li>
           <a class="block px-4 py-2 rounded-lg font-medium {% if request.endpoint == 'about' %}active{% endif %}" href="/about">
             <i class="fas fa-info-circle mr-2"></i> About
+          </a>
+        </li>
+
+         <li>
+          <a class="block px-4 py-2 rounded-lg font-medium {% if request.endpoint == 'compare' %}active{% endif %}" href="/compare">
+            <i class="fas fa-balance-scale mr-1"></i> Compare
           </a>
         </li>
         <li>

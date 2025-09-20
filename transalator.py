@@ -1,32 +1,48 @@
-from flask import Flask, request
-import google.generativeai as genai
+from flask import Flask, render_template, request
+import requests
 import os
-import json
-
-# Load Gemini API Key
-# ✅ Load configuration from config.json
-with open("config.json") as f:
-    config = json.load(f)
 
 
-#-------------API Key Setup-------------
-api_key = config["API_KEY"]["key"]
-genai.configure(api_key=api_key)
+# It's best practice to use environment variables for sensitive information like API keys.
+# You MUST replace "YOUR_GOOGLE_TRANSLATE_API_KEY" with your actual, working API key.
+# This 403 Forbidden error is almost certainly caused by an invalid or restricted key.
+API_KEY = os.environ.get("GOOGLE_TRANSLATE_API_KEY", "AIzaSyA3j3SgJXqw9moz4I3T1vrBjbJ4JA0cAnw")
+URL = "https://translation.googleapis.com/language/translate/v2"
 
-# Initialize the model
-model = genai.GenerativeModel("gemini-1.5-flash")  # You can use gemini-pro or gemini-1.5-pro for better quality
 
-def translator_gemini(text, target_language):
-    if not text or not target_language:
-        return "Please enter text and select a target language."
+        # Check if both text and target language were provided
+def transaltor(text,target):
+    text_to_translate=text
+    target_language=target
+    if text_to_translate and target_language:
+            # The API key and query parameters are typically sent via a URL query string.
+            # The 'params' argument in requests handles this correctly.
+            payload = {
+                "q": text_to_translate,
+                "target": target_language,
+                "key": API_KEY
+            }
 
-    try:
-        prompt = f"Translate the following text into {target_language}:\n\n{text}"
-        response = model.generate_content(prompt)
-        return response.text.strip()
-    except Exception as e:
-        return f"Error using Gemini API: {e}"
+            try:
+                # The requests.post() call is updated to use 'params' for the URL query.
+                response = requests.post(URL, params=payload)
+                response.raise_for_status()  # Raise an exception for bad status codes (4xx or 5xx)
+                result = response.json()
+                translated_text = result["data"]["translations"][0]["translatedText"]
+            except requests.exceptions.HTTPError as e:
+                # Handle specific HTTP errors like 403 Forbidden.
+                if e.response.status_code == 403:
+                    translated_text = "Error: 403 Forbidden. The API key is likely incorrect or not configured for the Google Translation API. Please check your key."
+                else:
+                    translated_text = f"HTTP Error: {e}"
+            except requests.exceptions.RequestException as e:
+                # Handle general connection errors or other request issues
+                translated_text = f"Error communicating with the translation API: {e}"
+            except KeyError:
+                # Handle cases where the JSON response is not as expected
+                translated_text = "Error: Invalid response from the translation API. Please check your API key."
+    else:
+            translated_text = "Please enter text and select a target language."
 
-# # Test
-# p = translator("hello Rutik, how is your team?", "Hindi")
-# print(p)
+    return translated_text
+
